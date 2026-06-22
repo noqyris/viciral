@@ -1,8 +1,10 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 /**
- * Append-only credit ledger. Balance = sum of signed amounts.
- * GRANT/REFUND/positive ADJUSTMENT add; DEBIT subtracts (stored negative).
+ * Credits are tracked on `User.creditBalance` (the authoritative counter) and
+ * mirrored to the append-only `CreditLedger` (audit log). All mutations are
+ * atomic at the row level, so concurrent debits cannot overspend.
  */
 
 export class InsufficientCreditsError extends Error {
@@ -10,40 +12,96 @@ export class InsufficientCreditsError extends Error {
     public readonly balance: number,
     public readonly required: number,
   ) {
-    super(`Insufficient credits: have ${balance}, need ${required}`);
+    super(`Nedovoljno kredita: imaš ${balance}, potrebno ${required}`);
     this.name = "InsufficientCreditsError";
   }
 }
 
+type AddType = "GRANT" | "REFUND" | "ADJUSTMENT";
+
 export async function getBalance(userId: string): Promise<number> {
-  const agg = await prisma.creditLedger.aggregate({
-    where: { userId },
-    _sum: { amount: true },
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { creditBalance: true },
   });
-  return agg._sum.amount ?? 0;
+  return user?.creditBalance ?? 0;
 }
 
-/** Add credits (subscription grant or top-up). */
-export async function grantCredits(
+/**
+ * Adds credits and records a ledger row in one transaction. When
+ * `idempotencyKey` is set, a repeated call (e.g. a retried webhook) is a no-op:
+ * the unique constraint serializes concurrent duplicates.
+ */
+async function addCredits(
+  userId: string,
+  amount: number,
+  type: AddType,
+  reason: string,
+  refId?: string,
+  idempotencyKey?: string,
+) {
+  if (amount <= 0) throw new Error("amount must be positive");
+  try {
+    return await prisma.$transaction(async (tx) => {
+      if (idempotencyKey) {
+        const existing = await tx.creditLedger.findUnique({ where: { idempotencyKey } });
+        if (existing) return existing; // already processed
+      }
+      const user = await tx.user.update({
+        where: { id: userId },
+        data: { creditBalance: { increment: amount } },
+      });
+      return tx.creditLedger.create({
+        data: {
+          userId,
+          type,
+          amount,
+          balanceAfter: user.creditBalance,
+          reason,
+          refId,
+          idempotencyKey,
+        },
+      });
+    });
+  } catch (err) {
+    // Concurrent duplicate hit the unique constraint — treat as already-processed.
+    if (
+      idempotencyKey &&
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      return prisma.creditLedger.findUnique({ where: { idempotencyKey } });
+    }
+    throw err;
+  }
+}
+
+/** Add subscription/top-up credits (idempotent when `idempotencyKey` is given). */
+export function grantCredits(
+  userId: string,
+  amount: number,
+  reason: string,
+  refId?: string,
+  idempotencyKey?: string,
+) {
+  return addCredits(userId, amount, "GRANT", reason, refId, idempotencyKey);
+}
+
+/** Return reserved-but-unused credits (or refund a failed run). */
+export function refundCredits(
   userId: string,
   amount: number,
   reason: string,
   refId?: string,
 ) {
-  if (amount <= 0) throw new Error("grant amount must be positive");
-  return prisma.$transaction(async (tx) => {
-    const cur = await tx.creditLedger.aggregate({
-      where: { userId },
-      _sum: { amount: true },
-    });
-    const balanceAfter = (cur._sum.amount ?? 0) + amount;
-    return tx.creditLedger.create({
-      data: { userId, type: "GRANT", amount, balanceAfter, reason, refId },
-    });
-  });
+  return addCredits(userId, amount, "REFUND", reason, refId);
 }
 
-/** Consume credits, enforcing a sufficient balance. Throws {@link InsufficientCreditsError}. */
+/**
+ * Atomically consume credits. The conditional `updateMany` (decrement only when
+ * `creditBalance >= amount`) takes a row lock, so two concurrent debits cannot
+ * both succeed past the balance. Throws {@link InsufficientCreditsError}.
+ */
 export async function debitCredits(
   userId: string,
   amount: number,
@@ -52,15 +110,29 @@ export async function debitCredits(
 ) {
   if (amount <= 0) throw new Error("debit amount must be positive");
   return prisma.$transaction(async (tx) => {
-    const cur = await tx.creditLedger.aggregate({
-      where: { userId },
-      _sum: { amount: true },
+    const updated = await tx.user.updateMany({
+      where: { id: userId, creditBalance: { gte: amount } },
+      data: { creditBalance: { decrement: amount } },
     });
-    const balance = cur._sum.amount ?? 0;
-    if (balance < amount) throw new InsufficientCreditsError(balance, amount);
-    const balanceAfter = balance - amount;
+    if (updated.count === 0) {
+      const balance =
+        (await tx.user.findUnique({ where: { id: userId }, select: { creditBalance: true } }))
+          ?.creditBalance ?? 0;
+      throw new InsufficientCreditsError(balance, amount);
+    }
+    const user = await tx.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { creditBalance: true },
+    });
     return tx.creditLedger.create({
-      data: { userId, type: "DEBIT", amount: -amount, balanceAfter, reason, refId },
+      data: {
+        userId,
+        type: "DEBIT",
+        amount: -amount,
+        balanceAfter: user.creditBalance,
+        reason,
+        refId,
+      },
     });
   });
 }

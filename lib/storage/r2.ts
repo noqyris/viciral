@@ -6,6 +6,28 @@ import { env, requireEnv } from "@/lib/env";
  * download and persist assets to R2 so they outlive the provider's TTL.
  */
 
+/** Whether all R2 env vars are present (so the runner can gracefully skip persistence). */
+export function isR2Configured(): boolean {
+  return Boolean(
+    env.R2_ACCOUNT_ID &&
+      env.R2_ACCESS_KEY_ID &&
+      env.R2_SECRET_ACCESS_KEY &&
+      env.R2_BUCKET,
+  );
+}
+
+const EXT_BY_KIND: Record<string, string> = {
+  image: "png",
+  video: "mp4",
+  text: "txt",
+};
+
+/** Deterministic storage key for a generation's asset. Pure — safe to unit test. */
+export function buildAssetKey(generationId: string, index: number, kind: string): string {
+  const ext = EXT_BY_KIND[kind] ?? "bin";
+  return `generations/${generationId}/${index}-${kind}.${ext}`;
+}
+
 let client: S3Client | null = null;
 function getClient(): S3Client {
   if (!client) {

@@ -75,16 +75,21 @@ export async function POST(req: Request) {
     });
   }
 
-  // Grant monthly credits when a subscription is created or renews.
+  // Grant monthly credits when a subscription is created or renews. The grant is
+  // idempotent on (event, data id): Lemon Squeezy delivers at-least-once and
+  // retries on non-2xx, and for payment_success `data.id` is the per-payment
+  // invoice id, so each renewal grants exactly once and retries are no-ops.
   if (
     planConfig &&
     (eventName === "subscription_created" || eventName === "subscription_payment_success")
   ) {
+    const idempotencyKey = `ls:${eventName}:${payload.data?.id ?? ""}`;
     await grantCredits(
       userId,
       planConfig.monthlyCredits,
       `lemonsqueezy:${eventName}`,
       payload.data?.id,
+      idempotencyKey,
     );
   }
 

@@ -14,3 +14,11 @@ export async function loadBrand(
   }
   return prisma.brandProfile.findFirst({ where: { userId, isDefault: true } });
 }
+
+/** Lists a user's brands in display order (default first, then newest). */
+export function listBrands(userId: string): Promise<BrandProfile[]> {
+  return prisma.brandProfile.findMany({
+    where: { userId },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+  });
+}

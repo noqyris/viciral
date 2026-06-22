@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface Asset {
   kind: "image" | "video" | "text";
   url?: string;
   text?: string;
+}
+
+interface BrandOption {
+  id: string;
+  name: string;
+  isDefault: boolean;
 }
 
 interface GenerationResponse {
@@ -25,6 +31,26 @@ export function SocialPackRunner({ supportsAuto }: { supportsAuto: boolean }) {
   const [assets, setAssets] = useState<Asset[] | null>(null);
   const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
 
+  const [brands, setBrands] = useState<BrandOption[]>([]);
+  const [brandId, setBrandId] = useState<string>("");
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/brands")
+      .then((r) => r.json())
+      .then((data: { brands?: BrandOption[] }) => {
+        if (!active) return;
+        const list = data.brands ?? [];
+        setBrands(list);
+        const def = list.find((b) => b.isDefault);
+        if (def) setBrandId(def.id);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
   async function run(mode: "manual" | "auto") {
     setLoading(true);
     setError(null);
@@ -38,6 +64,7 @@ export function SocialPackRunner({ supportsAuto }: { supportsAuto: boolean }) {
           moduleSlug: "social-pack",
           mode,
           inputs: { topic, platform, postCount, tone },
+          brandId: brandId || undefined,
         }),
       });
       const data = (await res.json()) as GenerationResponse;
@@ -99,6 +126,25 @@ export function SocialPackRunner({ supportsAuto }: { supportsAuto: boolean }) {
             />
           </label>
         </div>
+
+        {brands.length > 0 && (
+          <label className="block">
+            <span className="text-sm font-medium text-zinc-700">Brend</span>
+            <select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-violet-400"
+            >
+              <option value="">Bez brenda</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                  {b.isDefault ? " (podrazumevani)" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button onClick={() => run("manual")} disabled={loading || topic.length < 2}>

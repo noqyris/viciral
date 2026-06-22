@@ -29,6 +29,12 @@ export interface ModuleContext<I> {
   providers: Providers;
   /** Optional progress reporting (e.g. for SSE/log). */
   onProgress?: (message: string) => void;
+  /**
+   * Report credits consumed after each PAID provider step. The runner reserves
+   * an upfront estimate and reconciles against the sum reported here, so partial
+   * work is charged even if a later step fails.
+   */
+  spend?: (credits: number) => void;
 }
 
 export interface ModuleResult {
