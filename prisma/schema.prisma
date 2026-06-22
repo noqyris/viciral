@@ -1,0 +1,143 @@
+// Viciral — data model
+// See ~/.claude/plans for the product/architecture plan.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brandProfiles BrandProfile[]
+  projects      Project[]
+  generations   Generation[]
+  ledger        CreditLedger[]
+  subscription  Subscription?
+}
+
+/// A user's brand: colors, voice, logo. Injected into every generation — the data moat.
+model BrandProfile {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  colors    Json? // palette, e.g. ["#111", "#f5f5f5"]
+  voice     String? // tone of voice description
+  logoUrl   String?
+  fonts     Json?
+  notes     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Project {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  module      String // module slug
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  generations Generation[]
+
+  @@index([userId])
+}
+
+enum GenerationStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+/// One run of a module (e.g. a Social Pack generation).
+model Generation {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  module      String
+  mode        String // 'manual' | 'auto'
+  status      GenerationStatus @default(PENDING)
+  inputs      Json
+  creditsEst  Int              @default(0)
+  creditsUsed Int              @default(0)
+  error       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  assets      Asset[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+/// A generated output (image/video/text) belonging to a Generation.
+model Asset {
+  id           String     @id @default(cuid())
+  generationId String
+  generation   Generation @relation(fields: [generationId], references: [id], onDelete: Cascade)
+  kind         String // 'image' | 'video' | 'text'
+  url          String? // persisted (R2) url
+  sourceUrl    String? // original provider url (temporary)
+  text         String?
+  modelId      String?
+  meta         Json?
+  // For async (queued) video jobs:
+  providerJobId String?
+  jobStatus     String? // 'queued' | 'completed' | 'failed'
+  createdAt    DateTime   @default(now())
+
+  @@index([generationId])
+  @@index([providerJobId])
+}
+
+enum LedgerType {
+  GRANT // subscription / top-up credits added
+  DEBIT // consumed by a generation
+  REFUND
+  ADJUSTMENT
+}
+
+/// Append-only credit ledger — the source of truth for billing. Amount is signed.
+model CreditLedger {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         LedgerType
+  amount       Int // positive = added, negative = consumed
+  balanceAfter Int
+  reason       String?
+  refId        String? // generation id / lemon squeezy order id
+  createdAt    DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model Subscription {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lsSubscriptionId String?   @unique // Lemon Squeezy subscription id
+  lsCustomerId     String?
+  variantId        String?
+  plan             String    @default("free") // free | starter | pro
+  status           String    @default("active")
+  monthlyCredits   Int       @default(0)
+  renewsAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
