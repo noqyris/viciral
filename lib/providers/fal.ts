@@ -44,6 +44,10 @@ export const falVideoProvider: VideoProvider = {
   async submitVideo(req: VideoRequest): Promise<VideoSubmitResponse> {
     ensureConfigured();
     const model = getModel(req.modelId);
+    // Seedance image-to-video derives output resolution from the input image, so
+    // we don't forward width/height here. The reservation and the settlement use
+    // the same assumed dimensions (consistent charge); the webhook reports actual
+    // dimensions when available so the cost basis tracks the real output.
     const queued = await fal.queue.submit(model.providerModel, {
       input: {
         ...(req.prompt ? { prompt: req.prompt } : {}),

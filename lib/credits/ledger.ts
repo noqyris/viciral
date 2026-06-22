@@ -87,14 +87,19 @@ export function grantCredits(
   return addCredits(userId, amount, "GRANT", reason, refId, idempotencyKey);
 }
 
-/** Return reserved-but-unused credits (or refund a failed run). */
+/**
+ * Return reserved-but-unused credits (or refund a failed run). Pass an
+ * `idempotencyKey` so a late webhook and a reaper can't both refund the same
+ * reservation.
+ */
 export function refundCredits(
   userId: string,
   amount: number,
   reason: string,
   refId?: string,
+  idempotencyKey?: string,
 ) {
-  return addCredits(userId, amount, "REFUND", reason, refId);
+  return addCredits(userId, amount, "REFUND", reason, refId, idempotencyKey);
 }
 
 /**

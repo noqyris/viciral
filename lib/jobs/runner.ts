@@ -1,12 +1,13 @@
-import type { Prisma } from "@prisma/client";
+import type { Generation, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { providers } from "@/lib/providers";
 import { getModuleDef } from "@/lib/modules/registry";
 import { debitCredits, refundCredits } from "@/lib/credits/ledger";
 import { loadBrand } from "@/lib/brand/profile";
 import { AppError } from "@/lib/http";
+import { reconcileCharge } from "@/lib/jobs/settle";
 import { buildAssetKey, isR2Configured, persistFromUrl } from "@/lib/storage/r2";
-import type { GeneratedAsset, GenerationMode } from "@/lib/modules/types";
+import type { GeneratedAsset, GenerationMode, ModuleDef } from "@/lib/modules/types";
 
 export interface RunModuleInput {
   userId: string;
@@ -43,25 +44,12 @@ async function persistAssets(
   );
 }
 
-/**
- * Runs one module with a reserve → run → reconcile credit flow:
- *  1. Reserve a conservative upfront estimate (atomic debit; fails fast if the
- *     balance is too low — no provider call happens).
- *  2. Run the module; each paid step reports cost via `ctx.spend`.
- *  3. Persist assets + flip status atomically, then refund the unused reservation.
- *
- * On failure we charge for work actually done and refund the rest, so a partial
- * run can never be free, and a failed debit can never leave free output.
- */
-export async function runModule(run: RunModuleInput) {
-  const mod = getModuleDef(run.moduleSlug);
-  if (!mod || mod.status !== "available") {
-    throw new AppError(`Modul nije dostupan: ${run.moduleSlug}`, 400);
-  }
-
-  const inputs = mod.inputSchema.parse(run.inputs);
-  const estimate = mod.estimateCredits(inputs);
-
+/** Create a PENDING generation and atomically reserve the estimate (fails fast if low). */
+async function createAndReserve(
+  run: RunModuleInput,
+  inputs: unknown,
+  estimate: number,
+): Promise<Generation> {
   const generation = await prisma.generation.create({
     data: {
       userId: run.userId,
@@ -72,8 +60,6 @@ export async function runModule(run: RunModuleInput) {
       creditsEst: estimate,
     },
   });
-
-  // 1. Reserve the estimate atomically. Throws InsufficientCreditsError if low.
   try {
     await debitCredits(run.userId, estimate, "reserve", generation.id);
   } catch (err) {
@@ -83,10 +69,59 @@ export async function runModule(run: RunModuleInput) {
     });
     throw err;
   }
+  return generation;
+}
 
-  // 2. Run, accumulating actual spend (survives a mid-run throw). Everything
-  // after the reservation is refund-protected, so a failure anywhere returns
-  // the unused hold.
+/** Charge for work done, refund the rest of the reservation, mark FAILED. Idempotent refund. */
+async function failGeneration(
+  userId: string,
+  generationId: string,
+  spent: number,
+  estimate: number,
+  err: unknown,
+) {
+  const { charged, refund } = reconcileCharge(estimate, spent, 0);
+  if (refund > 0) {
+    await refundCredits(userId, refund, "refund-failed", generationId, `settle:${generationId}`);
+  }
+  await prisma.generation.update({
+    where: { id: generationId },
+    data: { status: "FAILED", creditsUsed: charged, error: (err as Error).message },
+  });
+}
+
+/**
+ * Entry point. Validates inputs, computes a conservative estimate, then runs the
+ * module via the sync (inline) or async (submit → webhook) path.
+ */
+export async function runModule(run: RunModuleInput) {
+  const mod = getModuleDef(run.moduleSlug);
+  if (!mod || mod.status !== "available") {
+    throw new AppError(`Modul nije dostupan: ${run.moduleSlug}`, 400);
+  }
+
+  const inputs = mod.inputSchema.parse(run.inputs);
+  const estimate = mod.estimateCredits(inputs);
+
+  return mod.kind === "async"
+    ? runAsyncModule(run, mod, inputs, estimate)
+    : runSyncModule(run, mod, inputs, estimate);
+}
+
+/**
+ * Sync flow: reserve → run inline → persist + status atomically → refund unused.
+ * On failure we charge for work actually done and refund the rest.
+ */
+async function runSyncModule(
+  run: RunModuleInput,
+  mod: ModuleDef,
+  inputs: unknown,
+  estimate: number,
+) {
+  if (!mod.generate) throw new AppError(`Modul ${run.moduleSlug} nije izvršiv`, 500);
+
+  const generation = await createAndReserve(run, inputs, estimate);
+
   let actualUsed = 0;
   const spend = (credits: number) => {
     actualUsed += Math.max(0, Math.ceil(credits));
@@ -108,14 +143,11 @@ export async function runModule(run: RunModuleInput) {
       spend,
     });
 
-    // Trust ctx.spend; fall back to the returned total if the module didn't report.
     if (actualUsed === 0 && result.creditsUsed > 0) actualUsed = result.creditsUsed;
-    // Never charge more than was reserved (estimate is a conservative upper bound).
-    const charged = Math.min(actualUsed, estimate);
+    const { charged, refund } = reconcileCharge(estimate, 0, actualUsed);
 
     const persisted = await persistAssets(generation.id, result.assets);
 
-    // 3. Persist outputs + final status atomically.
     await prisma.$transaction(async (tx) => {
       await tx.asset.createMany({
         data: persisted.map((a) => ({
@@ -134,9 +166,8 @@ export async function runModule(run: RunModuleInput) {
       });
     });
 
-    const refund = estimate - charged;
     if (refund > 0) {
-      await refundCredits(run.userId, refund, "reconcile", generation.id);
+      await refundCredits(run.userId, refund, "reconcile", generation.id, `settle:${generation.id}`);
     }
 
     return prisma.generation.findUniqueOrThrow({
@@ -144,16 +175,82 @@ export async function runModule(run: RunModuleInput) {
       include: { assets: true },
     });
   } catch (err) {
-    // Charge for work actually performed; refund the rest of the reservation.
-    const charged = Math.min(actualUsed, estimate);
-    const refund = estimate - charged;
-    if (refund > 0) {
-      await refundCredits(run.userId, refund, "refund-failed", generation.id);
-    }
+    await failGeneration(run.userId, generation.id, actualUsed, estimate, err);
+    throw err;
+  }
+}
+
+/**
+ * Async flow: reserve → submit a queued provider job → persist a pending asset
+ * (carrying the stable pre-spend) and leave the generation RUNNING. The fal
+ * webhook settles it later (lib/jobs/settle.ts); a reaper backstops lost webhooks.
+ */
+async function runAsyncModule(
+  run: RunModuleInput,
+  mod: ModuleDef,
+  inputs: unknown,
+  estimate: number,
+) {
+  if (!mod.submit) throw new AppError(`Modul ${run.moduleSlug} nema async submit`, 500);
+
+  const generation = await createAndReserve(run, inputs, estimate);
+
+  // Credits spent synchronously during submit (e.g. a pre-generated image).
+  let preSpent = 0;
+  const spend = (credits: number) => {
+    preSpent += Math.max(0, Math.ceil(credits));
+  };
+
+  try {
     await prisma.generation.update({
       where: { id: generation.id },
-      data: { status: "FAILED", creditsUsed: charged, error: (err as Error).message },
+      data: { status: "RUNNING" },
     });
+
+    const brand = await loadBrand(run.userId, run.brandId);
+    const submitResult = await mod.submit({
+      userId: run.userId,
+      mode: run.mode,
+      inputs,
+      brand,
+      providers,
+      spend,
+    });
+
+    const chargedPre = Math.min(preSpent, estimate);
+
+    try {
+      await prisma.asset.create({
+        data: {
+          generationId: generation.id,
+          kind: "video",
+          jobStatus: "queued",
+          providerJobId: submitResult.requestId,
+          modelId: submitResult.modelId,
+          // preSpent is the stable settlement basis read by the webhook.
+          meta: { params: submitResult.params, preSpent: chargedPre } as unknown as Prisma.InputJsonValue,
+        },
+      });
+    } catch (err) {
+      console.error(
+        `Orphaned fal job ${submitResult.requestId} (pending asset insert failed); refunding.`,
+      );
+      throw err;
+    }
+
+    if (chargedPre > 0) {
+      await prisma.generation.update({
+        where: { id: generation.id },
+        data: { creditsUsed: chargedPre },
+      });
+    }
+
+    return prisma.generation.findUniqueOrThrow({
+      where: { id: generation.id },
+      include: { assets: true },
+    });
+  } catch (err) {
+    await failGeneration(run.userId, generation.id, preSpent, estimate, err);
     throw err;
   }
 }

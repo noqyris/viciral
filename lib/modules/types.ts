@@ -1,6 +1,7 @@
 import type { ZodType } from "zod";
 import type { BrandProfile } from "@prisma/client";
 import type { Providers } from "@/lib/providers";
+import type { UsageParams } from "@/lib/credits/pricing";
 
 /**
  * A module is an integrated, multi-model workflow (the product's moat).
@@ -42,16 +43,35 @@ export interface ModuleResult {
   creditsUsed: number;
 }
 
+/**
+ * Returned by an async module's `submit`: a queued provider job whose result
+ * arrives later via webhook. `params` lets the webhook compute the actual cost.
+ */
+export interface SubmitResult {
+  requestId: string;
+  /** Catalog model id of the async job (for cost calc at settle time). */
+  modelId: string;
+  params: UsageParams;
+}
+
+/** Sync modules complete inline; async modules submit a job and settle via webhook. */
+export type ModuleKind = "sync" | "async";
+
 export interface ModuleDef<I = unknown> {
   slug: string;
   name: string;
   tagline: string;
   category: string;
   status: ModuleStatus;
+  /** Defaults to "sync". Async modules implement `submit` instead of `generate`. */
+  kind?: ModuleKind;
   /** Whether the module offers a one-click "auto" pipeline (manual is always available). */
   supportsAuto: boolean;
   icon?: string;
   inputSchema: ZodType<I>;
   estimateCredits(inputs: I): number;
-  generate(ctx: ModuleContext<I>): Promise<ModuleResult>;
+  /** Sync modules: run to completion inline. */
+  generate?(ctx: ModuleContext<I>): Promise<ModuleResult>;
+  /** Async modules: submit a queued job; the webhook settles it. */
+  submit?(ctx: ModuleContext<I>): Promise<SubmitResult>;
 }

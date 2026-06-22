@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getModuleDef } from "@/lib/modules/registry";
 import { SocialPackRunner } from "@/components/social-pack-runner";
+import { CinematicRunner } from "@/components/cinematic-runner";
 
 export default async function ModuleRunnerPage({
   params,
@@ -33,6 +34,8 @@ export default async function ModuleRunnerPage({
         </div>
       ) : slug === "social-pack" ? (
         <SocialPackRunner supportsAuto={mod.supportsAuto} />
+      ) : slug === "cinematic" ? (
+        <CinematicRunner />
       ) : (
         <div className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center text-zinc-500">
           Runner za ovaj modul još nije implementiran.

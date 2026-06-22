@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ModuleDef } from "./types";
 import { socialPackModule } from "./social-pack";
+import { cinematicModule } from "./cinematic";
 
 /**
  * Module registry. The hub renders from this list; new modules are added here.
@@ -34,13 +35,7 @@ function soon(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const MODULES: ModuleDef<any>[] = [
   socialPackModule,
-  soon(
-    "cinematic",
-    "Cinematic Video",
-    "Tekst/slika → kinematski video klip (Seedance/Veo).",
-    "video",
-    "🎬",
-  ),
+  cinematicModule,
   soon(
     "brand-kit",
     "Brand Kit",

@@ -19,6 +19,9 @@ const schema = z.object({
   FAL_KEY: z.string().optional(),
   FAL_WEBHOOK_SECRET: z.string().optional(),
 
+  // Reaper cron auth (sweeps stuck async jobs)
+  CRON_SECRET: z.string().optional(),
+
   // Billing — Lemon Squeezy (Merchant of Record)
   LEMONSQUEEZY_API_KEY: z.string().optional(),
   LEMONSQUEEZY_STORE_ID: z.string().optional(),
