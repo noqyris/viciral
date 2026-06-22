@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { estimateCredits, MODEL_CATALOG } from "@/lib/credits/pricing";
 import { brandPromptLine } from "@/lib/brand/inject";
+import { extractJson } from "./json";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
 /**
@@ -30,15 +31,6 @@ const planSchema = z.object({
     )
     .min(1),
 });
-
-function extractJson(text: string): string {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fenced) return fenced[1].trim();
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start >= 0 && end > start) return text.slice(start, end + 1);
-  return text;
-}
 
 export const socialPackModule: ModuleDef<Input> = {
   slug: "social-pack",

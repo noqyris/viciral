@@ -38,9 +38,22 @@ export interface ModuleContext<I> {
   spend?: (credits: number) => void;
 }
 
+/**
+ * Brand memory produced by a module (Brand Kit). The runner upserts it into a
+ * BrandProfile so other modules can reuse it — the product's data moat.
+ */
+export interface BrandProfileDraft {
+  name: string;
+  voice?: string;
+  colors?: string[];
+  notes?: string;
+}
+
 export interface ModuleResult {
   assets: GeneratedAsset[];
   creditsUsed: number;
+  /** When present, the runner saves it as a BrandProfile (with the generated logo). */
+  brandProfile?: BrandProfileDraft;
 }
 
 /**

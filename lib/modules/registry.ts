@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ModuleDef } from "./types";
 import { socialPackModule } from "./social-pack";
 import { cinematicModule } from "./cinematic";
+import { brandKitModule } from "./brand-kit";
 
 /**
  * Module registry. The hub renders from this list; new modules are added here.
@@ -36,13 +37,7 @@ function soon(
 export const MODULES: ModuleDef<any>[] = [
   socialPackModule,
   cinematicModule,
-  soon(
-    "brand-kit",
-    "Brand Kit",
-    "Logo, paleta, avatar i ton — kompletan vizuelni identitet.",
-    "brand",
-    "🎨",
-  ),
+  brandKitModule,
   soon(
     "website",
     "Website Builder",

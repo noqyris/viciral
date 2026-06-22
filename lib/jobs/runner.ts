@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { providers } from "@/lib/providers";
 import { getModuleDef } from "@/lib/modules/registry";
 import { debitCredits, refundCredits } from "@/lib/credits/ledger";
-import { loadBrand } from "@/lib/brand/profile";
+import { createBrandFromKit, loadBrand } from "@/lib/brand/profile";
 import { AppError } from "@/lib/http";
 import { reconcileCharge } from "@/lib/jobs/settle";
 import { buildAssetKey, isR2Configured, persistFromUrl } from "@/lib/storage/r2";
@@ -168,6 +168,18 @@ async function runSyncModule(
 
     if (refund > 0) {
       await refundCredits(run.userId, refund, "reconcile", generation.id, `settle:${generation.id}`);
+    }
+
+    // Brand-memory side effect (Brand Kit): save the result as a BrandProfile,
+    // wiring the generated logo's persisted URL. Best-effort — the generation is
+    // already paid for and COMPLETED, so a brand-write failure must not fail it.
+    if (result.brandProfile) {
+      try {
+        const logo = persisted.find((a) => a.kind === "image" && a.meta?.role === "logo");
+        await createBrandFromKit(run.userId, result.brandProfile, logo?.url);
+      } catch (err) {
+        console.error(`Brand kit: saving BrandProfile failed (gen ${generation.id}):`, err);
+      }
     }
 
     return prisma.generation.findUniqueOrThrow({
