@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Zap } from "lucide-react";
 import { MODULES } from "@/lib/modules/registry";
+import { ModuleIcon } from "@/components/icons";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { getLocale } from "@/lib/i18n-server";
 import { moduleName, moduleTagline, CATEGORY_LABEL } from "@/lib/modules/i18n";
@@ -17,7 +19,7 @@ const T = {
   sr: {
     title: "Napravi nešto",
     sub: "Izaberi modul — više AI modela radi zajedno. Cenu u kreditima vidiš pre pokretanja.",
-    auto: "⚡ Auto",
+    auto: "Auto",
     soon: "Uskoro",
     from: "od ≈",
     credits: "kredita",
@@ -25,7 +27,7 @@ const T = {
   en: {
     title: "Make something",
     sub: "Pick a module — multiple AI models working together. You see the credit cost before running.",
-    auto: "⚡ Auto",
+    auto: "Auto",
     soon: "Soon",
     from: "from ≈",
     credits: "credits",
@@ -60,13 +62,14 @@ export default async function StudioHub() {
             >
               <div className="flex items-start justify-between">
                 <span
-                  className={`grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br ${grad} text-xl shadow-lg`}
+                  className={`grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br ${grad} shadow-lg`}
                 >
-                  {m.icon}
+                  <ModuleIcon slug={m.slug} className="h-[22px] w-[22px] text-white" strokeWidth={2} />
                 </span>
                 <div className="flex items-center gap-1.5">
                   {available && m.supportsAuto && (
-                    <span className="rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-300 ring-1 ring-inset ring-violet-400/20">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-300 ring-1 ring-inset ring-violet-400/20">
+                      <Zap className="h-3 w-3 fill-violet-300" strokeWidth={0} aria-hidden />
                       {t.auto}
                     </span>
                   )}

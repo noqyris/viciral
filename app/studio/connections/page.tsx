@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PLATFORMS } from "@/lib/publishing/types";
+import { PlatformIcon } from "@/components/icons";
 import { getLocale } from "@/lib/i18n-server";
 
 const T = {
@@ -47,7 +48,9 @@ export default async function ConnectionsPage() {
             className="flex items-center justify-between surface p-5"
           >
             <div className="flex items-center gap-3">
-              <span className="text-2xl">{p.icon}</span>
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/5 text-zinc-100 ring-1 ring-white/10">
+                <PlatformIcon id={p.id} className="h-5 w-5" />
+              </span>
               <div className="font-medium text-zinc-100">{p.label}</div>
             </div>
             <button

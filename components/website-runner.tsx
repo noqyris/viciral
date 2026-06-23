@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
@@ -18,7 +19,7 @@ const T = {
     goalPlaceholder: "npr. prikupi prijave, prodaj proizvod",
     building: "Pravim sajt…",
     makeSite: "Napravi sajt",
-    auto: "⚡ Auto",
+    auto: "Auto",
     autoTitle: "Pusti AI (Opus) da odradi ceo proces umesto tebe",
     costNote: "tekst + hero i slike sekcija",
     fallbackFile: "sajt",
@@ -36,7 +37,7 @@ const T = {
     goalPlaceholder: "e.g. collect sign-ups, sell a product",
     building: "Building site…",
     makeSite: "Build site",
-    auto: "⚡ Auto",
+    auto: "Auto",
     autoTitle: "Let the AI (Opus) run the whole process for you",
     costNote: "text + hero and section images",
     fallbackFile: "site",
@@ -163,6 +164,7 @@ export function WebsiteRunner({
                 disabled={loading || siteName.length < 2 || description.length < 2}
                 title={t.autoTitle}
               >
+                <Zap className="mr-1.5 h-4 w-4" strokeWidth={2.25} aria-hidden />
                 {t.auto}
               </Button>
             )}

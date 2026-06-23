@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TEMPLATES } from "@/lib/templates/registry";
 import { getModuleDef } from "@/lib/modules/registry";
+import { ModuleIcon, TemplateIcon } from "@/components/icons";
 import { getLocale } from "@/lib/i18n-server";
 import { moduleName } from "@/lib/modules/i18n";
 
@@ -43,7 +44,9 @@ export default async function TemplatesPage() {
           return (
             <section key={slug}>
               <div className="mb-3 flex items-center gap-2">
-                <span className="text-xl">{mod.icon}</span>
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/5 ring-1 ring-white/10">
+                  <ModuleIcon slug={mod.slug} className="h-4 w-4 text-violet-300" />
+                </span>
                 <h2 className="font-semibold text-zinc-100">
                   {moduleName(mod.slug, locale, mod.name)}
                 </h2>
@@ -53,10 +56,12 @@ export default async function TemplatesPage() {
                   <Link
                     key={tpl.id}
                     href={`/studio/${slug}?template=${tpl.id}`}
-                    className="flex h-full flex-col surface p-5 transition-colors hover:border-violet-300 hover:shadow-sm"
+                    className="flex h-full flex-col surface p-5 transition-colors hover:border-violet-400/40 hover:bg-white/[0.05]"
                   >
-                    <div className="text-2xl">{tpl.icon}</div>
-                    <div className="mt-2 font-semibold text-zinc-100">{tpl.title}</div>
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-violet-500/10 text-violet-300 ring-1 ring-inset ring-violet-400/20">
+                      <TemplateIcon name={tpl.icon} className="h-5 w-5" />
+                    </span>
+                    <div className="mt-3 font-semibold text-zinc-100">{tpl.title}</div>
                     <p className="mt-1 flex-1 text-sm text-zinc-400">{tpl.description}</p>
                     <span className="mt-3 text-sm font-medium text-violet-300">{t.use}</span>
                   </Link>

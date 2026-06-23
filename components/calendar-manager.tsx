@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PlatformIcon } from "@/components/icons";
 import { useLocale } from "@/components/locale-context";
 import type { Locale } from "@/lib/i18n";
 import { PLATFORMS } from "@/lib/publishing/types";
@@ -91,10 +92,6 @@ function statusLabel(status: string, t: (typeof T)[Locale]): string {
   }
 }
 
-function platformIcon(id: string): string {
-  return PLATFORMS.find((p) => p.id === id)?.icon ?? "🌐";
-}
-
 export function CalendarManager({
   initial,
   seed,
@@ -172,7 +169,7 @@ export function CalendarManager({
             >
               {PLATFORMS.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.icon} {p.label}
+                  {p.label}
                 </option>
               ))}
             </select>
@@ -222,7 +219,9 @@ export function CalendarManager({
               <div key={p.id} className="surface p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-medium text-zinc-100">
-                    <span aria-hidden>{platformIcon(p.platform)}</span>
+                    <span className="grid h-6 w-6 place-items-center rounded-md bg-white/5 text-zinc-300 ring-1 ring-white/10">
+                      <PlatformIcon id={p.platform} className="h-3.5 w-3.5" />
+                    </span>
                     {new Date(p.scheduledAt).toLocaleString(t.locale)}
                   </div>
                   <div className="flex items-center gap-2">

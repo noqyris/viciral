@@ -7,11 +7,11 @@
 
 export type Platform = "instagram" | "tiktok" | "linkedin" | "facebook";
 
-export const PLATFORMS: { id: Platform; label: string; icon: string }[] = [
-  { id: "instagram", label: "Instagram", icon: "📸" },
-  { id: "tiktok", label: "TikTok", icon: "🎵" },
-  { id: "linkedin", label: "LinkedIn", icon: "💼" },
-  { id: "facebook", label: "Facebook", icon: "👍" },
+export const PLATFORMS: { id: Platform; label: string }[] = [
+  { id: "instagram", label: "Instagram" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "linkedin", label: "LinkedIn" },
+  { id: "facebook", label: "Facebook" },
 ];
 
 export function isPlatform(value: string): value is Platform {

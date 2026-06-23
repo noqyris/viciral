@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
@@ -22,7 +23,7 @@ const T = {
     defaultSuffix: " (podrazumevani)",
     generating: "Generišem…",
     make: "Napravi",
-    auto: "⚡ Auto",
+    auto: "Auto",
     autoTitle: "Pusti AI (Opus) da odradi ceo proces umesto tebe",
     autoNote: "Auto: AI vodi ceo proces",
     creditsUsed: "Potrošeno kredita:",
@@ -43,7 +44,7 @@ const T = {
     defaultSuffix: " (default)",
     generating: "Generating…",
     make: "Create",
-    auto: "⚡ Auto",
+    auto: "Auto",
     autoTitle: "Let the AI (Opus) run the whole process for you",
     autoNote: "Auto: AI runs the whole process",
     creditsUsed: "Credits used:",
@@ -231,6 +232,7 @@ export function SocialPackRunner({
                 disabled={loading || topic.length < 2}
                 title={t.autoTitle}
               >
+                <Zap className="mr-1.5 h-4 w-4" strokeWidth={2.25} aria-hidden />
                 {t.auto}
               </Button>
             )}

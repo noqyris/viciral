@@ -14,6 +14,7 @@ import { EditorRunner } from "@/components/editor-runner";
 import { AvatarRunner } from "@/components/avatar-runner";
 import { DubbingRunner } from "@/components/dubbing-runner";
 import { MusicRunner } from "@/components/music-runner";
+import { ModuleIcon, TemplateIcon } from "@/components/icons";
 import { getLocale } from "@/lib/i18n-server";
 import { moduleName, moduleTagline } from "@/lib/modules/i18n";
 
@@ -84,7 +85,9 @@ export default async function ModuleRunnerPage({
       </Link>
 
       <header className="mt-4 mb-6 flex items-center gap-3">
-        <span className="text-3xl">{mod.icon}</span>
+        <span className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 shadow-[0_8px_30px_-10px_rgba(139,92,246,0.8)]">
+          <ModuleIcon slug={mod.slug} className="h-6 w-6 text-white" strokeWidth={2} />
+        </span>
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-100">
             {moduleName(mod.slug, locale, mod.name)}
@@ -110,7 +113,7 @@ export default async function ModuleRunnerPage({
                       : "border-white/10 bg-white/5 text-zinc-400 hover:border-violet-400/30 hover:text-violet-200"
                   }`}
                 >
-                  <span aria-hidden>{tpl.icon}</span>
+                  <TemplateIcon name={tpl.icon} className="h-4 w-4" />
                   {tpl.title}
                 </Link>
               );

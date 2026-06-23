@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
@@ -19,10 +20,10 @@ const T = {
     stylePlaceholder: "npr. moderno, toplo, minimalistički",
     building: "Pravim…",
     makeBrand: "Napravi brend",
-    auto: "⚡ Auto",
+    auto: "Auto",
     autoTitle: "Pusti AI (Opus) da odradi ceo proces umesto tebe",
     costNote: "logo + avatar + identitet",
-    savedPrefix: "✓ Brend je sačuvan u memoriju — izaberi ga u",
+    savedPrefix: "Brend je sačuvan u memoriju — izaberi ga u",
     brandsLink: "Brendovima",
     savedSuffix: "ili direktno u Social / Cinematic modulu.",
     logo: "Logo",
@@ -39,10 +40,10 @@ const T = {
     stylePlaceholder: "e.g. modern, warm, minimalist",
     building: "Creating…",
     makeBrand: "Create brand",
-    auto: "⚡ Auto",
+    auto: "Auto",
     autoTitle: "Let the AI (Opus) run the whole process for you",
     costNote: "logo + avatar + identity",
-    savedPrefix: "✓ Brand saved to memory — pick it in",
+    savedPrefix: "Brand saved to memory — pick it in",
     brandsLink: "Brands",
     savedSuffix: "or directly in the Social / Cinematic module.",
     logo: "Logo",
@@ -153,6 +154,7 @@ export function BrandKitRunner({ supportsAuto }: { supportsAuto: boolean }) {
                 disabled={loading || brandName.length < 2 || description.length < 2}
                 title={t.autoTitle}
               >
+                <Zap className="mr-1.5 h-4 w-4" strokeWidth={2.25} aria-hidden />
                 {t.auto}
               </Button>
             )}
@@ -172,12 +174,15 @@ export function BrandKitRunner({ supportsAuto }: { supportsAuto: boolean }) {
 
       {assets && (
         <div className="space-y-5">
-          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-300">
-            {t.savedPrefix}{" "}
-            <Link href="/studio/brand" className="underline">
-              {t.brandsLink}
-            </Link>{" "}
-            {t.savedSuffix}
+          <div className="flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+            <Check className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.5} aria-hidden />
+            <span>
+              {t.savedPrefix}{" "}
+              <Link href="/studio/brand" className="underline">
+                {t.brandsLink}
+              </Link>{" "}
+              {t.savedSuffix}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -24,7 +24,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "social-pack",
     title: "Lansiranje proizvoda",
     description: "Najava novog proizvoda sa prednostima i pozivom na akciju.",
-    icon: "🚀",
+    icon: "rocket",
     inputs: {
       topic: "Lansiranje novog proizvoda — istakni ključne prednosti i jasan poziv na akciju",
       platform: "instagram",
@@ -37,7 +37,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "social-pack",
     title: "Nedeljni saveti",
     description: "Serija korisnih saveta iz tvoje oblasti za LinkedIn.",
-    icon: "💡",
+    icon: "lightbulb",
     inputs: {
       topic: "Korisni saveti iz naše oblasti — jedan konkretan savet po objavi",
       platform: "linkedin",
@@ -50,7 +50,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "social-pack",
     title: "Iza scene",
     description: "Pokaži tim i proces rada na opušten, autentičan način.",
-    icon: "🎥",
+    icon: "film",
     inputs: {
       topic: "Iza scene — pokaži tim, radni prostor i proces nastanka proizvoda",
       platform: "tiktok",
@@ -65,7 +65,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "website",
     title: "Landing za uslugu",
     description: "Stranica koja predstavlja uslugu i prikuplja kontakte.",
-    icon: "📄",
+    icon: "file",
     inputs: {
       description: "Predstavi uslugu, za koga je i zašto je bolja od konkurencije",
       goal: "prikupi prijave i kontakte",
@@ -76,7 +76,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "website",
     title: "Stranica proizvoda",
     description: "Prodajna stranica sa prednostima i poverenjem.",
-    icon: "🛍️",
+    icon: "store",
     inputs: {
       description: "Predstavi proizvod, njegove prednosti, recenzije i garanciju",
       goal: "prodaj proizvod",
@@ -89,7 +89,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "avatar",
     title: "Najava akcije",
     description: "Kratka, energična najava popusta ili događaja.",
-    icon: "📣",
+    icon: "megaphone",
     inputs: {
       script:
         "Zdravo! Imam sjajne vesti — pokrećemo specijalnu akciju ovog vikenda. Iskoristite priliku, ne propustite!",
@@ -101,7 +101,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "avatar",
     title: "Objašnjenje u 3 koraka",
     description: "Smiren prezenter objašnjava kako proizvod rešava problem.",
-    icon: "🧑‍🏫",
+    icon: "teacher",
     inputs: {
       script:
         "Danas vam objašnjavam kako naš proizvod rešava vaš problem u tri jednostavna koraka. Krenimo.",
@@ -115,7 +115,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "short-form",
     title: "Podkast → kratki klipovi",
     description: "Iseci najjače momente iz dugog snimka za TikTok.",
-    icon: "🎙️",
+    icon: "mic",
     inputs: { platform: "tiktok", clipCount: 5, approxMinutes: 30 },
   },
 
@@ -125,7 +125,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "image-tools",
     title: "Slika za Story (9:16)",
     description: "Prilagodi postojeću sliku na vertikalni format.",
-    icon: "📱",
+    icon: "phone",
     inputs: { operation: "resize", aspectRatio: "9:16" },
   },
   {
@@ -133,7 +133,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "image-tools",
     title: "Ukloni pozadinu",
     description: "Izdvoj proizvod/osobu sa providnom pozadinom.",
-    icon: "✂️",
+    icon: "scissors",
     inputs: { operation: "bg-remove" },
   },
 
@@ -143,7 +143,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "music",
     title: "Podloga za reels",
     description: "Energična upbeat muzika bez vokala, ~20s.",
-    icon: "🎶",
+    icon: "music",
     inputs: { prompt: "Energičan upbeat za reels, moderno, bez vokala", durationSec: 20 },
   },
 
@@ -153,7 +153,7 @@ export const TEMPLATES: Template[] = [
     moduleSlug: "dubbing",
     title: "Prevedi na engleski",
     description: "Lokalizuj video na engleski sa sinhronizovanim usnama.",
-    icon: "🇬🇧",
+    icon: "translate",
     inputs: { targetLang: "en", approxSeconds: 30 },
   },
 ];

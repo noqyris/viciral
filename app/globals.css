@@ -119,3 +119,377 @@ body::before {
   font-weight: 500;
   color: #c4c4cc;
 }
+
+/* ===== Elevated design system ===== */
+
+/* ============================================================
+   Redesign layer — "Studio After Dark, engineered"
+   APPEND ONLY. Adds new names; never redefines existing utilities
+   (.glass .surface .gradient-text .glow-violet .field .field-label).
+   Animates transform/opacity only; gated behind prefers-reduced-motion.
+   ============================================================ */
+
+/* ---- New surface + depth tokens (additive) ---- */
+:root {
+  --pit: #07070b;            /* deepest full-bleed sections */
+  --surface-1: rgba(255, 255, 255, 0.035);
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(139, 92, 246, 0.4);
+  --ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---- Section rhythm wrapper ---- */
+.section {
+  width: 100%;
+  padding-top: clamp(4.5rem, 9vh, 8rem);
+  padding-bottom: clamp(4.5rem, 9vh, 8rem);
+}
+.section-pit {
+  background: var(--pit);
+}
+
+/* ---- Fluid display type ---- */
+.display {
+  font-size: clamp(2.75rem, 7vw, 5.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+.h2-fluid {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+/* ---- Eyebrow (mono spec-sheet label) ---- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c4b5fd;
+}
+.mono {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* ---- Aurora mesh background (client island toggles nothing; pure CSS) ---- */
+.aurora {
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.aurora__blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.5;
+  will-change: transform, opacity;
+}
+.aurora__blob--v {
+  width: 42rem;
+  height: 42rem;
+  left: 8%;
+  top: -8%;
+  background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.55), transparent 65%);
+}
+.aurora__blob--i {
+  width: 38rem;
+  height: 38rem;
+  right: 6%;
+  top: 18%;
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.45), transparent 65%);
+}
+.aurora__blob--s {
+  width: 36rem;
+  height: 36rem;
+  left: 30%;
+  bottom: -10%;
+  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.35), transparent 65%);
+}
+
+/* ---- Film grain overlay ---- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Premium buttons ---- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 10px 40px -12px rgba(139, 92, 246, 0.85);
+  transition:
+    transform 0.18s var(--ease-soft),
+    filter 0.18s var(--ease-soft),
+    box-shadow 0.18s var(--ease-soft);
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 14px 50px -10px rgba(139, 92, 246, 0.95);
+}
+.btn-primary:active {
+  transform: translateY(1px);
+}
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #e4e4e7;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  transition:
+    background 0.18s var(--ease-soft),
+    border-color 0.18s var(--ease-soft),
+    transform 0.18s var(--ease-soft);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.btn-ghost:active {
+  transform: translateY(1px);
+}
+
+/* ---- Cards ---- */
+.card {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  transition:
+    transform 0.22s var(--ease-soft),
+    border-color 0.22s var(--ease-soft),
+    background 0.22s var(--ease-soft);
+}
+.card:hover {
+  background: var(--surface-2);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.card-glow {
+  position: relative;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  transition:
+    transform 0.22s var(--ease-soft),
+    border-color 0.22s var(--ease-soft),
+    box-shadow 0.22s var(--ease-soft);
+}
+.card-glow:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-hover);
+  box-shadow: 0 24px 70px -36px rgba(139, 92, 246, 0.7);
+}
+
+/* ---- Chip (mono model/category chip with top-lit edge) ---- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
+  color: #d4d4d8;
+  transition:
+    border-color 0.18s var(--ease-soft),
+    color 0.18s var(--ease-soft);
+}
+.chip:hover {
+  border-color: var(--border-hover);
+  color: #fff;
+}
+
+/* ---- Per-scene accent bloom (set --bloom inline) ---- */
+.bloom {
+  position: absolute;
+  inset: -12% -8%;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0;
+  background: radial-gradient(circle at 50% 50%, var(--bloom, rgba(139, 92, 246, 0.45)), transparent 65%);
+  transition: opacity 0.7s var(--ease-soft);
+}
+.bloom.is-lit {
+  opacity: 0.55;
+}
+
+/* ---- Nav gradient hairline thread ---- */
+.nav-thread {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, #8b5cf6, #6366f1, #38bdf8, transparent);
+  background-size: 200% 100%;
+  opacity: 0.5;
+}
+
+/* ---- Marquee (proof strip) ---- */
+.marquee {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  will-change: transform;
+}
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* ---- Float (hero constellation tiles) — set --dur / --amp inline ---- */
+.float {
+  will-change: transform;
+}
+
+/* ============================================================
+   MOTION — only enabled when the user allows it.
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .aurora__blob--v { animation: aurora-drift-a 26s var(--ease-soft) infinite alternate; }
+  .aurora__blob--i { animation: aurora-drift-b 30s var(--ease-soft) infinite alternate; }
+  .aurora__blob--s { animation: aurora-drift-c 34s var(--ease-soft) infinite alternate; }
+
+  .nav-thread { animation: thread-shimmer 6s linear infinite; }
+
+  .float { animation: float-y var(--dur, 7s) ease-in-out infinite alternate; }
+
+  .marquee { animation: marquee-x 48s linear infinite; }
+  .marquee-mask:hover .marquee { animation-play-state: paused; }
+
+  .cta-breathe { animation: breathe 8s ease-in-out infinite; }
+}
+
+@keyframes aurora-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.45; }
+  to   { transform: translate3d(6%, 8%, 0) scale(1.12); opacity: 0.6; }
+}
+@keyframes aurora-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.05); opacity: 0.4; }
+  to   { transform: translate3d(-7%, 5%, 0) scale(0.95); opacity: 0.55; }
+}
+@keyframes aurora-drift-c {
+  from { transform: translate3d(0, 0, 0) scale(1); opacity: 0.3; }
+  to   { transform: translate3d(5%, -6%, 0) scale(1.1); opacity: 0.45; }
+}
+@keyframes thread-shimmer {
+  from { background-position: 0% 0; }
+  to   { background-position: 200% 0; }
+}
+@keyframes float-y {
+  from { transform: translateY(calc(var(--amp, 10px) * -1)); }
+  to   { transform: translateY(var(--amp, 10px)); }
+}
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.85; }
+}
+
+/* Reduced motion: freeze everything to a calm static state. */
+@media (prefers-reduced-motion: reduce) {
+  .aurora__blob,
+  .float,
+  .marquee,
+  .nav-thread,
+  .cta-breathe {
+    animation: none !important;
+  }
+  .bloom { transition: none; }
+}
+
+/* ===== Before / After reveal slider ===== */
+.ba {
+  --pos: 88%;
+}
+/* the "before" pane is clipped from the left edge up to the divider */
+.ba-before {
+  clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+}
+/* raw / unprocessed look for the before pane */
+.ba-raw {
+  filter: grayscale(0.7) saturate(0.45) contrast(0.92) brightness(0.8);
+}
+.ba-divider {
+  left: var(--pos);
+  box-shadow: 0 0 20px 2px rgba(139, 92, 246, 0.55);
+}
+.ba-grip {
+  box-shadow:
+    0 8px 26px -8px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+/* native range thumb — invisible but keeps the whole track draggable */
+.ba-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  /* let vertical swipes scroll the page; horizontal drags move the slider */
+  touch-action: pan-y;
+}
+.ba-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 44px;
+  height: 100%;
+  cursor: ew-resize;
+}
+.ba-range::-moz-range-thumb {
+  width: 44px;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+/* moving sheen on the before pane — reads as "scanning / processing" */
+@media (prefers-reduced-motion: no-preference) {
+  .ba-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 42%, rgba(255, 255, 255, 0.1) 50%, transparent 58%);
+    background-size: 240% 100%;
+    animation: ba-sheen 3.4s linear infinite;
+  }
+}
+@keyframes ba-sheen {
+  from { background-position: 150% 0; }
+  to   { background-position: -50% 0; }
+}

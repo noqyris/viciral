@@ -3,17 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { Gem, LogOut } from "lucide-react";
 import { useCredits } from "@/components/credits-context";
 import { useLocale } from "@/components/locale-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Logo } from "@/components/logo";
+import { NavIcon } from "@/components/icons";
 
 const NAV = [
-  { id: "studio", href: "/studio", icon: "⚡", exact: true },
-  { id: "templates", href: "/studio/templates", icon: "🍱" },
-  { id: "calendar", href: "/studio/calendar", icon: "📅" },
-  { id: "history", href: "/studio/history", icon: "🗂️" },
-  { id: "brands", href: "/studio/brand", icon: "🎨" },
-  { id: "connections", href: "/studio/connections", icon: "🔗" },
+  { id: "studio", href: "/studio", exact: true },
+  { id: "templates", href: "/studio/templates" },
+  { id: "calendar", href: "/studio/calendar" },
+  { id: "history", href: "/studio/history" },
+  { id: "brands", href: "/studio/brand" },
+  { id: "connections", href: "/studio/connections" },
 ] as const;
 
 const T = {
@@ -47,20 +50,6 @@ function isActive(pathname: string, item: { href: string; exact?: boolean }) {
     : pathname === item.href || pathname.startsWith(item.href + "/");
 }
 
-function Logo({ size = "md" }: { size?: "sm" | "md" }) {
-  const box = size === "sm" ? "h-7 w-7 text-xs" : "h-8 w-8 text-sm";
-  return (
-    <Link href="/" className="flex items-center gap-2">
-      <span
-        className={`grid ${box} place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500 font-bold text-white shadow-[0_4px_20px_-4px_rgba(139,92,246,0.7)]`}
-      >
-        V
-      </span>
-      <span className="text-lg font-semibold tracking-tight">Viciral</span>
-    </Link>
-  );
-}
-
 function CreditPill({ creditsLabel }: { creditsLabel: string }) {
   const { balance, loading } = useCredits();
   return (
@@ -68,9 +57,7 @@ function CreditPill({ creditsLabel }: { creditsLabel: string }) {
       title={creditsLabel}
       className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium text-zinc-200"
     >
-      <span aria-hidden className="text-violet-400">
-        ◈
-      </span>
+      <Gem className="h-4 w-4 text-violet-400" strokeWidth={2} aria-hidden />
       {loading && balance == null ? "…" : (balance ?? 0)}
       <span className="text-zinc-500">{creditsLabel}</span>
     </span>
@@ -97,7 +84,7 @@ export function StudioSidebar({ userLabel }: { userLabel: string }) {
                 : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
             }`}
           >
-            <span className="text-base">{item.icon}</span>
+            <NavIcon id={item.id} className="h-[18px] w-[18px] shrink-0" />
             {t[item.id]}
           </Link>
         );
@@ -110,7 +97,7 @@ export function StudioSidebar({ userLabel }: { userLabel: string }) {
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-white/10 bg-white/[0.02] px-4 py-5 backdrop-blur-xl md:flex">
         <div className="mb-8 px-2">
-          <Logo />
+          <Logo size={26} />
         </div>
         <nav className="flex flex-1 flex-col gap-1">{links}</nav>
         <div className="mt-4 space-y-3 border-t border-white/10 px-1 pt-4">
@@ -124,8 +111,9 @@ export function StudioSidebar({ userLabel }: { userLabel: string }) {
             </span>
             <button
               onClick={logout}
-              className="text-xs text-zinc-400 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1.5 text-xs text-zinc-400 transition-colors hover:text-white"
             >
+              <LogOut className="h-3.5 w-3.5" aria-hidden />
               {t.signOut}
             </button>
           </div>
@@ -134,7 +122,7 @@ export function StudioSidebar({ userLabel }: { userLabel: string }) {
 
       {/* Mobile top bar + scrollable nav */}
       <div className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-white/10 bg-[#0a0a0f]/80 px-4 py-3 backdrop-blur-xl md:hidden">
-        <Logo size="sm" />
+        <Logo size={22} />
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           <CreditPill creditsLabel={t.credits} />

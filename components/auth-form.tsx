@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
+import { GoogleIcon } from "@/components/icons";
 import { useLocale } from "@/components/locale-context";
 
 const T = {
@@ -95,9 +97,7 @@ export function AuthForm({
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8 text-center">
-        <span className="mx-auto mb-4 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-base font-bold text-white shadow-[0_8px_30px_-10px_rgba(139,92,246,0.8)]">
-          V
-        </span>
+        <Logo size={44} withWordmark={false} href={null} glow className="mb-4" />
         <h1 className="text-2xl font-bold tracking-tight text-white">
           {isSignup ? t.signupTitle : t.loginTitle}
         </h1>
@@ -113,7 +113,7 @@ export function AuthForm({
               className="w-full"
               onClick={() => signIn("google", { callbackUrl: "/studio" })}
             >
-              <span className="mr-2">🟦</span> {t.google}
+              <GoogleIcon className="mr-2 h-[18px] w-[18px]" /> {t.google}
             </Button>
             <div className="my-4 flex items-center gap-3 text-xs text-zinc-500">
               <span className="h-px flex-1 bg-white/10" />

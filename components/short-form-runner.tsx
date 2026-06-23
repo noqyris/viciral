@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
@@ -156,7 +157,8 @@ export function ShortFormRunner({
                 disabled={loading || mediaUrl.length < 4}
                 title={t.autoTitle}
               >
-                ⚡ Auto
+                <Zap className="mr-1.5 h-4 w-4" strokeWidth={2.25} aria-hidden />
+                Auto
               </Button>
             )}
           </div>

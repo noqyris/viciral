@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { History } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getModuleDef } from "@/lib/modules/registry";
+import { ModuleIcon } from "@/components/icons";
 import { getLocale } from "@/lib/i18n-server";
 import { moduleName } from "@/lib/modules/i18n";
 
@@ -69,7 +71,9 @@ export default async function HistoryPage() {
 
       {generations.length === 0 ? (
         <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] p-10 text-center">
-          <div className="text-3xl">🗂️</div>
+          <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-white/5 ring-1 ring-white/10">
+            <History className="h-6 w-6 text-zinc-400" strokeWidth={1.75} aria-hidden />
+          </span>
           <p className="mt-3 font-medium text-zinc-300">{t.emptyTitle}</p>
           <p className="mt-1 text-sm text-zinc-400">{t.emptyHint}</p>
           <Link
@@ -88,7 +92,11 @@ export default async function HistoryPage() {
               <div key={g.id} className="surface p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-medium text-zinc-100">
-                    {mod?.icon && <span aria-hidden>{mod.icon}</span>}
+                    {mod && (
+                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-white/5 ring-1 ring-white/10">
+                        <ModuleIcon slug={mod.slug} className="h-4 w-4 text-violet-300" />
+                      </span>
+                    )}
                     {mod ? moduleName(mod.slug, locale, mod.name) : g.module}
                   </div>
                   <span
