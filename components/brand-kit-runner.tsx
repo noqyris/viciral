@@ -3,6 +3,53 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { CostHint } from "@/components/cost-hint";
+import { notifyCreditsChanged } from "@/components/credits-context";
+import { useLocale } from "@/components/locale-context";
+import { estimateModuleCredits } from "@/lib/credits/estimate";
+
+const T = {
+  sr: {
+    genError: "Greška pri generisanju",
+    brandName: "Naziv brenda",
+    brandNamePlaceholder: "npr. Lunar Coffee",
+    description: "Opis",
+    descriptionPlaceholder: "Čime se brend bavi, kome se obraća…",
+    style: "Stil / vajb",
+    stylePlaceholder: "npr. moderno, toplo, minimalistički",
+    building: "Pravim…",
+    makeBrand: "Napravi brend",
+    auto: "⚡ Auto",
+    autoTitle: "Pusti AI (Opus) da odradi ceo proces umesto tebe",
+    costNote: "logo + avatar + identitet",
+    savedPrefix: "✓ Brend je sačuvan u memoriju — izaberi ga u",
+    brandsLink: "Brendovima",
+    savedSuffix: "ili direktno u Social / Cinematic modulu.",
+    logo: "Logo",
+    avatar: "Avatar",
+    creditsUsed: "Potrošeno kredita:",
+  },
+  en: {
+    genError: "Generation failed",
+    brandName: "Brand name",
+    brandNamePlaceholder: "e.g. Lunar Coffee",
+    description: "Description",
+    descriptionPlaceholder: "What the brand does, who it speaks to…",
+    style: "Style / vibe",
+    stylePlaceholder: "e.g. modern, warm, minimalist",
+    building: "Creating…",
+    makeBrand: "Create brand",
+    auto: "⚡ Auto",
+    autoTitle: "Let the AI (Opus) run the whole process for you",
+    costNote: "logo + avatar + identity",
+    savedPrefix: "✓ Brand saved to memory — pick it in",
+    brandsLink: "Brands",
+    savedSuffix: "or directly in the Social / Cinematic module.",
+    logo: "Logo",
+    avatar: "Avatar",
+    creditsUsed: "Credits used:",
+  },
+} as const;
 
 interface Asset {
   id: string;
@@ -21,6 +68,7 @@ export function BrandKitRunner({ supportsAuto }: { supportsAuto: boolean }) {
   const [brandName, setBrandName] = useState("");
   const [description, setDescription] = useState("");
   const [vibe, setVibe] = useState("");
+  const t = T[useLocale()];
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,9 +91,10 @@ export function BrandKitRunner({ supportsAuto }: { supportsAuto: boolean }) {
         }),
       });
       const data = (await res.json()) as GenerationResponse;
-      if (!res.ok) throw new Error(data.error ?? "Greška pri generisanju");
+      if (!res.ok) throw new Error(data.error ?? t.genError);
       setAssets(data.generation?.assets ?? []);
       setCreditsUsed(data.generation?.creditsUsed ?? null);
+      notifyCreditsChanged();
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -60,75 +109,90 @@ export function BrandKitRunner({ supportsAuto }: { supportsAuto: boolean }) {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5">
-        <input
-          value={brandName}
-          onChange={(e) => setBrandName(e.target.value)}
-          placeholder="Naziv brenda"
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-violet-400"
-        />
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          placeholder="Čime se brend bavi, kome se obraća…"
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-violet-400"
-        />
-        <input
-          value={vibe}
-          onChange={(e) => setVibe(e.target.value)}
-          placeholder="Stil / vajb (npr. moderno, toplo, minimalistički)"
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-violet-400"
-        />
-        <div className="flex flex-wrap items-center gap-3 pt-1">
-          <Button
-            onClick={() => run("manual")}
-            disabled={loading || brandName.length < 2 || description.length < 2}
-          >
-            {loading ? "Pravim…" : "Napravi brend"}
-          </Button>
-          {supportsAuto && (
+      <div className="space-y-4 surface p-5">
+        <label className="block">
+          <span className="field-label">{t.brandName}</span>
+          <input
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
+            placeholder={t.brandNamePlaceholder}
+            className="mt-1 field"
+          />
+        </label>
+        <label className="block">
+          <span className="field-label">{t.description}</span>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            placeholder={t.descriptionPlaceholder}
+            className="mt-1 field"
+          />
+        </label>
+        <label className="block">
+          <span className="field-label">{t.style}</span>
+          <input
+            value={vibe}
+            onChange={(e) => setVibe(e.target.value)}
+            placeholder={t.stylePlaceholder}
+            className="mt-1 field"
+          />
+        </label>
+        <div className="space-y-2 pt-1">
+          <div className="flex flex-wrap items-center gap-3">
             <Button
-              variant="secondary"
-              onClick={() => run("auto")}
+              onClick={() => run("manual")}
               disabled={loading || brandName.length < 2 || description.length < 2}
-              title="Jača orkestracija (Opus) za bolji identitet"
             >
-              ⚡ Auto (Opus)
+              {loading ? t.building : t.makeBrand}
             </Button>
-          )}
+            {supportsAuto && (
+              <Button
+                variant="secondary"
+                onClick={() => run("auto")}
+                disabled={loading || brandName.length < 2 || description.length < 2}
+                title={t.autoTitle}
+              >
+                {t.auto}
+              </Button>
+            )}
+          </div>
+          <CostHint
+            credits={estimateModuleCredits("brand-kit")}
+            note={t.costNote}
+          />
         </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
           {error}
         </div>
       )}
 
       {assets && (
         <div className="space-y-5">
-          <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-            ✓ Brend je sačuvan u memoriju — izaberi ga u{" "}
+          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-300">
+            {t.savedPrefix}{" "}
             <Link href="/studio/brand" className="underline">
-              Brendovima
+              {t.brandsLink}
             </Link>{" "}
-            ili direktno u Social / Cinematic modulu.
+            {t.savedSuffix}
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {logo?.url && (
-              <figure className="overflow-hidden rounded-xl border border-zinc-200">
+              <figure className="overflow-hidden rounded-xl border border-white/10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logo.url} alt="Logo" className="w-full" />
-                <figcaption className="p-2 text-center text-xs text-zinc-500">Logo</figcaption>
+                <img src={logo.url} alt={t.logo} className="w-full" />
+                <figcaption className="p-2 text-center text-xs text-zinc-400">{t.logo}</figcaption>
               </figure>
             )}
             {avatar?.url && (
-              <figure className="overflow-hidden rounded-xl border border-zinc-200">
+              <figure className="overflow-hidden rounded-xl border border-white/10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={avatar.url} alt="Avatar" className="w-full" />
-                <figcaption className="p-2 text-center text-xs text-zinc-500">Avatar</figcaption>
+                <img src={avatar.url} alt={t.avatar} className="w-full" />
+                <figcaption className="p-2 text-center text-xs text-zinc-400">{t.avatar}</figcaption>
               </figure>
             )}
           </div>
@@ -136,26 +200,26 @@ export function BrandKitRunner({ supportsAuto }: { supportsAuto: boolean }) {
           {palette.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {palette.map((c) => (
-                <div key={c} className="flex items-center gap-2 rounded-lg border border-zinc-200 px-2 py-1">
+                <div key={c} className="flex items-center gap-2 rounded-lg border border-white/10 px-2 py-1">
                   <span
                     className="h-5 w-5 rounded"
                     style={{ backgroundColor: c }}
                     aria-hidden
                   />
-                  <span className="text-xs text-zinc-600">{c}</span>
+                  <span className="text-xs text-zinc-400">{c}</span>
                 </div>
               ))}
             </div>
           )}
 
           {summary?.text && (
-            <div className="whitespace-pre-wrap rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-800">
+            <div className="whitespace-pre-wrap surface p-4 text-sm text-zinc-200">
               {summary.text}
             </div>
           )}
 
           {creditsUsed != null && (
-            <div className="text-sm text-zinc-500">Potrošeno kredita: {creditsUsed}</div>
+            <div className="text-sm text-zinc-400">{t.creditsUsed} {creditsUsed}</div>
           )}
         </div>
       )}

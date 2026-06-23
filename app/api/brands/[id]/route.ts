@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { referenceImagesToStrings } from "@/lib/brand/normalize";
 import { AppError, jsonError } from "@/lib/http";
 
 export const runtime = "nodejs";
@@ -12,6 +13,7 @@ const updateSchema = z.object({
   voice: z.string().max(200).nullable().optional(),
   colors: z.array(z.string().max(40)).max(12).optional(),
   notes: z.string().max(1000).nullable().optional(),
+  referenceImages: z.array(z.string().url().max(600)).max(6).optional(),
   isDefault: z.boolean().optional(),
 });
 
@@ -45,6 +47,10 @@ export async function PATCH(
           colors:
             body.colors !== undefined
               ? (body.colors as Prisma.InputJsonValue)
+              : undefined,
+          referenceImages:
+            body.referenceImages !== undefined
+              ? (referenceImagesToStrings(body.referenceImages) as Prisma.InputJsonValue)
               : undefined,
           isDefault: body.isDefault,
         },

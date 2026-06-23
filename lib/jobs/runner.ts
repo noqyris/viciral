@@ -6,6 +6,7 @@ import { debitCredits, refundCredits } from "@/lib/credits/ledger";
 import { createBrandFromKit, loadBrand } from "@/lib/brand/profile";
 import { AppError } from "@/lib/http";
 import { reconcileCharge } from "@/lib/jobs/settle";
+import { rewriteEmbeddedUrls } from "@/lib/jobs/rewrite";
 import { buildAssetKey, isR2Configured, persistFromUrl } from "@/lib/storage/r2";
 import type { GeneratedAsset, GenerationMode, ModuleDef } from "@/lib/modules/types";
 
@@ -146,7 +147,7 @@ async function runSyncModule(
     if (actualUsed === 0 && result.creditsUsed > 0) actualUsed = result.creditsUsed;
     const { charged, refund } = reconcileCharge(estimate, 0, actualUsed);
 
-    const persisted = await persistAssets(generation.id, result.assets);
+    const persisted = rewriteEmbeddedUrls(await persistAssets(generation.id, result.assets));
 
     await prisma.$transaction(async (tx) => {
       await tx.asset.createMany({
@@ -176,7 +177,13 @@ async function runSyncModule(
     if (result.brandProfile) {
       try {
         const logo = persisted.find((a) => a.kind === "image" && a.meta?.role === "logo");
-        await createBrandFromKit(run.userId, result.brandProfile, logo?.url);
+        const avatar = persisted.find((a) => a.kind === "image" && a.meta?.role === "avatar");
+        // Seed the brand's character reference from its generated avatar (and
+        // logo) so future generations can stay visually consistent with it.
+        const referenceImages = [avatar?.url, logo?.url].filter(
+          (u): u is string => typeof u === "string" && u.length > 0,
+        );
+        await createBrandFromKit(run.userId, result.brandProfile, logo?.url, referenceImages);
       } catch (err) {
         console.error(`Brand kit: saving BrandProfile failed (gen ${generation.id}):`, err);
       }

@@ -7,6 +7,7 @@ const input = {
   platform: "instagram" as const,
   postCount: 3,
   tone: "neutralan",
+  variantsPerPost: 1,
 };
 
 describe("social-pack credit estimate (reservation upper bound)", () => {
@@ -28,5 +29,18 @@ describe("social-pack credit estimate (reservation upper bound)", () => {
     const e1 = socialPackModule.estimateCredits({ ...input, postCount: 1 });
     const e5 = socialPackModule.estimateCredits({ ...input, postCount: 5 });
     expect(e5).toBeGreaterThan(e1);
+  });
+
+  it("reserves images per-post (reserve == charge) and scales with variants", () => {
+    // The generate loop spends estimateCredits(nano, {numImages: variants}) PER POST,
+    // so the reservation must sum that per post (not a single batch ceil).
+    const perPost = estimateCredits("nano-banana", { numImages: 3 });
+    const text = estimateCredits("claude-opus", { inputTokens: 2000, outputTokens: 2000 });
+    expect(
+      socialPackModule.estimateCredits({ ...input, postCount: 10, variantsPerPost: 3 }),
+    ).toBe(10 * perPost + text);
+    expect(
+      socialPackModule.estimateCredits({ ...input, variantsPerPost: 3 }),
+    ).toBeGreaterThan(socialPackModule.estimateCredits({ ...input, variantsPerPost: 1 }));
   });
 });

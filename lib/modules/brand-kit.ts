@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { estimateCredits, MODEL_CATALOG } from "@/lib/credits/pricing";
-import { extractJson } from "./json";
+import { estimateCredits } from "@/lib/credits/pricing";
+import { estimateModuleCredits } from "@/lib/credits/estimate";
+import { runJsonText } from "./text";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
 /**
@@ -41,14 +42,10 @@ export const brandKitModule: ModuleDef<Input> = {
   icon: "🎨",
   inputSchema,
 
+  // Shared with the client cost hint (single source of truth). Conservative
+  // upper bound: text at Opus + the logo and avatar images.
   estimateCredits() {
-    // Conservative upper bound: text at Opus + the logo and avatar images.
-    const text = estimateCredits("claude-opus", {
-      inputTokens: 2000,
-      outputTokens: MAX_OUTPUT_TOKENS,
-    });
-    const images = estimateCredits("nano-banana", { numImages: 2 });
-    return text + images;
+    return estimateModuleCredits("brand-kit");
   },
 
   async generate(ctx) {
@@ -70,32 +67,23 @@ export const brandKitModule: ModuleDef<Input> = {
       `<podaci>\nNaziv: ${input.brandName}\nOpis: ${input.description}\n` +
       `Stil/vajb: ${input.vibe || "po tvojoj proceni"}\n</podaci>`;
 
-    const textModelId = ctx.mode === "auto" ? "claude-opus" : "claude-sonnet";
-
-    const res = await ctx.providers.text.generateText({
+    const { value: kit, creditsUsed: textCredits } = await runJsonText(ctx, kitSchema, {
       system,
       prompt,
-      model: MODEL_CATALOG[textModelId].providerModel,
       maxTokens: MAX_OUTPUT_TOKENS,
     });
 
-    const kit = kitSchema.parse(JSON.parse(extractJson(res.text)));
-
     const assets: GeneratedAsset[] = [];
-    const textCredits = estimateCredits(textModelId, {
-      inputTokens: res.inputTokens,
-      outputTokens: res.outputTokens,
-    });
-    ctx.spend?.(textCredits);
     let creditsUsed = textCredits;
 
-    ctx.onProgress?.("Generišem logo…");
+    ctx.onProgress?.("Generišem logo (vektorski)…");
+    // Vector logo (Recraft) → scalable, professionally usable SVG, not a raster PNG.
     const logo = await ctx.providers.image.generateImage({
-      modelId: "nano-banana",
+      modelId: "recraft-vector",
       prompt: kit.logoPrompt,
       numImages: 1,
     });
-    const logoCredits = estimateCredits("nano-banana", { numImages: 1 });
+    const logoCredits = estimateCredits("recraft-vector", { numImages: 1 });
     ctx.spend?.(logoCredits);
     creditsUsed += logoCredits;
 
@@ -116,7 +104,7 @@ export const brandKitModule: ModuleDef<Input> = {
       `Smernice: ${kit.notes}`;
     assets.push({ kind: "text", text: summary, meta: { role: "summary", palette: kit.palette } });
     if (logo.images[0]) {
-      assets.push({ kind: "image", url: logo.images[0].url, modelId: "nano-banana", meta: { role: "logo" } });
+      assets.push({ kind: "image", url: logo.images[0].url, modelId: "recraft-vector", meta: { role: "logo" } });
     }
     if (avatar.images[0]) {
       assets.push({ kind: "image", url: avatar.images[0].url, modelId: "nano-banana", meta: { role: "avatar" } });

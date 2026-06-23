@@ -19,6 +19,12 @@ const schema = z.object({
   FAL_KEY: z.string().optional(),
   FAL_WEBHOOK_SECRET: z.string().optional(),
 
+  // Auth.js (NextAuth)
+  AUTH_SECRET: z.string().optional(),
+  AUTH_TRUST_HOST: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+
   // Reaper cron auth (sweeps stuck async jobs)
   CRON_SECRET: z.string().optional(),
 

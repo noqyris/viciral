@@ -23,5 +23,5 @@ AI content studio that aggregates multiple AI models (Claude, Nano Banana/Gemini
 - **Node 22 LTS recommended** (`nvm use 22`). Prisma is pinned to v6 (Prisma 7 needs Node ≥22.12 and broke on Node 21).
 - Claude model IDs: orchestration `claude-opus-4-8`, bulk text `claude-sonnet-4-6` (see `lib/providers/anthropic.ts`). Confirm any Claude pricing/ID via the `claude-api` skill — don't answer from memory.
 - Env access goes through `lib/env.ts` (`requireEnv` fails loudly only when a feature is used). Copy `.env.example` → `.env`.
-- Auth is a dev stub in `lib/auth.ts` — wire Clerk/Auth.js before production (open decision).
+- Auth is **Auth.js (NextAuth v5)** — email+password (Credentials, bcrypt) + Google OAuth (only enabled when `GOOGLE_CLIENT_ID/SECRET` are set); JWT sessions, Prisma adapter, config in `auth.ts`. `getCurrentUser()` (`lib/auth.ts`) reads the session and 401s if absent; studio routes guard and redirect to `/login`. New accounts get 200 trial credits (`lib/auth-trial.ts`). Dev login: `dev@viciral.local` / `dev12345` (via `pnpm db:seed`). Publishing's Meta/TikTok/LinkedIn OAuth is separate (still pending keys).
 - UI/user-facing copy is in Serbian.

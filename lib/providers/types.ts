@@ -5,7 +5,47 @@
  * (mitigates platform-dependency risk).
  */
 
-export type ModelKind = "text" | "image" | "video";
+export type ModelKind = "text" | "image" | "video" | "audio";
+
+// ---- Audio / transcription ----
+export interface TranscriptSegment {
+  /** Seconds from the start of the media. */
+  start: number;
+  end: number;
+  text: string;
+}
+
+export interface TranscriptResult {
+  text: string;
+  segments: TranscriptSegment[];
+  language?: string;
+  /** Total media duration in seconds, when the provider reports it. */
+  durationSec?: number;
+}
+
+export interface AudioRequest {
+  /** Catalog model id, e.g. "whisper". */
+  modelId: string;
+  /** URL of the audio/video to transcribe. */
+  mediaUrl: string;
+}
+
+export interface MusicRequest {
+  /** Catalog model id, e.g. "music-gen". */
+  modelId: string;
+  prompt: string;
+  durationSec: number;
+}
+
+export interface MusicResponse {
+  audioUrl: string;
+}
+
+export interface AudioProvider {
+  transcribe(req: AudioRequest): Promise<TranscriptResult>;
+  /** Optional: not every audio backend can generate music. */
+  generateMusic?(req: MusicRequest): Promise<MusicResponse>;
+}
 
 // ---- Text ----
 export interface TextRequest {
@@ -44,8 +84,23 @@ export interface ImageResponse {
   modelId: string;
 }
 
+/**
+ * Single-image-in → single-image-out transforms: background removal, upscaling,
+ * and prompt-driven edits (resize/outpaint/inpaint). `prompt` present ⇒ an edit
+ * model (e.g. nano-banana-edit); absent ⇒ a pure transform (bg-removal/upscale).
+ */
+export interface ImageTransformRequest {
+  /** Catalog model id, e.g. "bg-removal", "image-upscale", "nano-banana-edit". */
+  modelId: string;
+  imageUrl: string;
+  prompt?: string;
+  aspectRatio?: string;
+}
+
 export interface ImageProvider {
   generateImage(req: ImageRequest): Promise<ImageResponse>;
+  /** Optional: not every image backend supports transforms. */
+  transformImage?(req: ImageTransformRequest): Promise<ImageResponse>;
 }
 
 // ---- Video (async / queued) ----
@@ -56,6 +111,16 @@ export interface VideoRequest {
   durationSec?: number;
   width?: number;
   height?: number;
+  /** Generate native synchronized audio (music/SFX/dialogue) with the clip. */
+  withAudio?: boolean;
+  /** Talking-head script (text the avatar speaks). */
+  script?: string;
+  /** Voice id for talking-head TTS. */
+  voiceId?: string;
+  /** Source video URL (e.g. for dubbing/translation). */
+  videoUrl?: string;
+  /** Target language code for dubbing/translation. */
+  targetLang?: string;
   /** Provider posts completion here (fal webhook). */
   webhookUrl?: string;
 }

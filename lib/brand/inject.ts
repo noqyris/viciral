@@ -1,9 +1,20 @@
 import type { BrandProfile } from "@prisma/client";
+import { referenceImagesToStrings } from "./normalize";
 
 /** Coerces the Json `colors` field into a clean string[]. */
 export function colorsToStrings(colors: unknown): string[] {
   if (!Array.isArray(colors)) return [];
   return colors.filter((c): c is string => typeof c === "string" && c.trim().length > 0);
+}
+
+/**
+ * The brand's persistent character/face/product reference image URLs, validated
+ * (http(s)-only, bounded). Modules pass these as image-to-image references so
+ * generated images keep the same subject/look — the consistency moat.
+ */
+export function brandReferenceImages(brand: BrandProfile | null | undefined): string[] {
+  if (!brand) return [];
+  return referenceImagesToStrings(brand.referenceImages);
 }
 
 /**

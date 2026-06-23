@@ -5,6 +5,7 @@ const base = {
   prompt: "spori zoom na proizvod",
   imageUrl: "https://example.com/img.png",
   durationSec: 5 as const,
+  withAudio: true,
 };
 
 describe("cinematic estimate", () => {

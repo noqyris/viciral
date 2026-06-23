@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BRAND_LIMITS, clampBrandDraft } from "./normalize";
+import { BRAND_LIMITS, clampBrandDraft, referenceImagesToStrings } from "./normalize";
 
 describe("clampBrandDraft", () => {
   it("caps color count and per-item length, drops empty entries", () => {
@@ -35,5 +35,41 @@ describe("clampBrandDraft", () => {
     expect(out.name).toHaveLength(BRAND_LIMITS.name);
     expect(out.voice).toBeUndefined();
     expect(out.colors).toBeUndefined();
+  });
+
+  it("clamps reference images: http(s) only, bounded count", () => {
+    const out = clampBrandDraft({
+      name: "X",
+      referenceImages: [
+        "https://a/1.png",
+        "ftp://bad/2.png",
+        "javascript:alert(1)",
+        ...Array.from({ length: 10 }, (_, i) => `https://a/${i}.png`),
+      ],
+    });
+    expect(out.referenceImages!.length).toBeLessThanOrEqual(BRAND_LIMITS.refCount);
+    expect(out.referenceImages!.every((u) => /^https?:\/\//.test(u))).toBe(true);
+  });
+
+  it("referenceImagesToStrings rejects non-http(s) and over-long URLs", () => {
+    expect(referenceImagesToStrings(["https://x/a.png", "javascript:alert(1)", 42, null])).toEqual([
+      "https://x/a.png",
+    ]);
+    expect(referenceImagesToStrings(["https://x/" + "a".repeat(700)])).toEqual([]);
+    expect(referenceImagesToStrings("nope")).toEqual([]);
+  });
+
+  it("referenceImagesToStrings blocks private/loopback hosts and userinfo (SSRF surface)", () => {
+    expect(
+      referenceImagesToStrings([
+        "https://cdn.example.com/ok.png",
+        "http://169.254.169.254/latest/meta-data/", // cloud metadata
+        "http://localhost:8080/x.png",
+        "http://127.0.0.1/x.png",
+        "http://10.0.0.5/x.png",
+        "http://192.168.1.10/x.png",
+        "http://user:pass@cdn.example.com/x.png", // credentials
+      ]),
+    ).toEqual(["https://cdn.example.com/ok.png"]);
   });
 });

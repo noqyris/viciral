@@ -15,7 +15,7 @@ export type GenerationMode = "manual" | "auto";
 export type ModuleStatus = "available" | "soon";
 
 export interface GeneratedAsset {
-  kind: "image" | "video" | "text";
+  kind: "image" | "video" | "text" | "audio";
   url?: string;
   text?: string;
   modelId?: string;
@@ -47,6 +47,8 @@ export interface BrandProfileDraft {
   voice?: string;
   colors?: string[];
   notes?: string;
+  /** Persistent character/face/product reference image URLs (visual consistency). */
+  referenceImages?: string[];
 }
 
 export interface ModuleResult {

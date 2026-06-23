@@ -10,7 +10,7 @@
  */
 
 export type Provider = "fal" | "anthropic" | "gemini";
-export type ModelKind = "text" | "image" | "video";
+export type ModelKind = "text" | "image" | "video" | "audio";
 
 type CostSpec =
   | { type: "per_image"; usd: number }
@@ -75,6 +75,96 @@ export const MODEL_CATALOG: Record<string, ModelInfo> = {
     commercial: true,
     margin: 4,
     cost: { type: "per_mtoken", inUsd: 5, outUsd: 25 },
+  },
+  // Image post-processing / editing (Faza 5 "Doterivanje"). Wholesale figures are
+  // approximate placeholders — confirm each model's price AND commercial license
+  // on fal before launch (per the whitelist discipline).
+  "nano-banana-edit": {
+    id: "nano-banana-edit",
+    label: "Nano Banana Edit (Gemini Image edit)",
+    provider: "fal",
+    providerModel: "fal-ai/nano-banana/edit",
+    kind: "image",
+    commercial: true,
+    margin: 3,
+    cost: { type: "per_image", usd: 0.0398 },
+  },
+  "bg-removal": {
+    id: "bg-removal",
+    label: "Background Removal (Bria RMBG)",
+    provider: "fal",
+    providerModel: "fal-ai/bria/background/remove",
+    kind: "image",
+    commercial: true,
+    margin: 3,
+    cost: { type: "per_image", usd: 0.02 },
+  },
+  "image-upscale": {
+    id: "image-upscale",
+    label: "Image Upscaler (Clarity)",
+    provider: "fal",
+    providerModel: "fal-ai/clarity-upscaler",
+    kind: "image",
+    commercial: true,
+    margin: 3,
+    cost: { type: "per_image", usd: 0.03 },
+  },
+  // Speech-to-text for the Short-Form Repurposing module (Faza 7). Per-second of
+  // media; wholesale is an approximate placeholder — confirm fal's price/license.
+  whisper: {
+    id: "whisper",
+    label: "Whisper (transkripcija)",
+    provider: "fal",
+    providerModel: "fal-ai/whisper",
+    kind: "audio",
+    commercial: true,
+    margin: 4,
+    cost: { type: "per_second", usd: 0.0001 },
+  },
+  // Talking-head / avatar video (Faza 9). Premium, gated like other video.
+  // Wholesale per second is an approximate placeholder — confirm fal price/license.
+  "talking-avatar": {
+    id: "talking-avatar",
+    label: "Talking Avatar (lip-sync video)",
+    provider: "fal",
+    providerModel: "fal-ai/talking-avatar",
+    kind: "video",
+    commercial: true,
+    margin: 1.3,
+    cost: { type: "per_second", usd: 0.05 },
+  },
+  // Video dubbing / translation with re-synced lips (Faza 11). Placeholder price.
+  "video-dub": {
+    id: "video-dub",
+    label: "Video Dubbing (lokalizacija)",
+    provider: "fal",
+    providerModel: "fal-ai/video-dubbing",
+    kind: "video",
+    commercial: true,
+    margin: 1.3,
+    cost: { type: "per_second", usd: 0.04 },
+  },
+  // Music / soundtrack generation (Faza 14). Placeholder price.
+  "music-gen": {
+    id: "music-gen",
+    label: "Music Generator",
+    provider: "fal",
+    providerModel: "fal-ai/stable-audio",
+    kind: "audio",
+    commercial: true,
+    margin: 3,
+    cost: { type: "per_second", usd: 0.002 },
+  },
+  // Vector logo / SVG (Faza 12 — Brand Kit credibility). Placeholder price.
+  "recraft-vector": {
+    id: "recraft-vector",
+    label: "Recraft Vector (SVG logo)",
+    provider: "fal",
+    providerModel: "fal-ai/recraft/v3/text-to-vector",
+    kind: "image",
+    commercial: true,
+    margin: 3,
+    cost: { type: "per_image", usd: 0.08 },
   },
 };
 

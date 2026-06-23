@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --bg: #0a0a0f;
+  --text: #e7e7ea;
+  --muted: #a1a1aa;
+  --border: rgba(255, 255, 255, 0.09);
+  --accent: #8b5cf6;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient studio glow */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55rem 38rem at 78% -12%, rgba(139, 92, 246, 0.2), transparent 60%),
+    radial-gradient(48rem 36rem at 6% 4%, rgba(56, 189, 248, 0.1), transparent 55%);
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ---- Shared design utilities (dark studio) ---- */
+
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.surface {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #d8b4fe, #818cf8 55%, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glow-violet {
+  box-shadow: 0 0 50px -12px rgba(139, 92, 246, 0.55);
+}
+
+/* Form fields — used across every runner so a restyle is one place. */
+.field {
+  width: 100%;
+  border-radius: 0.625rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+.field::placeholder {
+  color: #6b7280;
+}
+.field:focus {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+}
+.field:disabled {
+  opacity: 0.5;
+}
+/* Native dropdown list in dark */
+.field option {
+  background: #14141b;
+  color: var(--text);
+}
+
+.field-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #c4c4cc;
 }

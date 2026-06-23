@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BrandProfile } from "@prisma/client";
-import { brandPromptLine, colorsToStrings } from "./inject";
+import { brandPromptLine, brandReferenceImages, colorsToStrings } from "./inject";
 
 function brand(partial: Partial<BrandProfile>): BrandProfile {
   return {
@@ -10,6 +10,7 @@ function brand(partial: Partial<BrandProfile>): BrandProfile {
     colors: null,
     voice: null,
     logoUrl: null,
+    referenceImages: null,
     fonts: null,
     notes: null,
     isDefault: false,
@@ -43,5 +44,15 @@ describe("brand injection", () => {
   it("ignores non-string color entries", () => {
     expect(colorsToStrings(["#111", 42, null, "  ", "#222"])).toEqual(["#111", "#222"]);
     expect(colorsToStrings("not-an-array")).toEqual([]);
+  });
+
+  it("returns brand reference images (http(s) only) for image-to-image", () => {
+    expect(brandReferenceImages(null)).toEqual([]);
+    expect(brandReferenceImages(brand({ referenceImages: null }))).toEqual([]);
+    expect(
+      brandReferenceImages(
+        brand({ referenceImages: ["https://x/a.png", "javascript:alert(1)", "http://y/b.png"] }),
+      ),
+    ).toEqual(["https://x/a.png", "http://y/b.png"]);
   });
 });

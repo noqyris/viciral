@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { listBrands } from "@/lib/brand/profile";
+import { referenceImagesToStrings } from "@/lib/brand/normalize";
 import { jsonError } from "@/lib/http";
 
 export const runtime = "nodejs";
@@ -13,6 +14,7 @@ const createSchema = z.object({
   voice: z.string().max(200).optional(),
   colors: z.array(z.string().max(40)).max(12).optional(),
   notes: z.string().max(1000).optional(),
+  referenceImages: z.array(z.string().url().max(600)).max(6).optional(),
   isDefault: z.boolean().optional(),
 });
 
@@ -45,6 +47,10 @@ export async function POST(req: Request) {
           voice: body.voice,
           notes: body.notes,
           colors: (body.colors ?? undefined) as Prisma.InputJsonValue | undefined,
+          referenceImages:
+            body.referenceImages !== undefined
+              ? (referenceImagesToStrings(body.referenceImages) as Prisma.InputJsonValue)
+              : undefined,
           isDefault: body.isDefault ?? false,
         },
       });

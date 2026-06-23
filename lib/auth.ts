@@ -1,22 +1,19 @@
-import { prisma } from "@/lib/db";
 import type { User } from "@prisma/client";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
+import { AppError } from "@/lib/http";
 
 /**
- * Auth seam. The concrete provider (Clerk vs Auth.js) is an open decision in the
- * plan — for now this resolves a single dev user so the app runs end-to-end
- * locally. Wire a real provider before production: replace the body of
- * {@link getCurrentUser} to read the authenticated session.
+ * The authenticated user for the current request (Auth.js session → DB user).
+ * Throws 401 if not signed in. Studio pages guard with a redirect; API routes
+ * surface the 401 to the client.
  */
 export async function getCurrentUser(): Promise<User> {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "Auth not configured. Wire Clerk or Auth.js into lib/auth.ts before production.",
-    );
-  }
-  const email = "dev@viciral.local";
-  return prisma.user.upsert({
-    where: { email },
-    update: {},
-    create: { email, name: "Dev User" },
-  });
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) throw new AppError("Niste prijavljeni.", 401);
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new AppError("Korisnik nije pronađen.", 401);
+  return user;
 }

@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { estimateCredits, MODEL_CATALOG } from "@/lib/credits/pricing";
-import { brandPromptLine } from "@/lib/brand/inject";
-import { extractJson } from "./json";
+import { estimateCredits } from "@/lib/credits/pricing";
+import { estimateModuleCredits } from "@/lib/credits/estimate";
+import { brandPromptLine, brandReferenceImages } from "@/lib/brand/inject";
+import { runJsonText } from "./text";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
 /**
@@ -16,6 +17,8 @@ const inputSchema = z.object({
   platform: z.enum(["instagram", "tiktok", "linkedin"]).default("instagram"),
   postCount: z.number().int().min(1).max(10).default(3),
   tone: z.string().max(120).default("prijateljski"),
+  /** Image variants generated per post (batch). */
+  variantsPerPost: z.number().int().min(1).max(3).default(1),
 });
 
 type Input = z.infer<typeof inputSchema>;
@@ -42,15 +45,11 @@ export const socialPackModule: ModuleDef<Input> = {
   icon: "✨",
   inputSchema,
 
+  // Shared with the client cost hint so the displayed estimate always matches
+  // what gets reserved. Prices text at Opus (the priciest) at the output cap, so
+  // the reservation always covers the actual run (auto or not).
   estimateCredits(input) {
-    const images = estimateCredits("nano-banana", { numImages: input.postCount });
-    // Conservative upper bound: price text at Opus (most expensive) at the
-    // output cap, so the reservation always covers the actual run (auto or not).
-    const text = estimateCredits("claude-opus", {
-      inputTokens: 2000,
-      outputTokens: MAX_OUTPUT_TOKENS,
-    });
-    return images + text;
+    return estimateModuleCredits("social-pack", input as Record<string, unknown>);
   },
 
   async generate(ctx) {
@@ -70,27 +69,18 @@ export const socialPackModule: ModuleDef<Input> = {
       `Napravi ${input.postCount} objava za ${input.platform}.\n` +
       `<podaci>\nTema: ${input.topic}\n${brandLine}\n</podaci>`;
 
-    // Auto mode uses the stronger (more expensive) model; both paths are priced
-    // against the same catalog id used to run them.
-    const textModelId = ctx.mode === "auto" ? "claude-opus" : "claude-sonnet";
-
-    const res = await ctx.providers.text.generateText({
+    const { value: plan, creditsUsed: textCredits } = await runJsonText(ctx, planSchema, {
       system,
       prompt,
-      model: MODEL_CATALOG[textModelId].providerModel,
       maxTokens: MAX_OUTPUT_TOKENS,
     });
 
-    const plan = planSchema.parse(JSON.parse(extractJson(res.text)));
-
     const assets: GeneratedAsset[] = [];
-
-    const textCredits = estimateCredits(textModelId, {
-      inputTokens: res.inputTokens,
-      outputTokens: res.outputTokens,
-    });
-    ctx.spend?.(textCredits);
     let creditsUsed = textCredits;
+
+    // Brand character/product references → image-to-image, so every post's image
+    // keeps the same subject/look (the consistency moat).
+    const referenceImages = brandReferenceImages(ctx.brand);
 
     // Cap to the requested count so cost can never exceed the reserved estimate.
     const posts = plan.posts.slice(0, input.postCount);
@@ -102,9 +92,10 @@ export const socialPackModule: ModuleDef<Input> = {
       const img = await ctx.providers.image.generateImage({
         modelId: "nano-banana",
         prompt: post.imagePrompt,
-        numImages: 1,
+        numImages: input.variantsPerPost,
+        ...(referenceImages.length ? { imageUrls: referenceImages } : {}),
       });
-      const imageCredits = estimateCredits("nano-banana", { numImages: 1 });
+      const imageCredits = estimateCredits("nano-banana", { numImages: input.variantsPerPost });
       ctx.spend?.(imageCredits);
       creditsUsed += imageCredits;
 
@@ -115,14 +106,15 @@ export const socialPackModule: ModuleDef<Input> = {
         meta: { index: i },
       });
 
-      if (img.images[0]) {
+      // One or more image variants per post (batch).
+      img.images.forEach((im, v) => {
         assets.push({
           kind: "image",
-          url: img.images[0].url,
+          url: im.url,
           modelId: "nano-banana",
-          meta: { index: i, prompt: post.imagePrompt },
+          meta: { index: i, variant: v, prompt: post.imagePrompt },
         });
-      }
+      });
     }
 
     return { assets, creditsUsed };

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { getLocale } from "@/lib/i18n-server";
+import { LocaleProvider } from "@/components/locale-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,17 +20,20 @@ export const metadata: Metadata = {
     "Spoji više AI modela na jednom mestu: social paket, cinematic video, brand kit i sajtovi.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
     <html
-      lang="sr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang={locale}
+      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-[#0a0a0f] text-zinc-100">
+        <LocaleProvider locale={locale}>{children}</LocaleProvider>
+      </body>
     </html>
   );
 }

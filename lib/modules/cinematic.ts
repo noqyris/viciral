@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { estimateCredits } from "@/lib/credits/pricing";
-import { env } from "@/lib/env";
+import { estimateModuleCredits } from "@/lib/credits/estimate";
+import { submitVideoJob } from "./async-video";
 import type { ModuleDef } from "./types";
 
 /**
@@ -16,19 +16,10 @@ const inputSchema = z.object({
   prompt: z.string().min(2, "Opis je obavezan").max(500),
   imageUrl: z.string().url("Potrebna je URL adresa polazne slike"),
   durationSec: z.union([z.literal(5), z.literal(10)]).default(5),
+  withAudio: z.boolean().default(true),
 });
 
 type Input = z.infer<typeof inputSchema>;
-
-/** Where fal posts the job-complete webhook. A shared token guards the endpoint. */
-function falWebhookUrl(): string | undefined {
-  const base = env.APP_URL?.replace(/\/$/, "");
-  if (!base) return undefined;
-  const url = `${base}/api/webhooks/fal`;
-  return env.FAL_WEBHOOK_SECRET
-    ? `${url}?token=${encodeURIComponent(env.FAL_WEBHOOK_SECRET)}`
-    : url;
-}
 
 export const cinematicModule: ModuleDef<Input> = {
   slug: "cinematic",
@@ -41,28 +32,24 @@ export const cinematicModule: ModuleDef<Input> = {
   icon: "🎬",
   inputSchema,
 
+  // Shared with the client cost hint (single source of truth).
   estimateCredits(input) {
-    return estimateCredits("seedance-2", {
-      durationSec: input.durationSec,
-      width: WIDTH,
-      height: HEIGHT,
-    });
+    return estimateModuleCredits("cinematic", input as Record<string, unknown>);
   },
 
   async submit(ctx) {
-    const res = await ctx.providers.video.submitVideo({
-      modelId: "seedance-2",
-      prompt: ctx.inputs.prompt,
-      imageUrl: ctx.inputs.imageUrl,
-      durationSec: ctx.inputs.durationSec,
-      width: WIDTH,
-      height: HEIGHT,
-      webhookUrl: falWebhookUrl(),
-    });
-    return {
-      requestId: res.requestId,
-      modelId: "seedance-2",
-      params: { durationSec: ctx.inputs.durationSec, width: WIDTH, height: HEIGHT },
-    };
+    return submitVideoJob(
+      ctx,
+      "seedance-2",
+      {
+        prompt: ctx.inputs.prompt,
+        imageUrl: ctx.inputs.imageUrl,
+        durationSec: ctx.inputs.durationSec,
+        width: WIDTH,
+        height: HEIGHT,
+        withAudio: ctx.inputs.withAudio,
+      },
+      { durationSec: ctx.inputs.durationSec, width: WIDTH, height: HEIGHT },
+    );
   },
 };

@@ -37,9 +37,13 @@ export async function createBrandFromKit(
   userId: string,
   draft: BrandProfileDraft,
   logoUrl?: string,
+  referenceImages?: string[],
 ): Promise<BrandProfile> {
-  const brand = clampBrandDraft(draft);
+  // Clamp through the same choke point as the human form (referenceImages are
+  // http(s)-only and bounded by clampBrandDraft → referenceImagesToStrings).
+  const brand = clampBrandDraft({ ...draft, referenceImages });
   const colors = (brand.colors ?? undefined) as Prisma.InputJsonValue | undefined;
+  const refs = (brand.referenceImages ?? undefined) as Prisma.InputJsonValue | undefined;
 
   return prisma.$transaction(async (tx) => {
     const existing = await tx.brandProfile.findFirst({
@@ -55,6 +59,8 @@ export async function createBrandFromKit(
           notes: brand.notes,
           colors,
           logoUrl: logoUrl ?? existing.logoUrl,
+          // Only overwrite references when this run produced some.
+          ...(refs !== undefined ? { referenceImages: refs } : {}),
         },
       });
     }
@@ -72,6 +78,7 @@ export async function createBrandFromKit(
         notes: brand.notes,
         colors,
         logoUrl,
+        referenceImages: refs,
         isDefault: !hasDefault,
       },
     });
