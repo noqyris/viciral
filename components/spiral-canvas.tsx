@@ -28,17 +28,46 @@ const C_A = new THREE.Color("#c084fc");
 const C_B = new THREE.Color("#6366f1");
 const C_C = new THREE.Color("#22d3ee");
 
+// The two strands trace the two arms of the logo "V" at the top, meet at the
+// vertex, then unspool out of it into the helix below.
+const V_END = 0.1; // fraction of the strand that draws the V
+const V_W = 300; // half-width of the V (arm spread — wide so the arms reach past the hero copy)
+const V_TOP = 250; // y of the arm tops (high, above the headline)
+const V_BOT = -40; // y of the shared vertex (near centre)
+
+function smoothstep(e0: number, e1: number, x: number) {
+  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+  return t * t * (3 - 2 * t);
+}
+
 function buildStrand(tubeRadius: number, phase: number) {
-  const N = 800;
+  const N = 900;
+  const sign = phase < 0.1 ? -1 : 1; // strand A = left arm, strand B = right arm
   const pts: THREE.Vector3[] = [];
   for (let i = 0; i <= N; i++) {
     const tn = i / N;
-    const y = -tn * LENGTH;
-    const ang = tn * COILS * Math.PI * 2 + phase;
-    const r = RADIUS * (0.7 + 0.5 * Math.sin(tn * Math.PI * 2.2));
-    const cx = Math.sin(tn * Math.PI * 1.8) * SWAY + Math.sin(tn * Math.PI * 7) * 18;
-    const cz = Math.cos(tn * Math.PI * 1.3) * 60;
-    pts.push(new THREE.Vector3(cx + Math.cos(ang) * r, y, cz + Math.sin(ang) * r));
+    let x: number;
+    let y: number;
+    let z: number;
+    if (tn < V_END) {
+      // logo "V": straight arm from the top corner down to the shared vertex (0, V_BOT, 0)
+      const k = tn / V_END;
+      x = sign * V_W * (1 - k);
+      y = V_TOP - (V_TOP - V_BOT) * k;
+      z = 0;
+    } else {
+      // helix unspooling out of the vertex (radius/sway grow from 0 so it blossoms smoothly)
+      const u = (tn - V_END) / (1 - V_END);
+      const ramp = smoothstep(0, 0.08, u);
+      const ang = u * COILS * Math.PI * 2 + phase;
+      const r = RADIUS * (0.7 + 0.5 * Math.sin(u * Math.PI * 2.2)) * ramp;
+      const cx = (Math.sin(u * Math.PI * 1.8) * SWAY + Math.sin(u * Math.PI * 7) * 18) * ramp;
+      const cz = Math.cos(u * Math.PI * 1.3) * 60 * ramp;
+      x = cx + Math.cos(ang) * r;
+      y = V_BOT - u * LENGTH;
+      z = cz + Math.sin(ang) * r;
+    }
+    pts.push(new THREE.Vector3(x, y, z));
   }
   const curve = new THREE.CatmullRomCurve3(pts);
   const geo = new THREE.TubeGeometry(curve, TUBULAR, tubeRadius, RADIAL, false);
@@ -92,7 +121,9 @@ const FRAG = /* glsl */ `
     float pulse = smoothstep(0.0, 0.12, f) * smoothstep(0.55, 0.12, f);
     float head = smoothstep(0.06, 0.0, abs(t - uHead));
     float fres = pow(1.0 - max(dot(normalize(vN), normalize(vView)), 0.0), 2.0);
-    float bright = (0.7 + 2.8 * pulse + 1.35 * fres + 3.4 * head) * uBright;
+    // Extra glow over the logo "V" arms (t near 0) so the mark reads in the hero.
+    float vGlow = smoothstep(0.12, 0.0, t) * 1.05;
+    float bright = (0.7 + 2.8 * pulse + 1.35 * fres + 3.4 * head + vGlow) * uBright;
     gl_FragColor = vec4(base * bright, 0.92);
   }
 `;
@@ -137,8 +168,10 @@ function Strands({ scrollRef, bright }: { scrollRef: { current: number }; bright
     const p = scrollRef.current;
     const g = group.current;
     if (g) {
-      g.position.y = p * LENGTH;
-      const s = 1 + 0.2 * Math.sin(p * Math.PI * 6);
+      // Eased travel — slow at the start so the "V" lingers in the hero, then
+      // the helix unspools as you scroll on.
+      g.position.y = Math.pow(p, 1.35) * LENGTH;
+      const s = 1 + 0.2 * Math.sin(p * Math.PI * 6) * smoothstep(0.12, 0.3, p);
       g.scale.x = s;
       g.scale.z = s;
       g.position.x = Math.sin(state.clock.elapsedTime * 0.22) * 14;

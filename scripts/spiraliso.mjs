@@ -13,7 +13,7 @@ const browser = await chromium.launch({
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "no-preference" });
 const page = await ctx.newPage();
 await page.goto(BASE, { waitUntil: "networkidle" });
-await page.waitForTimeout(2500);
+await page.waitForTimeout(4500);
 
 // brightness probe of the canvas (average luminance of a downscaled read)
 const info = await page.evaluate(() => {

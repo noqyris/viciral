@@ -22,7 +22,7 @@ page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
 
 await page.goto(BASE, { waitUntil: "networkidle" });
-await page.waitForTimeout(2500); // let the dynamic three.js canvas mount + render
+await page.waitForTimeout(4500); // let the dynamic three.js canvas mount + render (slow software GL)
 
 const hasCanvas = await page.evaluate(() => !!document.querySelector("canvas"));
 const glOk = await page.evaluate(() => {
