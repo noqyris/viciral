@@ -1,6 +1,6 @@
 import { getLocale } from "@/lib/i18n-server";
 import { ScrollFX } from "@/components/scroll-fx";
-import { SpiralController } from "@/components/spiral-controller";
+import { SpiralThread } from "@/components/spiral-thread";
 import SiteNav from "@/components/landing/site-nav";
 import Hero from "@/components/landing/hero";
 import ModelRig from "@/components/landing/model-rig";
@@ -28,9 +28,15 @@ export default async function Home() {
         <div className="aurora__blob aurora__blob--i" />
         <div className="aurora__blob aurora__blob--s" />
       </div>
-      {/* 3D glowing helix + on-page prominence switcher (1 Subtle / 2 Bold / 3 Max) */}
-      <SpiralController />
+      {/* 3D glowing helix behind the content — glows through the page as it descends */}
+      <SpiralThread mode={2} />
       <div className="grain" aria-hidden />
+      {/* Readability scrim over the spiral (behind content) — a base veil so text
+          stays legible over the glow, deepening into a vignette at the edges. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-[1] bg-[radial-gradient(125%_125%_at_50%_40%,rgba(6,7,12,0.36),rgba(2,3,6,0.72))]"
+      />
       <ScrollFX />
 
       <SiteNav locale={locale} />

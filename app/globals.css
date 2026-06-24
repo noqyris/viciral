@@ -27,6 +27,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Guard against sideways scroll on phones (decorative transforms / wide rows).
+   `clip` (not hidden) keeps the sticky nav working and adds no scroll container.
+   Scoped to <main> so it never clips the sticky header (a sibling). */
+main {
+  overflow-x: clip;
+}
+
 /* Ambient studio glow */
 body::before {
   content: "";
@@ -147,7 +154,7 @@ body::before {
 .section-pit {
   /* Semi-transparent veil (not opaque) so the 3D spiral glows THROUGH the
      section while copy stays readable. Was `var(--pit)` (opaque) — that hid it. */
-  background: color-mix(in srgb, var(--pit) 62%, transparent);
+  background: color-mix(in srgb, var(--pit) 66%, transparent);
 }
 
 /* ---- Fluid display type ---- */
@@ -288,21 +295,26 @@ body::before {
 .card {
   border-radius: 1rem;
   border: 1px solid var(--border);
-  background: var(--surface-1);
+  /* Frosted DARK glass so white text stays readable over the bright spiral. */
+  background: rgba(11, 12, 18, 0.66);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
   transition:
     transform 0.22s var(--ease-soft),
     border-color 0.22s var(--ease-soft),
     background 0.22s var(--ease-soft);
 }
 .card:hover {
-  background: var(--surface-2);
+  background: rgba(17, 18, 27, 0.74);
   border-color: rgba(255, 255, 255, 0.16);
 }
 .card-glow {
   position: relative;
   border-radius: 1rem;
   border: 1px solid var(--border);
-  background: var(--surface-1);
+  background: rgba(11, 12, 18, 0.66);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
   transition:
     transform 0.22s var(--ease-soft),
     border-color 0.22s var(--ease-soft),
@@ -312,6 +324,16 @@ body::before {
   transform: translateY(-4px);
   border-color: var(--border-hover);
   box-shadow: 0 24px 70px -36px rgba(139, 92, 246, 0.7);
+}
+/* Frosted DARK glass — dims the bright spiral behind so white text stays readable.
+   Pair with .card / .card-glow (defined later, so this background wins). */
+.card-frost {
+  background: rgba(11, 12, 18, 0.66);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+}
+.card-frost:hover {
+  background: rgba(17, 18, 27, 0.74);
 }
 
 /* ---- Chip (mono model/category chip with top-lit edge) ---- */

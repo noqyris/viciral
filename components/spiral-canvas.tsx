@@ -10,64 +10,37 @@ import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
 export type SpiralMode = 1 | 2 | 3;
 
-/** Prominence presets driven by the on-page switcher. */
+/** Prominence presets. The spiral renders behind the content and glows through. */
 const MODES: Record<SpiralMode, { bloom: { s: number; r: number }; bright: number }> = {
-  1: { bloom: { s: 1.0, r: 0.7 }, bright: 0.7 }, // subtle accent behind content
-  2: { bloom: { s: 1.7, r: 0.9 }, bright: 1.15 }, // bold, still behind content
-  3: { bloom: { s: 1.7, r: 0.85 }, bright: 1.3 }, // max — rendered in front (screen blend)
+  1: { bloom: { s: 0.9, r: 0.7 }, bright: 0.62 }, // subtle accent
+  2: { bloom: { s: 1.25, r: 0.82 }, bright: 0.8 }, // bold (kept off the white-clip knee so text reads)
+  3: { bloom: { s: 1.6, r: 0.9 }, bright: 1.05 }, // max
 };
 
 const LENGTH = 4800;
+const TOP_Y = 260; // where the top of the helix sits at scroll 0
 const RADIUS = 158;
 const SWAY = 245;
 const COILS = 13;
 const RADIAL = 12;
 const TUBULAR = 1100;
 
-const C_A = new THREE.Color("#c084fc");
+const C_A = new THREE.Color("#a78bfa");
 const C_B = new THREE.Color("#6366f1");
-const C_C = new THREE.Color("#22d3ee");
+const C_C = new THREE.Color("#38bdf8");
 
-// The two strands trace the two arms of the logo "V" at the top, meet at the
-// vertex, then unspool out of it into the helix below.
-const V_END = 0.1; // fraction of the strand that draws the V
-const V_W = 300; // half-width of the V (arm spread — wide so the arms reach past the hero copy)
-const V_TOP = 250; // y of the arm tops (high, above the headline)
-const V_BOT = -40; // y of the shared vertex (near centre)
-
-function smoothstep(e0: number, e1: number, x: number) {
-  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
-  return t * t * (3 - 2 * t);
-}
-
-function buildStrand(tubeRadius: number, phase: number) {
+// A flowing double-helix that descends the page (behind the content). Two strands
+// at opposite phases intertwine; the group translates on scroll so you travel down it.
+function buildStrand(phase: number, tubeRadius: number) {
   const N = 900;
-  const sign = phase < 0.1 ? -1 : 1; // strand A = left arm, strand B = right arm
   const pts: THREE.Vector3[] = [];
   for (let i = 0; i <= N; i++) {
-    const tn = i / N;
-    let x: number;
-    let y: number;
-    let z: number;
-    if (tn < V_END) {
-      // logo "V": straight arm from the top corner down to the shared vertex (0, V_BOT, 0)
-      const k = tn / V_END;
-      x = sign * V_W * (1 - k);
-      y = V_TOP - (V_TOP - V_BOT) * k;
-      z = 0;
-    } else {
-      // helix unspooling out of the vertex (radius/sway grow from 0 so it blossoms smoothly)
-      const u = (tn - V_END) / (1 - V_END);
-      const ramp = smoothstep(0, 0.08, u);
-      const ang = u * COILS * Math.PI * 2 + phase;
-      const r = RADIUS * (0.7 + 0.5 * Math.sin(u * Math.PI * 2.2)) * ramp;
-      const cx = (Math.sin(u * Math.PI * 1.8) * SWAY + Math.sin(u * Math.PI * 7) * 18) * ramp;
-      const cz = Math.cos(u * Math.PI * 1.3) * 60 * ramp;
-      x = cx + Math.cos(ang) * r;
-      y = V_BOT - u * LENGTH;
-      z = cz + Math.sin(ang) * r;
-    }
-    pts.push(new THREE.Vector3(x, y, z));
+    const u = i / N;
+    const ang = u * COILS * Math.PI * 2 + phase;
+    const r = RADIUS * (0.7 + 0.5 * Math.sin(u * Math.PI * 2.2));
+    const cx = Math.sin(u * Math.PI * 1.8) * SWAY + Math.sin(u * Math.PI * 7) * 18;
+    const cz = Math.cos(u * Math.PI * 1.3) * 60;
+    pts.push(new THREE.Vector3(cx + Math.cos(ang) * r, TOP_Y - u * LENGTH, cz + Math.sin(ang) * r));
   }
   const curve = new THREE.CatmullRomCurve3(pts);
   const geo = new THREE.TubeGeometry(curve, TUBULAR, tubeRadius, RADIAL, false);
@@ -103,8 +76,8 @@ const VERT = /* glsl */ `
   }
 `;
 
-// Flowing-energy: gradient along the tube + bright pulses streaming down it + a
-// fresnel rim + a comet around the scroll head. HDR (values > 1) so bloom lights it.
+// Flowing-energy: gradient along the tube + streaming pulses + a fresnel rim + a
+// comet around the scroll head. HDR (values > 1) so bloom lights it up.
 const FRAG = /* glsl */ `
   uniform float uTime;
   uniform float uHead;
@@ -113,7 +86,7 @@ const FRAG = /* glsl */ `
   varying vec2 vUv;
   varying vec3 vN;
   varying vec3 vView;
-  vec3 grad(float t){ return t < 0.5 ? mix(cA, cB, t/0.5) : mix(cB, cC, (t-0.5)/0.5); }
+  vec3 grad(float t){ return t < 0.52 ? mix(cA, cB, t/0.52) : mix(cB, cC, (t-0.52)/0.48); }
   void main(){
     float t = vUv.x;
     vec3 base = grad(t);
@@ -121,10 +94,9 @@ const FRAG = /* glsl */ `
     float pulse = smoothstep(0.0, 0.12, f) * smoothstep(0.55, 0.12, f);
     float head = smoothstep(0.06, 0.0, abs(t - uHead));
     float fres = pow(1.0 - max(dot(normalize(vN), normalize(vView)), 0.0), 2.0);
-    // Extra glow over the logo "V" arms (t near 0) so the mark reads in the hero.
-    float vGlow = smoothstep(0.12, 0.0, t) * 1.05;
-    float bright = (0.7 + 2.8 * pulse + 1.35 * fres + 3.4 * head + vGlow) * uBright;
-    gl_FragColor = vec4(base * bright, 0.92);
+    // Lower peaks (less blown-out white) so it stays a rich coloured glow text can sit over.
+    float bright = (0.6 + 2.2 * pulse + 1.15 * fres + 2.6 * head) * uBright;
+    gl_FragColor = vec4(base * bright, 0.84);
   }
 `;
 
@@ -135,8 +107,8 @@ function Strands({ scrollRef, bright }: { scrollRef: { current: number }; bright
   const matA = useRef<THREE.ShaderMaterial>(null);
   const matB = useRef<THREE.ShaderMaterial>(null);
 
-  const a = useMemo(() => buildStrand(3.2, 0), []);
-  const b = useMemo(() => buildStrand(3.2, Math.PI), []);
+  const a = useMemo(() => buildStrand(0, 3.2), []);
+  const b = useMemo(() => buildStrand(Math.PI, 3.2), []);
   const uniA = useMemo(() => makeUniforms(), []);
   const uniB = useMemo(() => makeUniforms(), []);
   const scratch = useMemo(() => new THREE.Vector3(), []);
@@ -166,26 +138,20 @@ function Strands({ scrollRef, bright }: { scrollRef: { current: number }; bright
 
   useFrame((state) => {
     const p = scrollRef.current;
+    const tt = state.clock.elapsedTime;
     const g = group.current;
     if (g) {
-      // Eased travel — slow at the start so the "V" lingers in the hero, then
-      // the helix unspools as you scroll on.
-      g.position.y = Math.pow(p, 1.35) * LENGTH;
-      const s = 1 + 0.2 * Math.sin(p * Math.PI * 6) * smoothstep(0.12, 0.3, p);
+      g.position.y = Math.pow(p, 1.35) * LENGTH; // travel down it as you scroll
+      const s = 1 + 0.18 * Math.sin(p * Math.PI * 6);
       g.scale.x = s;
       g.scale.z = s;
-      g.position.x = Math.sin(state.clock.elapsedTime * 0.22) * 14;
+      g.position.x = Math.sin(tt * 0.22) * 16;
     }
-    const tt = state.clock.elapsedTime;
-    if (matA.current) {
-      matA.current.uniforms.uTime.value = tt;
-      matA.current.uniforms.uHead.value = p;
-      matA.current.uniforms.uBright.value = bright;
-    }
-    if (matB.current) {
-      matB.current.uniforms.uTime.value = tt;
-      matB.current.uniforms.uHead.value = p;
-      matB.current.uniforms.uBright.value = bright;
+    for (const m of [matA.current, matB.current]) {
+      if (!m) continue;
+      m.uniforms.uTime.value = tt;
+      m.uniforms.uHead.value = p;
+      m.uniforms.uBright.value = bright;
     }
     const clamp = Math.min(Math.max(p, 0.001), 0.999);
     if (headA.current) headA.current.position.copy(a.curve.getPointAt(clamp, scratch));

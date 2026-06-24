@@ -9,10 +9,9 @@ import type { SpiralMode } from "@/components/spiral-canvas";
 const SpiralCanvas = dynamic(() => import("@/components/spiral-canvas"), { ssr: false });
 
 /**
- * Full-page glowing helix. Modes 1 & 2 render BEHIND the content (z-0, the
- * canvas is the page background); mode 3 renders in FRONT with `mix-blend-screen`
- * so the light glows over the content edges (max drama). Skipped under
- * prefers-reduced-motion.
+ * Full-page glowing helix rendered BEHIND the content (z-0); the page is
+ * semi-transparent over it (`.section-pit` veil) so the spiral glows through as
+ * it descends the page. Skipped under prefers-reduced-motion.
  */
 export function SpiralThread({ mode = 2 }: { mode?: SpiralMode }) {
   const [show, setShow] = useState(false);
@@ -25,13 +24,8 @@ export function SpiralThread({ mode = 2 }: { mode?: SpiralMode }) {
 
   if (!show) return null;
 
-  const cls =
-    mode === 3
-      ? "pointer-events-none fixed inset-0 z-[5] mix-blend-screen"
-      : "pointer-events-none fixed inset-0 z-0";
-
   return (
-    <div aria-hidden className={cls}>
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
       <SpiralCanvas mode={mode} />
     </div>
   );

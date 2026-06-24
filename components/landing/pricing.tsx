@@ -122,7 +122,7 @@ export default function Pricing({ locale }: { locale: Locale }) {
         <div className="mt-12 grid gap-4 md:grid-cols-3 md:items-stretch">
           {/* FREE — the lit, primary tier */}
           <Reveal dir="up" delay={60} className="md:order-1 h-full">
-            <article className="card-glow relative flex h-full flex-col p-6 sm:p-7">
+            <article className="card-glow card-frost relative flex h-full flex-col p-6 sm:p-7">
               <div
                 aria-hidden="true"
                 className="bloom is-lit"
@@ -137,7 +137,7 @@ export default function Pricing({ locale }: { locale: Locale }) {
               </div>
 
               <div className="mt-5">
-                <p className="display text-4xl font-bold tracking-tight text-white sm:text-4xl">
+                <p className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                   {t.free.price}
                 </p>
                 <p className="mono mt-1 text-sm text-zinc-400">{t.free.priceNote}</p>
@@ -162,7 +162,7 @@ export default function Pricing({ locale }: { locale: Locale }) {
 
               <Link
                 href="/signup"
-                className="btn-primary mt-7 w-full"
+                className="btn-primary mt-auto w-full"
                 aria-label={t.free.cta}
               >
                 <Sparkles aria-hidden="true" className="size-4" />
@@ -204,7 +204,7 @@ function PaidTier({
   indicative: string;
 }) {
   return (
-    <article className="card flex h-full flex-col p-6 sm:p-7">
+    <article className="card card-frost flex h-full flex-col p-6 sm:p-7">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-2xl font-bold text-white">{tier.name}</h3>
         <span className="chip">{tier.badge}</span>
@@ -235,7 +235,7 @@ function PaidTier({
         type="button"
         disabled
         aria-disabled="true"
-        className="btn-ghost mt-7 w-full cursor-not-allowed opacity-60"
+        className="btn-ghost mt-auto w-full cursor-not-allowed opacity-60"
       >
         {tier.cta}
       </button>

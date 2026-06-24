@@ -31,13 +31,17 @@ export function ScrollFX() {
     root.classList.add("fx"); // CSS hides [data-fx] until GSAP takes over
 
     const ctx = gsap.context(() => {
+      // On phones, full-width items can't fly in sideways without causing a
+      // horizontal-scroll overflow — keep the scatter (x + rotate) for ≥768px only.
+      const wide = window.matchMedia("(min-width: 768px)").matches;
+
       // assemble — fly in scattered/rotated/scaled, lock into place (scrubbed)
       gsap.utils.toArray<HTMLElement>("[data-fx='assemble']").forEach((el) => {
         const i = Number(el.dataset.i ?? 0);
         const dir = i % 2 === 0 ? -1 : 1;
         gsap.fromTo(
           el,
-          { opacity: 0, xPercent: 9 * dir, yPercent: 14, rotate: 3 * dir, scale: 0.95 },
+          { opacity: 0, xPercent: wide ? 9 * dir : 0, yPercent: 14, rotate: wide ? 3 * dir : 0, scale: 0.95 },
           {
             opacity: 1,
             xPercent: 0,

@@ -185,7 +185,7 @@ export default function HowItWorks({ locale }: { locale: Locale }) {
   const t = T[locale];
 
   return (
-    <section aria-labelledby="how-it-works-title" className="section">
+    <section id="how-it-works" aria-labelledby="how-it-works-title" className="section">
       <div className="mx-auto max-w-5xl px-5">
         <Reveal dir="up" className="mb-12 text-center md:mb-16">
           <span className="eyebrow justify-center">
@@ -209,9 +209,9 @@ export default function HowItWorks({ locale }: { locale: Locale }) {
 
           <ol className="relative grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-5">
             {t.steps.map((step, i) => (
-              <li key={step.kicker} className="relative">
-                <Reveal dir="up" delay={i * 80}>
-                  <article className="card-glow relative flex h-full flex-col gap-4 rounded-2xl p-6">
+              <li key={step.kicker} className="relative flex">
+                <Reveal dir="up" delay={i * 80} className="flex w-full">
+                  <article className="card-glow relative flex h-full w-full flex-col gap-4 rounded-2xl p-6">
                     <div className="flex items-center justify-between">
                       <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-base font-bold text-white shadow-[0_8px_24px_-10px_rgba(139,92,246,0.9)]">
                         {i + 1}
