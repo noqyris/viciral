@@ -1,0 +1,1177 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation "Primary navigation" [ref=e3]:
+      - link "Viciral" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]:
+          - img [ref=e7]
+          - generic [ref=e12]: Viciral
+      - generic [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link "Modules" [ref=e16] [cursor=pointer]:
+              - /url: "#modules"
+          - listitem [ref=e17]:
+            - link "Examples" [ref=e18] [cursor=pointer]:
+              - /url: "#examples"
+          - listitem [ref=e19]:
+            - link "Cost of effort" [ref=e20] [cursor=pointer]:
+              - /url: "#cost-of-effort"
+        - generic [ref=e21]:
+          - button "SR" [ref=e22]
+          - button "EN" [pressed] [ref=e23]
+        - link "Log in" [ref=e24] [cursor=pointer]:
+          - /url: /login
+        - link "Start free →" [ref=e25] [cursor=pointer]:
+          - /url: /signup
+  - main [ref=e27]:
+    - region "Hero" [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - generic [ref=e32]: Multi-model orchestration
+          - heading "Make what you can't alone." [level=1] [ref=e37]
+          - paragraph [ref=e39]: One tool unites the best AI models — Claude for copy, Nano Banana (Gemini) for images, Seedance for video — so an idea becomes a full content set in a minute, with no team and no technical hassle.
+          - generic [ref=e41]:
+            - link "Start free → 200 credits" [ref=e42] [cursor=pointer]:
+              - /url: /signup
+              - text: Start free → 200 credits
+              - img [ref=e43]
+            - link "See real examples" [ref=e45] [cursor=pointer]:
+              - /url: "#examples"
+          - list [ref=e47]:
+            - listitem [ref=e48]: 200 credits
+            - listitem [ref=e49]: ·
+            - listitem [ref=e50]: no card
+            - listitem [ref=e51]: ·
+            - listitem [ref=e52]: made with this tool
+        - img "Real outputs made with this tool" [ref=e54]:
+          - generic [ref=e58]:
+            - generic [ref=e59]:
+              - generic [ref=e60]: Brand board
+              - generic [ref=e61]: "Tone: warm, confident"
+            - img "Brand board example" [ref=e63]
+            - generic [ref=e64]:
+              - generic [ref=e67]: Ink
+              - generic [ref=e70]: Violet
+              - generic [ref=e73]: Cream
+              - generic [ref=e76]: Roast
+              - generic [ref=e77]:
+                - generic [ref=e78]: Lunar Coffee
+                - generic [ref=e79]: „Your moment of calm.“
+          - generic [ref=e82]:
+            - img "Vertical clip example made with this tool" [ref=e83]
+            - generic [ref=e85]:
+              - img [ref=e86]
+              - text: "92"
+            - generic [ref=e88]:
+              - generic [ref=e89]:
+                - generic [ref=e90]: L
+                - img [ref=e92]
+              - generic [ref=e95]:
+                - img [ref=e96]
+                - generic [ref=e98]: 12.4k
+              - generic [ref=e99]:
+                - img [ref=e100]
+                - generic [ref=e102]: "318"
+              - generic [ref=e103]:
+                - img [ref=e104]
+                - generic [ref=e106]: 1.2k
+              - generic [ref=e107]:
+                - img [ref=e108]
+                - generic [ref=e111]: Share
+            - generic [ref=e112]:
+              - generic [ref=e113]: "@lunar.coffee"
+              - paragraph [ref=e114]: Launch in 24h ⚡
+              - generic [ref=e115]:
+                - img [ref=e116]
+                - generic [ref=e120]: original sound · lunar.coffee
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - generic [ref=e125]: L
+              - generic [ref=e126]:
+                - generic [ref=e127]:
+                  - text: lunar.coffee
+                  - img [ref=e128]
+                - generic [ref=e131]: Belgrade, Serbia
+              - img [ref=e132]
+            - img "Post example" [ref=e137]
+            - generic [ref=e138]:
+              - generic [ref=e139]:
+                - img [ref=e140]
+                - img [ref=e142]
+                - img [ref=e144]
+                - img [ref=e147]
+              - generic [ref=e149]: 1,247 likes
+              - paragraph [ref=e150]: lunar.coffee The new collection just dropped ☕ Limited run — don't miss it.
+              - paragraph [ref=e151]: "#newdrop #coffee #specialty #belgrade"
+              - paragraph [ref=e152]: View all 23 comments
+              - paragraph [ref=e153]: 2 hours ago
+      - generic [ref=e155]:
+        - generic [ref=e156]: "Powered by:"
+        - generic [ref=e157]: Claude
+        - generic [ref=e158]: Nano Banana (Gemini)
+        - generic [ref=e159]: Seedance
+        - generic [ref=e160]: Whisper
+        - generic [ref=e161]: Recraft
+      - link "Scroll to examples" [ref=e162] [cursor=pointer]:
+        - /url: "#examples"
+        - text: scroll
+        - img [ref=e163]
+    - region "Real models, one account" [ref=e165]:
+      - generic [ref=e166]:
+        - paragraph [ref=e168]:
+          - img [ref=e169]
+          - text: UNDER THE HOOD
+        - heading "Real models, one account" [level=2] [ref=e173]
+        - list [ref=e174]:
+          - listitem [ref=e175]:
+            - generic [ref=e177]:
+              - generic [ref=e178]: Claude
+              - generic [ref=e179]: ·
+              - generic [ref=e180]: text / strategy
+          - listitem [ref=e181]:
+            - generic [ref=e183]:
+              - generic [ref=e184]: Nano Banana
+              - generic [ref=e185]: ·
+              - generic [ref=e186]: Gemini · images
+          - listitem [ref=e187]:
+            - generic [ref=e189]:
+              - generic [ref=e190]: Seedance
+              - generic [ref=e191]: ·
+              - generic [ref=e192]: video
+          - listitem [ref=e193]:
+            - generic [ref=e195]:
+              - generic [ref=e196]: Whisper
+              - generic [ref=e197]: ·
+              - generic [ref=e198]: transcript / captions
+          - listitem [ref=e199]:
+            - generic [ref=e201]:
+              - generic [ref=e202]: Recraft
+              - generic [ref=e203]: ·
+              - generic [ref=e204]: vector / logo
+        - paragraph [ref=e206]: Each task goes to the model that does it best — while you stay on one account, no juggling five apps.
+    - region "All of this was made with this tool." [ref=e207]:
+      - generic [ref=e208]:
+        - paragraph [ref=e210]: REAL, NOT RENDERS
+        - heading "All of this was made with this tool." [level=2] [ref=e213]
+        - paragraph [ref=e215]: Real examples — made with this exact tool, no team and no other apps.
+        - list "Gallery of real examples" [ref=e216]:
+          - listitem [ref=e217]:
+            - link "Avatar — Open" [ref=e219] [cursor=pointer]:
+              - /url: /studio/avatar
+              - generic [ref=e221]:
+                - img "Avatar" [ref=e222]
+                - generic [ref=e224]:
+                  - generic [ref=e225]:
+                    - generic [ref=e226]: L
+                    - img [ref=e228]
+                  - generic [ref=e229]:
+                    - img [ref=e230]
+                    - generic [ref=e232]: 12.4k
+                  - generic [ref=e233]:
+                    - img [ref=e234]
+                    - generic [ref=e236]: "318"
+                  - generic [ref=e237]:
+                    - img [ref=e238]
+                    - generic [ref=e240]: 1.2k
+                  - generic [ref=e241]:
+                    - img [ref=e242]
+                    - generic [ref=e245]: Share
+                - generic [ref=e246]:
+                  - generic [ref=e247]: "@lunar.coffee"
+                  - paragraph [ref=e248]: Present your product, no camera.
+                  - generic [ref=e249]:
+                    - img [ref=e250]
+                    - generic [ref=e254]: original sound · lunar.coffee
+              - generic:
+                - img
+                - generic: Avatar
+              - generic:
+                - img
+          - listitem [ref=e255]:
+            - link "Website Builder — Open" [ref=e257] [cursor=pointer]:
+              - /url: /studio/website
+              - generic [ref=e259]:
+                - generic [ref=e264]:
+                  - img [ref=e265]
+                  - text: lunarcoffee.rs
+                - generic [ref=e268]:
+                  - img "Website example" [ref=e269]
+                  - generic [ref=e271]:
+                    - generic [ref=e272]: Lunar Coffee
+                    - generic [ref=e273]: Order →
+              - generic:
+                - img
+                - generic: Site
+              - generic:
+                - img
+          - listitem [ref=e274]:
+            - link "Social Media Pack — Open" [ref=e276] [cursor=pointer]:
+              - /url: /studio/social-pack
+              - generic [ref=e278]:
+                - generic [ref=e279]:
+                  - generic [ref=e280]: L
+                  - generic [ref=e281]:
+                    - generic [ref=e282]:
+                      - text: lunar.coffee
+                      - img [ref=e283]
+                    - generic [ref=e286]: Belgrade, Serbia
+                  - img [ref=e287]
+                - img "Post example" [ref=e292]
+                - generic [ref=e293]:
+                  - generic [ref=e294]:
+                    - img [ref=e295]
+                    - img [ref=e297]
+                    - img [ref=e299]
+                    - img [ref=e302]
+                  - generic [ref=e304]: 1,247 likes
+                  - paragraph [ref=e305]: lunar.coffee The new collection just dropped ☕ Limited run — don't miss it.
+                  - paragraph [ref=e306]: "#newdrop #coffee #specialty #belgrade"
+                  - paragraph [ref=e307]: View all 23 comments
+                  - paragraph [ref=e308]: 2 hours ago
+              - generic:
+                - img
+                - generic: Post
+              - generic:
+                - img
+          - listitem [ref=e309]:
+            - link "Cinematic Video — Open" [ref=e311] [cursor=pointer]:
+              - /url: /studio/cinematic
+              - generic [ref=e313]:
+                - img "Cinematic Video" [ref=e314]
+                - generic [ref=e317]: HD
+                - img [ref=e320]
+                - generic [ref=e322]:
+                  - generic [ref=e323]: Lunar Coffee — cinematic
+                  - generic [ref=e326]:
+                    - generic [ref=e327]: 0:03 / 0:10
+                    - img [ref=e328]
+              - generic:
+                - img
+                - generic: Video
+              - generic:
+                - img
+          - listitem [ref=e332]:
+            - link "Brand Kit — Open" [ref=e334] [cursor=pointer]:
+              - /url: /studio/brand-kit
+              - generic [ref=e336]:
+                - generic [ref=e337]:
+                  - generic [ref=e338]: Brand board
+                  - generic [ref=e339]: "Tone: warm, confident"
+                - img "Brand board example" [ref=e341]
+                - generic [ref=e342]:
+                  - generic [ref=e345]: Ink
+                  - generic [ref=e348]: Violet
+                  - generic [ref=e351]: Cream
+                  - generic [ref=e354]: Roast
+                  - generic [ref=e355]:
+                    - generic [ref=e356]: Lunar Coffee
+                    - generic [ref=e357]: „Your moment of calm.“
+              - generic:
+                - img
+                - generic: Brand
+              - generic:
+                - img
+          - listitem [ref=e358]:
+            - link "Short-Form Clips — Open" [ref=e360] [cursor=pointer]:
+              - /url: /studio/short-form
+              - generic [ref=e362]:
+                - img "Short-Form Clips" [ref=e363]
+                - generic [ref=e365]:
+                  - img [ref=e366]
+                  - text: "92"
+                - generic [ref=e368]:
+                  - generic [ref=e369]:
+                    - generic [ref=e370]: L
+                    - img [ref=e372]
+                  - generic [ref=e373]:
+                    - img [ref=e374]
+                    - generic [ref=e376]: 12.4k
+                  - generic [ref=e377]:
+                    - img [ref=e378]
+                    - generic [ref=e380]: "318"
+                  - generic [ref=e381]:
+                    - img [ref=e382]
+                    - generic [ref=e384]: 1.2k
+                  - generic [ref=e385]:
+                    - img [ref=e386]
+                    - generic [ref=e389]: Share
+                - generic [ref=e390]:
+                  - generic [ref=e391]: "@lunar.coffee"
+                  - paragraph [ref=e392]: Hook in the first 3 seconds.
+                  - generic [ref=e393]:
+                    - img [ref=e394]
+                    - generic [ref=e398]: original sound · lunar.coffee
+              - generic:
+                - img
+                - generic: Clip
+              - generic:
+                - img
+    - region "Drag to see the difference." [ref=e399]:
+      - generic [ref=e400]:
+        - generic [ref=e401]:
+          - paragraph [ref=e402]:
+            - img [ref=e403]
+            - text: BEFORE / AFTER
+          - heading "Drag to see the difference." [level=2] [ref=e406]
+          - paragraph [ref=e407]: Raw material on the left, finished work on the right — drag the handle on each. Every piece was made with this tool.
+        - generic [ref=e408]:
+          - 'figure "brief: a specialty-coffee site, warm and modern Website Builder Make this" [ref=e410]':
+            - generic [ref=e411]:
+              - 'img "Before and after: from wireframe to finished site" [ref=e412]'
+              - generic [ref=e413]: VICIRAL
+              - generic [ref=e414]:
+                - img [ref=e415]
+                - generic [ref=e416]: RAW
+              - img [ref=e419]
+              - slider "Drag before/after — Website Builder" [ref=e422]: "88"
+            - generic [ref=e423]:
+              - generic [ref=e424]:
+                - generic [ref=e425]: "brief: a specialty-coffee site, warm and modern"
+                - generic [ref=e426]: Website Builder
+              - link "Make this" [ref=e427] [cursor=pointer]:
+                - /url: /studio/website
+                - text: Make this
+                - img [ref=e428]
+          - generic [ref=e430]:
+            - 'figure "topic: launching a new sneaker collection Social Media Pack Make this" [ref=e432]':
+              - generic [ref=e433]:
+                - 'img "Before and after: from amateur snap to studio post" [ref=e434]'
+                - generic [ref=e435]: VICIRAL
+                - generic [ref=e436]:
+                  - img [ref=e437]
+                  - generic [ref=e438]: RAW
+                - img [ref=e441]
+                - slider "Drag before/after — Social Media Pack" [ref=e444]: "88"
+              - generic [ref=e445]:
+                - generic [ref=e446]:
+                  - generic [ref=e447]: "topic: launching a new sneaker collection"
+                  - generic [ref=e448]: Social Media Pack
+                - link "Make this" [ref=e449] [cursor=pointer]:
+                  - /url: /studio/social-pack
+                  - text: Make this
+                  - img [ref=e450]
+            - 'figure "brand: Lunar — elegant, mysterious (logo, palette, voice) Brand Kit Make this" [ref=e453]':
+              - generic [ref=e454]:
+                - 'img "Before and after: from notes to a finished logo" [ref=e455]'
+                - generic [ref=e456]: VICIRAL
+                - generic [ref=e457]:
+                  - img [ref=e458]
+                  - generic [ref=e459]: RAW
+                - img [ref=e462]
+                - slider "Drag before/after — Brand Kit" [ref=e465]: "88"
+              - generic [ref=e466]:
+                - generic [ref=e467]:
+                  - generic [ref=e468]: "brand: Lunar — elegant, mysterious (logo, palette, voice)"
+                  - generic [ref=e469]: Brand Kit
+                - link "Make this" [ref=e470] [cursor=pointer]:
+                  - /url: /studio/brand-kit
+                  - text: Make this
+                  - img [ref=e471]
+          - generic [ref=e473]:
+            - 'figure "portrait: a professional presenter, studio light Avatar / Presenter Make this" [ref=e475]':
+              - generic [ref=e476]:
+                - 'img "Before and after: from a selfie to a pro presenter" [ref=e477]'
+                - generic [ref=e478]: VICIRAL
+                - generic [ref=e479]:
+                  - img [ref=e480]
+                  - generic [ref=e481]: RAW
+                - img [ref=e484]
+                - slider "Drag before/after — Avatar / Presenter" [ref=e487]: "88"
+              - generic [ref=e488]:
+                - generic [ref=e489]:
+                  - generic [ref=e490]: "portrait: a professional presenter, studio light"
+                  - generic [ref=e491]: Avatar / Presenter
+                - link "Make this" [ref=e492] [cursor=pointer]:
+                  - /url: /studio/avatar
+                  - text: Make this
+                  - img [ref=e493]
+            - 'figure "clip: a vertical reel with captions Short-Form Clips Make this" [ref=e496]':
+              - generic [ref=e497]:
+                - 'img "Before and after: from raw footage to a finished clip" [ref=e498]'
+                - generic [ref=e499]: VICIRAL
+                - generic [ref=e500]:
+                  - img [ref=e501]
+                  - generic [ref=e502]: RAW
+                - img [ref=e505]
+                - slider "Drag before/after — Short-Form Clips" [ref=e508]: "88"
+              - generic [ref=e509]:
+                - generic [ref=e510]:
+                  - generic [ref=e511]: "clip: a vertical reel with captions"
+                  - generic [ref=e512]: Short-Form Clips
+                - link "Make this" [ref=e513] [cursor=pointer]:
+                  - /url: /studio/short-form
+                  - text: Make this
+                  - img [ref=e514]
+    - region "One studio, every industry." [ref=e516]:
+      - generic [ref=e517]:
+        - generic [ref=e518]:
+          - paragraph [ref=e519]: INDUSTRIES
+          - heading "One studio, every industry." [level=2] [ref=e521]
+          - paragraph [ref=e522]: From skincare to real estate — one tool, your brand. Hover an image for the raw “before”.
+        - generic [ref=e523]:
+          - figure [ref=e525]:
+            - img "Make — Food" [ref=e526]
+            - img [ref=e527]
+            - generic [ref=e528]: RAW
+            - generic:
+              - generic:
+                - generic: Food
+                - link "Make" [ref=e529] [cursor=pointer]:
+                  - /url: /studio/cinematic
+                  - text: Make
+                  - img [ref=e530]
+          - figure [ref=e534]:
+            - img "Make — Skincare" [ref=e535]
+            - img [ref=e536]
+            - generic [ref=e537]: RAW
+            - generic:
+              - generic:
+                - generic: Skincare
+                - link "Make" [ref=e538] [cursor=pointer]:
+                  - /url: /studio/social-pack
+                  - text: Make
+                  - img [ref=e539]
+          - figure [ref=e543]:
+            - img "Make — Fashion" [ref=e544]
+            - img [ref=e545]
+            - generic [ref=e546]: RAW
+            - generic:
+              - generic:
+                - generic: Fashion
+                - link "Make" [ref=e547] [cursor=pointer]:
+                  - /url: /studio/social-pack
+                  - text: Make
+                  - img [ref=e548]
+          - figure [ref=e552]:
+            - img "Make — SaaS" [ref=e553]
+            - img [ref=e554]
+            - generic [ref=e555]: RAW
+            - generic:
+              - generic:
+                - generic: SaaS
+                - link "Make" [ref=e556] [cursor=pointer]:
+                  - /url: /studio/website
+                  - text: Make
+                  - img [ref=e557]
+          - figure [ref=e561]:
+            - img "Make — Real estate" [ref=e562]
+            - img [ref=e563]
+            - generic [ref=e564]: RAW
+            - generic:
+              - generic:
+                - generic: Real estate
+                - link "Make" [ref=e565] [cursor=pointer]:
+                  - /url: /studio/website
+                  - text: Make
+                  - img [ref=e566]
+          - figure [ref=e570]:
+            - img "Make — Fitness" [ref=e571]
+            - img [ref=e572]
+            - generic [ref=e573]: RAW
+            - generic:
+              - generic:
+                - generic: Fitness
+                - link "Make" [ref=e574] [cursor=pointer]:
+                  - /url: /studio/short-form
+                  - text: Make
+                  - img [ref=e575]
+    - region "Your studio, in one sweep" [ref=e578]:
+      - generic [ref=e579]:
+        - generic [ref=e580]:
+          - paragraph [ref=e581]: ALL IN ONE PLACE
+          - heading "Your studio, in one sweep." [level=2] [ref=e583]
+        - generic [ref=e585]:
+          - img [ref=e587]
+          - img [ref=e589]
+          - img [ref=e591]
+          - img [ref=e593]
+          - img [ref=e595]
+          - img [ref=e597]
+          - img [ref=e599]
+          - img [ref=e601]
+          - img [ref=e603]
+          - img [ref=e605]
+          - img [ref=e607]
+          - img [ref=e609]
+    - region "One prompt in, a finished asset out" [ref=e610]:
+      - generic [ref=e611]:
+        - generic [ref=e612]:
+          - generic [ref=e613]: FROM ONE SENTENCE TO FINISHED
+          - heading "One prompt in, a finished asset out" [level=2] [ref=e615]
+          - paragraph [ref=e616]: "This is the whole product in miniature: you write what you want, several models do the work. Everything below was made with this tool."
+        - generic [ref=e617]:
+          - article "A whole post set in a minute" [ref=e618]:
+            - generic [ref=e619]:
+              - generic [ref=e622]:
+                - generic [ref=e624]: Input
+                - paragraph [ref=e627]
+                - button [ref=e629]:
+                  - text: Generate
+                  - img [ref=e630]
+              - img [ref=e633]
+              - generic [ref=e637]:
+                - generic [ref=e638]:
+                  - generic [ref=e639]: L
+                  - generic [ref=e640]:
+                    - generic [ref=e641]:
+                      - text: lunar.coffee
+                      - img [ref=e642]
+                    - generic [ref=e645]: Belgrade, Serbia
+                  - img [ref=e646]
+                - img "Post example" [ref=e651]
+                - generic [ref=e652]:
+                  - generic [ref=e653]:
+                    - img [ref=e654]
+                    - img [ref=e656]
+                    - img [ref=e658]
+                    - img [ref=e661]
+                  - generic [ref=e663]: 1,247 likes
+                  - paragraph [ref=e664]: lunar.coffee The new collection just dropped ☕ Limited run — don't miss it.
+                  - paragraph [ref=e665]: "#newdrop #coffee #specialty #belgrade"
+                  - paragraph [ref=e666]: View all 23 comments
+                  - paragraph [ref=e667]: 2 hours ago
+            - generic [ref=e669]:
+              - generic [ref=e670]: SOCIAL MEDIA PACK
+              - heading "A whole post set in a minute" [level=3] [ref=e672]
+              - list [ref=e673]:
+                - listitem [ref=e674]:
+                  - img [ref=e675]
+                  - generic [ref=e678]: An hour in Canva, then hunting for a caption, then guessing hashtags.
+                - listitem [ref=e679]:
+                  - img [ref=e680]
+                  - generic [ref=e682]: Image, caption and hashtags — a ready post set in a minute.
+              - link "Try it" [ref=e684] [cursor=pointer]:
+                - /url: /studio/social-pack
+                - text: Try it
+                - img [ref=e685]
+          - article "A film frame from a sentence" [ref=e687]:
+            - generic [ref=e688]:
+              - generic [ref=e692]:
+                - img "Cinematic frame" [ref=e693]
+                - generic [ref=e696]: HD
+                - img [ref=e699]
+                - generic [ref=e701]:
+                  - generic [ref=e702]: Lunar Coffee — cinematic
+                  - generic [ref=e705]:
+                    - generic [ref=e706]: 0:03 / 0:10
+                    - img [ref=e707]
+              - img [ref=e712]
+              - generic [ref=e715]:
+                - generic [ref=e717]: Input
+                - paragraph [ref=e720]
+                - button [ref=e722]:
+                  - text: Generate
+                  - img [ref=e723]
+            - generic [ref=e726]:
+              - generic [ref=e727]: CINEMATIC VIDEO
+              - heading "A film frame from a sentence" [level=3] [ref=e729]
+              - list [ref=e730]:
+                - listitem [ref=e731]:
+                  - img [ref=e732]
+                  - generic [ref=e735]: Filming, gear, editing — or an expensive shoot for a single clip.
+                - listitem [ref=e736]:
+                  - img [ref=e737]
+                  - generic [ref=e739]: A 16:9 cinematic shot from a description — no camera, no crew.
+              - link "Try it" [ref=e741] [cursor=pointer]:
+                - /url: /studio/cinematic
+                - text: Try it
+                - img [ref=e742]
+          - article "A presenter who speaks your script" [ref=e744]:
+            - generic [ref=e745]:
+              - generic [ref=e748]:
+                - generic [ref=e750]: Input
+                - paragraph [ref=e753]
+                - button [ref=e755]:
+                  - text: Generate
+                  - img [ref=e756]
+              - img [ref=e759]
+              - generic [ref=e763]:
+                - img "Avatar presenter" [ref=e764]
+                - generic [ref=e766]:
+                  - generic [ref=e767]:
+                    - generic [ref=e768]: L
+                    - img [ref=e770]
+                  - generic [ref=e771]:
+                    - img [ref=e772]
+                    - generic [ref=e774]: 12.4k
+                  - generic [ref=e775]:
+                    - img [ref=e776]
+                    - generic [ref=e778]: "318"
+                  - generic [ref=e779]:
+                    - img [ref=e780]
+                    - generic [ref=e782]: 1.2k
+                  - generic [ref=e783]:
+                    - img [ref=e784]
+                    - generic [ref=e787]: Share
+                - generic [ref=e788]:
+                  - generic [ref=e789]: "@lunar.coffee"
+                  - paragraph [ref=e790]: Introducing our new seasonal blend ☕
+                  - generic [ref=e791]:
+                    - img [ref=e792]
+                    - generic [ref=e796]: original sound · lunar.coffee
+            - generic [ref=e798]:
+              - generic [ref=e799]: AVATAR / PRESENTER
+              - heading "A presenter who speaks your script" [level=3] [ref=e801]
+              - list [ref=e802]:
+                - listitem [ref=e803]:
+                  - img [ref=e804]
+                  - generic [ref=e807]: Camera, mic, lighting and lots of takes to speak to your audience.
+                - listitem [ref=e808]:
+                  - img [ref=e809]
+                  - generic [ref=e811]: An avatar that speaks your script — a vertical clip, ready to post.
+              - link "Try it" [ref=e813] [cursor=pointer]:
+                - /url: /studio/avatar
+                - text: Try it
+                - img [ref=e814]
+          - article "Your brand identity in one place" [ref=e816]:
+            - generic [ref=e817]:
+              - generic [ref=e821]:
+                - generic [ref=e822]:
+                  - generic [ref=e823]: Brand board
+                  - generic [ref=e824]: "Tone: warm, confident"
+                - img "Brand board example" [ref=e826]
+                - generic [ref=e827]:
+                  - generic [ref=e830]: Ink
+                  - generic [ref=e833]: Violet
+                  - generic [ref=e836]: Cream
+                  - generic [ref=e839]: Roast
+                  - generic [ref=e840]:
+                    - generic [ref=e841]: Lunar Coffee
+                    - generic [ref=e842]: „Your moment of calm.“
+              - img [ref=e844]
+              - generic [ref=e847]:
+                - generic [ref=e849]: Input
+                - paragraph [ref=e852]
+                - button [ref=e854]:
+                  - text: Generate
+                  - img [ref=e855]
+            - generic [ref=e858]:
+              - generic [ref=e859]: BRAND KIT
+              - heading "Your brand identity in one place" [level=3] [ref=e861]
+              - list [ref=e862]:
+                - listitem [ref=e863]:
+                  - img [ref=e864]
+                  - generic [ref=e867]: Briefing a designer, rounds of edits and weeks waiting on a logo.
+                - listitem [ref=e868]:
+                  - img [ref=e869]
+                  - generic [ref=e871]: Logo, palette and tone of voice — a complete brand board, instantly.
+              - link "Try it" [ref=e873] [cursor=pointer]:
+                - /url: /studio/brand-kit
+                - text: Try it
+                - img [ref=e874]
+          - article "A site ready to take orders" [ref=e876]:
+            - generic [ref=e877]:
+              - generic [ref=e880]:
+                - generic [ref=e882]: Input
+                - paragraph [ref=e885]
+                - button [ref=e887]:
+                  - text: Generate
+                  - img [ref=e888]
+              - img [ref=e891]
+              - generic [ref=e895]:
+                - generic [ref=e900]:
+                  - img [ref=e901]
+                  - text: lunarcoffee.rs
+                - generic [ref=e904]:
+                  - img "Website example" [ref=e905]
+                  - generic [ref=e907]:
+                    - generic [ref=e908]: Lunar Coffee
+                    - generic [ref=e909]: Order →
+            - generic [ref=e911]:
+              - generic [ref=e912]: WEBSITE BUILDER
+              - heading "A site ready to take orders" [level=3] [ref=e914]
+              - list [ref=e915]:
+                - listitem [ref=e916]:
+                  - img [ref=e917]
+                  - generic [ref=e920]: A template that never fits, hours of tweaking and copy you write yourself.
+                - listitem [ref=e921]:
+                  - img [ref=e922]
+                  - generic [ref=e924]: A finished landing with a hero and a call to action — online right away.
+              - link "Try it" [ref=e926] [cursor=pointer]:
+                - /url: /studio/website
+                - text: Try it
+                - img [ref=e927]
+          - article "A vertical clip that grabs attention" [ref=e929]:
+            - generic [ref=e930]:
+              - generic [ref=e934]:
+                - img "Vertical clip" [ref=e935]
+                - generic [ref=e937]:
+                  - img [ref=e938]
+                  - text: "0"
+                - generic [ref=e940]:
+                  - generic [ref=e941]:
+                    - generic [ref=e942]: L
+                    - img [ref=e944]
+                  - generic [ref=e945]:
+                    - img [ref=e946]
+                    - generic [ref=e948]: 12.4k
+                  - generic [ref=e949]:
+                    - img [ref=e950]
+                    - generic [ref=e952]: "318"
+                  - generic [ref=e953]:
+                    - img [ref=e954]
+                    - generic [ref=e956]: 1.2k
+                  - generic [ref=e957]:
+                    - img [ref=e958]
+                    - generic [ref=e961]: Share
+                - generic [ref=e962]:
+                  - generic [ref=e963]: "@lunar.coffee"
+                  - paragraph [ref=e964]: The first frame is the hook — stay till the end 🔥
+                  - generic [ref=e965]:
+                    - img [ref=e966]
+                    - generic [ref=e970]: original sound · lunar.coffee
+              - img [ref=e972]
+              - generic [ref=e975]:
+                - generic [ref=e977]: Input
+                - paragraph [ref=e980]
+                - button [ref=e982]:
+                  - text: Generate
+                  - img [ref=e983]
+            - generic [ref=e986]:
+              - generic [ref=e987]: SHORT-FORM CLIPS
+              - heading "A vertical clip that grabs attention" [level=3] [ref=e989]
+              - list [ref=e990]:
+                - listitem [ref=e991]:
+                  - img [ref=e992]
+                  - generic [ref=e995]: Cutting second by second, picking hooks and guessing what lands.
+                - listitem [ref=e996]:
+                  - img [ref=e997]
+                  - generic [ref=e999]: A vertical clip ready for Reels and TikTok — with a potential score.
+              - link "Try it" [ref=e1001] [cursor=pointer]:
+                - /url: /studio/short-form
+                - text: Try it
+                - img [ref=e1002]
+    - region "All 10 modules in one place" [ref=e1004]:
+      - generic [ref=e1006]:
+        - paragraph [ref=e1007]:
+          - generic [ref=e1008]: •
+          - text: All 10 modules
+        - heading "All 10 modules in one place" [level=2] [ref=e1009]
+        - paragraph [ref=e1010]: One studio, one login. Each module is a finished workflow that wires real models together — start from any of them.
+      - list [ref=e1011]:
+        - listitem [ref=e1012]:
+          - 'link "Open module: Social Media Pack" [ref=e1014] [cursor=pointer]':
+            - /url: /studio/social-pack
+            - generic [ref=e1015]:
+              - img [ref=e1017]
+              - generic [ref=e1020]: Flagship
+            - heading "Social Media Pack" [level=3] [ref=e1021]
+            - paragraph [ref=e1022]: Theme → a set of posts (images + caption + hashtags) for IG/TikTok/LinkedIn.
+            - generic [ref=e1024]: Social media
+        - listitem [ref=e1025]:
+          - 'link "Open module: Cinematic Video" [ref=e1027] [cursor=pointer]':
+            - /url: /studio/cinematic
+            - generic [ref=e1028]:
+              - img [ref=e1030]
+              - img [ref=e1035]
+            - heading "Cinematic Video" [level=3] [ref=e1038]
+            - paragraph [ref=e1039]: Image + prompt → a cinematic video clip (Seedance).
+            - generic [ref=e1041]: Video
+        - listitem [ref=e1042]:
+          - 'link "Open module: Brand Kit" [ref=e1044] [cursor=pointer]':
+            - /url: /studio/brand-kit
+            - generic [ref=e1045]:
+              - img [ref=e1047]
+              - img [ref=e1053]
+            - heading "Brand Kit" [level=3] [ref=e1056]
+            - paragraph [ref=e1057]: Name + description → voice, palette, logo and avatar (fills brand memory).
+            - generic [ref=e1059]: Brand
+        - listitem [ref=e1060]:
+          - 'link "Open module: Website Builder" [ref=e1062] [cursor=pointer]':
+            - /url: /studio/website
+            - generic [ref=e1063]:
+              - img [ref=e1065]
+              - img [ref=e1068]
+            - heading "Website Builder" [level=3] [ref=e1071]
+            - paragraph [ref=e1072]: Brand description → a responsive site with copy and images.
+            - generic [ref=e1074]: Web
+        - listitem [ref=e1075]:
+          - 'link "Open module: Image Tools" [ref=e1077] [cursor=pointer]':
+            - /url: /studio/image-tools
+            - generic [ref=e1078]:
+              - img [ref=e1080]
+              - img [ref=e1083]
+            - heading "Image Tools" [level=3] [ref=e1086]
+            - paragraph [ref=e1087]: Remove the background, upscale, or reframe an image.
+            - generic [ref=e1089]: Images
+        - listitem [ref=e1090]:
+          - 'link "Open module: Short-Form Clips" [ref=e1092] [cursor=pointer]':
+            - /url: /studio/short-form
+            - generic [ref=e1093]:
+              - img [ref=e1095]
+              - img [ref=e1101]
+            - heading "Short-Form Clips" [level=3] [ref=e1104]
+            - paragraph [ref=e1105]: Long video → a plan of the best short clips (hook + caption + score).
+            - generic [ref=e1107]: Video
+        - listitem [ref=e1108]:
+          - 'link "Open module: Image Editor" [ref=e1110] [cursor=pointer]':
+            - /url: /studio/editor
+            - generic [ref=e1111]:
+              - img [ref=e1113]
+              - img [ref=e1118]
+            - heading "Image Editor" [level=3] [ref=e1121]
+            - paragraph [ref=e1122]: Edit an image with words — fix a detail, swap the background, layer by layer.
+            - generic [ref=e1124]: Images
+        - listitem [ref=e1125]:
+          - 'link "Open module: Avatar / Presenter" [ref=e1127] [cursor=pointer]':
+            - /url: /studio/avatar
+            - generic [ref=e1128]:
+              - img [ref=e1130]
+              - img [ref=e1134]
+            - heading "Avatar / Presenter" [level=3] [ref=e1137]
+            - paragraph [ref=e1138]: Portrait + script → a video where a person speaks the text (lip-sync).
+            - generic [ref=e1140]: Video
+        - listitem [ref=e1141]:
+          - 'link "Open module: Dubbing / Localization" [ref=e1143] [cursor=pointer]':
+            - /url: /studio/dubbing
+            - generic [ref=e1144]:
+              - img [ref=e1146]
+              - img [ref=e1150]
+            - heading "Dubbing / Localization" [level=3] [ref=e1153]
+            - paragraph [ref=e1154]: Video → the same video in another language (translation + lip-sync).
+            - generic [ref=e1156]: Video
+        - listitem [ref=e1157]:
+          - 'link "Open module: Music / Soundtrack" [ref=e1159] [cursor=pointer]':
+            - /url: /studio/music
+            - generic [ref=e1160]:
+              - img [ref=e1162]
+              - img [ref=e1166]
+            - heading "Music / Soundtrack" [level=3] [ref=e1169]
+            - paragraph [ref=e1170]: Description → a music track for video and reels (per second).
+            - generic [ref=e1172]: Audio
+    - region "Same work, without the weeks or the agency" [ref=e1173]:
+      - generic [ref=e1174]:
+        - generic [ref=e1176]:
+          - paragraph [ref=e1177]:
+            - generic [ref=e1178]: ◆
+            - text: The cost of effort
+          - heading "Same work, without the weeks or the agency" [level=2] [ref=e1179]
+          - paragraph [ref=e1180]: No invented numbers, no competitor prices — just an honest comparison of effort and time.
+        - generic [ref=e1181]:
+          - generic [ref=e1183]:
+            - generic [ref=e1184]: Alone
+            - heading "Everything yourself, everywhere" [level=3] [ref=e1185]
+            - list [ref=e1186]:
+              - listitem [ref=e1187]:
+                - img [ref=e1188]
+                - generic [ref=e1191]: Many apps and accounts
+              - listitem [ref=e1192]:
+                - img [ref=e1193]
+                - generic [ref=e1196]: Hours per single post
+              - listitem [ref=e1197]:
+                - img [ref=e1198]
+                - generic [ref=e1201]: Inconsistent style and brand
+              - listitem [ref=e1202]:
+                - img [ref=e1203]
+                - generic [ref=e1206]: Starting from scratch every time
+          - generic [ref=e1208]:
+            - generic [ref=e1209]: Agency
+            - heading "Hand it off to others" [level=3] [ref=e1210]
+            - list [ref=e1211]:
+              - listitem [ref=e1212]:
+                - img [ref=e1213]
+                - generic [ref=e1216]: Weeks to a first result
+              - listitem [ref=e1217]:
+                - img [ref=e1218]
+                - generic [ref=e1221]: Expensive, billed per project
+              - listitem [ref=e1222]:
+                - img [ref=e1223]
+                - generic [ref=e1226]: Waiting on someone else's schedule
+              - listitem [ref=e1227]:
+                - img [ref=e1228]
+                - generic [ref=e1231]: Every edit means another round
+          - generic [ref=e1235]:
+            - generic [ref=e1236]:
+              - img [ref=e1237]
+              - text: Viciral
+            - heading "One studio, your brand" [level=3] [ref=e1240]
+            - list [ref=e1241]:
+              - listitem [ref=e1242]:
+                - img [ref=e1243]
+                - generic [ref=e1245]: One tool instead of ten
+              - listitem [ref=e1246]:
+                - img [ref=e1247]
+                - generic [ref=e1249]: Minutes to a finished set
+              - listitem [ref=e1250]:
+                - img [ref=e1251]
+                - generic [ref=e1253]: Brand-consistent every time
+              - listitem [ref=e1254]:
+                - img [ref=e1255]
+                - generic [ref=e1257]: 200 credits to start, no card
+            - link "Start for free" [ref=e1258] [cursor=pointer]:
+              - /url: /signup
+            - paragraph [ref=e1259]: 200 credits · no card
+    - region "Three steps to done" [ref=e1260]:
+      - generic [ref=e1261]:
+        - generic [ref=e1262]:
+          - generic [ref=e1263]: HOW IT WORKS
+          - heading "Three steps to done" [level=2] [ref=e1265]
+          - paragraph [ref=e1266]: No crew and no pile of apps — describe the idea, pick a module, download the result.
+        - generic [ref=e1267]:
+          - img
+          - list [ref=e1268]:
+            - listitem [ref=e1269]:
+              - article [ref=e1271]:
+                - generic [ref=e1272]:
+                  - generic [ref=e1273]: "1"
+                  - generic [ref=e1274]: Step 01
+                - generic [ref=e1275]:
+                  - heading "Describe the idea" [level=3] [ref=e1276]
+                  - paragraph [ref=e1277]: Write one sentence about what you need — in your own language.
+                - paragraph [ref=e1284]: "> A post pack for my coffee brand — warm, premium tone."
+            - listitem [ref=e1286]:
+              - article [ref=e1288]:
+                - generic [ref=e1289]:
+                  - generic [ref=e1290]: "2"
+                  - generic [ref=e1291]: Step 02
+                - generic [ref=e1292]:
+                  - heading "Pick a module" [level=3] [ref=e1293]
+                  - paragraph [ref=e1294]: Viciral orchestrates the real models — Claude, Nano Banana, Seedance.
+                - generic [ref=e1296]:
+                  - img [ref=e1298]
+                  - img [ref=e1302]
+                  - img [ref=e1308]
+                  - generic [ref=e1314]: Pick a module
+            - listitem [ref=e1315]:
+              - article [ref=e1317]:
+                - generic [ref=e1318]:
+                  - generic [ref=e1319]: "3"
+                  - generic [ref=e1320]: Step 03
+                - generic [ref=e1321]:
+                  - heading "Download & publish" [level=3] [ref=e1322]
+                  - paragraph [ref=e1323]: Finished content — ready to download and post in a few minutes.
+                - generic [ref=e1326]:
+                  - img "Finished vertical clip, made with this tool" [ref=e1327]
+                  - generic [ref=e1329]:
+                    - generic [ref=e1330]: made with this tool
+                    - img [ref=e1332]
+        - link "Start free → 200 credits" [ref=e1336] [cursor=pointer]:
+          - /url: /signup
+          - text: Start free → 200 credits
+          - img [ref=e1337]
+    - region "Start free. Pay only as you grow." [ref=e1339]:
+      - generic [ref=e1340]:
+        - generic [ref=e1341]:
+          - paragraph [ref=e1342]: PRICING
+          - heading "Start free. Pay only as you grow." [level=2] [ref=e1344]
+          - paragraph [ref=e1345]: 200 credits are yours right now, no card. Plans show up when you need more — priced honestly, no fine print.
+        - generic [ref=e1346]:
+          - article [ref=e1348]:
+            - generic [ref=e1349]:
+              - heading "Free" [level=3] [ref=e1350]
+              - generic [ref=e1351]: ACTIVE
+            - generic [ref=e1353]:
+              - paragraph [ref=e1354]: 200 credits
+              - paragraph [ref=e1355]: no card
+            - paragraph [ref=e1356]: Enough to make your first real work and see how the tool runs.
+            - list [ref=e1357]:
+              - listitem [ref=e1358]:
+                - img [ref=e1359]
+                - generic [ref=e1361]: Access to every module — from social packs to video
+              - listitem [ref=e1362]:
+                - img [ref=e1363]
+                - generic [ref=e1365]: "Real models: Claude, Nano Banana, Seedance, Whisper"
+              - listitem [ref=e1366]:
+                - img [ref=e1367]
+                - generic [ref=e1369]: Your exports at full resolution
+              - listitem [ref=e1370]:
+                - img [ref=e1371]
+                - generic [ref=e1373]: No one-hour trial — credits don't expire on you
+            - link "Start free → 200 credits" [ref=e1374] [cursor=pointer]:
+              - /url: /signup
+              - img [ref=e1375]
+              - text: Start free → 200 credits
+          - article [ref=e1379]:
+            - generic [ref=e1380]:
+              - heading "Creator" [level=3] [ref=e1381]
+              - generic [ref=e1382]: SOON
+            - paragraph [ref=e1384]: indicative
+            - paragraph [ref=e1385]: For a steady posting rhythm and short-form video.
+            - list [ref=e1386]:
+              - listitem [ref=e1387]:
+                - img [ref=e1388]
+                - generic [ref=e1390]: More credits each month
+              - listitem [ref=e1391]:
+                - img [ref=e1392]
+                - generic [ref=e1394]: Brand memory — your tone and visual style stick
+              - listitem [ref=e1395]:
+                - img [ref=e1396]
+                - generic [ref=e1398]: Faster generation queue
+            - button "Notify me" [disabled] [ref=e1399]
+          - article [ref=e1401]:
+            - generic [ref=e1402]:
+              - heading "Studio" [level=3] [ref=e1403]
+              - generic [ref=e1404]: SOON
+            - paragraph [ref=e1406]: indicative
+            - paragraph [ref=e1407]: For teams and higher-volume cinematic and avatar work.
+            - list [ref=e1408]:
+              - listitem [ref=e1409]:
+                - img [ref=e1410]
+                - generic [ref=e1412]: Most credits + top-ups when you need them
+              - listitem [ref=e1413]:
+                - img [ref=e1414]
+                - generic [ref=e1416]: Multiple brand profiles and workspaces
+              - listitem [ref=e1417]:
+                - img [ref=e1418]
+                - generic [ref=e1420]: Priority and advanced exports
+            - button "Notify me" [disabled] [ref=e1421]
+        - paragraph [ref=e1423]: 1 credit = $0.01 · you only pay for the models you run.
+    - region "Before you doubt it." [ref=e1424]:
+      - generic [ref=e1425]:
+        - paragraph [ref=e1426]: HONEST
+        - heading "Before you doubt it." [level=2] [ref=e1428]
+        - paragraph [ref=e1429]: We're pre-launch, so we get the skepticism. Here are honest answers to what people actually ask.
+      - list [ref=e1430]:
+        - listitem [ref=e1431]:
+          - generic [ref=e1432]:
+            - heading "Are these real examples?" [level=3] [ref=e1433]:
+              - button "Are these real examples?" [expanded] [ref=e1434]:
+                - generic [ref=e1435]: Are these real examples?
+                - img [ref=e1437]
+            - region "Are these real examples?" [ref=e1440]:
+              - paragraph [ref=e1441]: Yes. Every example on this page was made with this very tool — no agency, no touch-ups after the fact. What you see is what you get.
+        - listitem [ref=e1442]:
+          - heading "What are 200 credits?" [level=3] [ref=e1444]:
+            - button "What are 200 credits?" [ref=e1445]:
+              - generic [ref=e1446]: What are 200 credits?
+              - img [ref=e1448]
+        - listitem [ref=e1449]:
+          - heading "Which models do you use?" [level=3] [ref=e1451]:
+            - button "Which models do you use?" [ref=e1452]:
+              - generic [ref=e1453]: Which models do you use?
+              - img [ref=e1455]
+        - listitem [ref=e1456]:
+          - heading "Do I need a card?" [level=3] [ref=e1458]:
+            - button "Do I need a card?" [ref=e1459]:
+              - generic [ref=e1460]: Do I need a card?
+              - img [ref=e1462]
+        - listitem [ref=e1463]:
+          - heading "Is everything already available?" [level=3] [ref=e1465]:
+            - button "Is everything already available?" [ref=e1466]:
+              - generic [ref=e1467]: Is everything already available?
+              - img [ref=e1469]
+      - link "More questions? Try it free →" [ref=e1472] [cursor=pointer]:
+        - /url: /signup
+    - region "Ready to try it?" [ref=e1473]:
+      - generic:
+        - img
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic: Brand board
+                  - generic: "Tone: warm, confident"
+                - generic:
+                  - img
+                - generic:
+                  - generic:
+                    - generic: Ink
+                  - generic:
+                    - generic: Violet
+                  - generic:
+                    - generic: Cream
+                  - generic:
+                    - generic: Roast
+                  - generic:
+                    - generic: Lunar Coffee
+                    - generic: „Your moment of calm.“
+          - generic:
+            - generic:
+              - generic:
+                - img
+                - generic:
+                  - generic:
+                    - generic: L
+                    - generic:
+                      - img
+                  - generic:
+                    - img
+                    - generic: 12.4k
+                  - generic:
+                    - img
+                    - generic: "318"
+                  - generic:
+                    - img
+                    - generic: 1.2k
+                  - generic:
+                    - img
+                    - generic: Share
+                - generic:
+                  - generic: "@lunar.coffee"
+                  - paragraph: Ready for reels
+                  - generic:
+                    - img
+                    - generic: original sound · lunar.coffee
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic: L
+                  - generic:
+                    - generic:
+                      - text: lunar.coffee
+                      - img
+                    - generic: Belgrade, Serbia
+                  - img
+                - generic:
+                  - img
+                - generic:
+                  - generic:
+                    - img
+                    - img
+                    - img
+                    - img
+                  - generic: 1,247 likes
+                  - paragraph: lunar.coffee The new collection just dropped ☕ Limited run — don't miss it.
+                  - paragraph: "#newdrop #coffee #specialty #belgrade"
+                  - paragraph: View all 23 comments
+                  - paragraph: 2 hours ago
+      - generic [ref=e1474]:
+        - paragraph [ref=e1476]: The lights come up
+        - heading "Ready to try it?" [level=2] [ref=e1479]
+        - paragraph [ref=e1481]: 200 free credits. No card needed.
+        - link "Create account →" [ref=e1484] [cursor=pointer]:
+          - /url: /signup
+          - text: Create account →
+          - img [ref=e1485]
+        - list [ref=e1488]:
+          - listitem [ref=e1489]: 200 credits
+          - listitem [ref=e1490]: ·
+          - listitem [ref=e1491]: no card
+          - listitem [ref=e1492]: ·
+          - listitem [ref=e1493]: made with this tool
+  - contentinfo "Footer" [ref=e1495]:
+    - generic [ref=e1496]:
+      - generic [ref=e1498]:
+        - generic [ref=e1499]:
+          - link "Viciral" [ref=e1500] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e1501]:
+              - img [ref=e1503]
+              - generic [ref=e1508]: Viciral
+          - paragraph [ref=e1509]: AI studio that brings multiple models together
+        - generic [ref=e1510]:
+          - navigation "Footer links" [ref=e1511]:
+            - list [ref=e1512]:
+              - listitem [ref=e1513]:
+                - link "Modules" [ref=e1514] [cursor=pointer]:
+                  - /url: "#modules"
+              - listitem [ref=e1515]:
+                - link "Examples" [ref=e1516] [cursor=pointer]:
+                  - /url: "#examples"
+              - listitem [ref=e1517]:
+                - link "Pricing" [ref=e1518] [cursor=pointer]:
+                  - /url: "#cost-of-effort"
+          - generic [ref=e1519]:
+            - generic [ref=e1520]:
+              - button "SR" [ref=e1521]
+              - button "EN" [pressed] [ref=e1522]
+            - link "Log in →" [ref=e1523] [cursor=pointer]:
+              - /url: /login
+      - generic [ref=e1524]:
+        - paragraph [ref=e1525]: "Powered by: Claude · Nano Banana · Seedance"
+        - paragraph [ref=e1526]: © 2026 Viciral. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e1532] [cursor=pointer]:
+    - img [ref=e1533]

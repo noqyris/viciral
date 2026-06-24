@@ -3,8 +3,11 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Reveal } from "@/components/reveal";
 import { PostMock, VerticalMock, BrandMock } from "@/components/landing-mocks";
+import { prefersReducedMotion } from "@/lib/utils/motion";
 import type { Locale } from "@/lib/i18n";
 
 const T = {
@@ -50,53 +53,36 @@ const MODELS = ["Claude", "Nano Banana (Gemini)", "Seedance", "Whisper", "Recraf
 
 export default function Hero({ locale }: { locale: Locale }) {
   const t = T[locale];
-  const stageRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
 
-  // rAF mouse-parallax: nudge the constellation a few capped px toward the
-  // cursor. Pointer-fine + reduced-motion gated; cleans up its own frame.
+  // Scroll choreography: a light orb travels down through the constellation; as
+  // it passes, the three real-output cards spread apart (via CSS vars, so it
+  // never fights their layout transforms) and a backlight blooms behind them.
+  // The hero pins so it holds in view while the light sweeps through.
   useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
+    if (prefersReducedMotion()) return;
+    const hero = heroRef.current;
+    if (!hero) return;
+    gsap.registerPlugin(ScrollTrigger);
 
-    const fine = window.matchMedia("(pointer: fine)");
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (!fine.matches || reduce.matches) return;
-
-    const MAX = 10; // px cap
-    let targetX = 0;
-    let targetY = 0;
-    let curX = 0;
-    let curY = 0;
-    let raf = 0;
-
-    const onMove = (e: PointerEvent) => {
-      const { innerWidth, innerHeight } = window;
-      targetX = (e.clientX / innerWidth - 0.5) * 2 * MAX;
-      targetY = (e.clientY / innerHeight - 0.5) * 2 * MAX;
-    };
-
-    const tick = () => {
-      curX += (targetX - curX) * 0.08;
-      curY += (targetY - curY) * 0.08;
-      const tiles = stage.querySelectorAll<HTMLElement>("[data-depth]");
-      tiles.forEach((tile) => {
-        const depth = Number(tile.dataset.depth) || 1;
-        tile.style.setProperty("--px", `${(curX * depth).toFixed(2)}px`);
-        tile.style.setProperty("--py", `${(curY * depth).toFixed(2)}px`);
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: hero, start: "top top", end: "+=72%", scrub: 0.5, pin: true },
       });
-      raf = requestAnimationFrame(tick);
-    };
+      tl.fromTo("[data-orb]", { top: "-18%", opacity: 0 }, { top: "112%", opacity: 0.95, ease: "none" }, 0)
+        .fromTo("[data-backlight]", { opacity: 0.1, scale: 0.65 }, { opacity: 0.85, scale: 1.12, ease: "none" }, 0)
+        .to("[data-tile='0']", { "--sx": "-66px", "--sy": "-26px", "--rot": "-12deg", ease: "none" }, 0)
+        .to("[data-tile='1']", { "--sx": "74px", "--sy": "-12px", "--rot": "12deg", ease: "none" }, 0)
+        .to("[data-tile='2']", { "--sy": "60px", "--rot": "4deg", scale: 1.03, ease: "none" }, 0);
+    }, hero);
 
-    window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(tick);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(raf);
-    };
+    ScrollTrigger.refresh();
+    return () => ctx.revert();
   }, []);
 
   return (
     <section
+      ref={heroRef}
       aria-label={locale === "sr" ? "Naslovna" : "Hero"}
       className="section-pit relative isolate flex min-h-[92vh] items-center overflow-hidden"
     >
@@ -111,10 +97,7 @@ export default function Hero({ locale }: { locale: Locale }) {
         <div className="text-center lg:text-left">
           <Reveal dir="up">
             <span className="eyebrow justify-center lg:justify-start">
-              <span
-                aria-hidden
-                className="relative grid h-2 w-2 place-items-center"
-              >
+              <span aria-hidden className="relative grid h-2 w-2 place-items-center">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400/70 motion-reduce:hidden" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-400" />
               </span>
@@ -142,7 +125,7 @@ export default function Hero({ locale }: { locale: Locale }) {
                 {t.ctaCredits}
                 <ArrowRight className="h-4 w-4" strokeWidth={2.2} aria-hidden />
               </Link>
-              <Link href="#primeri" className="btn-ghost w-full sm:w-auto">
+              <Link href="#examples" className="btn-ghost w-full sm:w-auto">
                 {t.seeExamples}
               </Link>
             </div>
@@ -151,36 +134,40 @@ export default function Hero({ locale }: { locale: Locale }) {
           <Reveal dir="up" delay={320}>
             <ul className="mono mt-6 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2 text-[13px] text-zinc-500 lg:justify-start">
               <li>{t.chipCredits}</li>
-              <li aria-hidden className="text-zinc-700">
-                ·
-              </li>
+              <li aria-hidden className="text-zinc-700">·</li>
               <li>{t.chipNoCard}</li>
-              <li aria-hidden className="text-zinc-700">
-                ·
-              </li>
+              <li aria-hidden className="text-zinc-700">·</li>
               <li className="text-violet-300/90">{t.chipMade}</li>
             </ul>
           </Reveal>
         </div>
 
-        {/* ---------- RIGHT: floating constellation of real outputs ---------- */}
+        {/* ---------- RIGHT: constellation the light sweeps through ---------- */}
         <Reveal dir="right" delay={200} className="relative">
           <div
-            ref={stageRef}
             role="img"
             aria-label={t.constellationLabel}
             className="relative mx-auto h-[34rem] w-full max-w-md sm:h-[38rem] lg:h-[40rem]"
           >
-            {/* group under-glow */}
+            {/* backlight — blooms as the orb passes */}
             <div
+              data-backlight
               aria-hidden
-              className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[80%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.32),transparent_68%)] blur-2xl"
+              className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.5),transparent_66%)] blur-3xl"
             />
 
-            {/* Behind-left: brand board peeking in (hidden on small to keep it light) */}
+            {/* traveling light orb */}
             <div
-              data-depth="0.4"
-              className="absolute -left-2 top-6 hidden w-[58%] -rotate-6 [transform:translate3d(var(--px,0),var(--py,0),0)] sm:block"
+              data-orb
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 z-20 h-44 w-44 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(216,180,254,0.9),rgba(99,102,241,0.35)_45%,transparent_70%)] mix-blend-screen blur-2xl"
+            />
+
+            {/* Behind-left: brand board */}
+            <div
+              data-tile="0"
+              style={{ ["--sx" as string]: "0px", ["--sy" as string]: "0px", ["--rot" as string]: "-6deg" }}
+              className="absolute -left-2 top-6 hidden w-[58%] [transform:translate3d(var(--sx),var(--sy),0)_rotate(var(--rot))] sm:block"
             >
               <div className="float" style={{ ["--dur" as string]: "9s", ["--amp" as string]: "7px" }}>
                 <div className="origin-bottom-left scale-[0.92] opacity-90">
@@ -189,10 +176,11 @@ export default function Hero({ locale }: { locale: Locale }) {
               </div>
             </div>
 
-            {/* Behind-up-right: vertical short-form clip with a viral score */}
+            {/* Behind-up-right: vertical short-form clip */}
             <div
-              data-depth="0.7"
-              className="absolute -right-1 top-0 hidden w-[46%] rotate-6 [transform:translate3d(var(--px,0),var(--py,0),0)] sm:block"
+              data-tile="1"
+              style={{ ["--sx" as string]: "0px", ["--sy" as string]: "0px", ["--rot" as string]: "6deg" }}
+              className="absolute -right-1 top-0 hidden w-[46%] [transform:translate3d(var(--sx),var(--sy),0)_rotate(var(--rot))] sm:block"
             >
               <div className="float" style={{ ["--dur" as string]: "8s", ["--amp" as string]: "11px" }}>
                 <VerticalMock
@@ -207,8 +195,9 @@ export default function Hero({ locale }: { locale: Locale }) {
 
             {/* Front/largest: the Instagram post */}
             <div
-              data-depth="1"
-              className="absolute bottom-0 left-1/2 w-[88%] max-w-sm -translate-x-1/2 -rotate-2 [transform:translate3d(calc(-50%+var(--px,0)),var(--py,0),0)] sm:bottom-4 sm:left-auto sm:right-2 sm:translate-x-0 sm:[transform:translate3d(var(--px,0),var(--py,0),0)]"
+              data-tile="2"
+              style={{ ["--sx" as string]: "0px", ["--sy" as string]: "0px", ["--rot" as string]: "-2deg" }}
+              className="absolute bottom-0 left-1/2 z-10 w-[88%] max-w-sm [transform:translate3d(calc(-50%+var(--sx)),var(--sy),0)_rotate(var(--rot))] sm:bottom-4 sm:left-auto sm:right-2 sm:[transform:translate3d(var(--sx),var(--sy),0)_rotate(var(--rot))]"
             >
               <div className="float" style={{ ["--dur" as string]: "7s", ["--amp" as string]: "9px" }}>
                 <PostMock locale={locale} />
@@ -221,9 +210,7 @@ export default function Hero({ locale }: { locale: Locale }) {
       {/* Underneath: the real engine line */}
       <div className="absolute inset-x-0 bottom-0">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-3 gap-y-2 px-6 pb-7 lg:justify-start">
-          <span className="mono text-[13px] uppercase tracking-wider text-zinc-500">
-            {t.powers}
-          </span>
+          <span className="mono text-[13px] uppercase tracking-wider text-zinc-500">{t.powers}</span>
           {MODELS.map((m) => (
             <span key={m} className="chip">
               {m}
@@ -234,7 +221,7 @@ export default function Hero({ locale }: { locale: Locale }) {
 
       {/* Scroll cue */}
       <Link
-        href="#primeri"
+        href="#examples"
         aria-label={locale === "sr" ? "Skroluj na primere" : "Scroll to examples"}
         className="mono absolute bottom-7 right-6 hidden items-center gap-1.5 text-[11px] uppercase tracking-[0.2em] text-zinc-500 transition-colors hover:text-zinc-300 lg:inline-flex"
       >

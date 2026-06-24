@@ -2,14 +2,22 @@ import { getCurrentUser } from "@/lib/auth";
 import { listScheduled } from "@/lib/publishing/schedule";
 import { isPlatform } from "@/lib/publishing/types";
 import { CalendarManager, type ScheduledView } from "@/components/calendar-manager";
+import { getLocale } from "@/lib/i18n-server";
 
 export const dynamic = "force-dynamic";
+
+const T = {
+  sr: { title: "Kalendar", sub: "Zakaži objave i prati ih do izlaska." },
+  en: { title: "Calendar", sub: "Schedule posts and track them until they go out." },
+} as const;
 
 export default async function CalendarPage({
   searchParams,
 }: {
   searchParams: Promise<{ caption?: string; mediaUrl?: string; platform?: string }>;
 }) {
+  const locale = await getLocale();
+  const t = T[locale];
   const user = await getCurrentUser();
   const sp = await searchParams;
   const posts = await listScheduled(user.id);
@@ -33,8 +41,8 @@ export default async function CalendarPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
-      <h1 className="mb-1 text-2xl font-bold tracking-tight text-zinc-100">Kalendar</h1>
-      <p className="mb-8 text-zinc-400">Zakaži objave i prati ih do izlaska.</p>
+      <h1 className="mb-1 text-2xl font-bold tracking-tight text-zinc-100">{t.title}</h1>
+      <p className="mb-8 text-zinc-400">{t.sub}</p>
       <CalendarManager initial={view} seed={seed} />
     </main>
   );

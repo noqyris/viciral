@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { referenceImagesToStrings } from "@/lib/brand/normalize";
-import { AppError, jsonError } from "@/lib/http";
+import { AppError, jsonError, readJsonBody } from "@/lib/http";
 
 export const runtime = "nodejs";
 
@@ -24,7 +24,7 @@ export async function PATCH(
   try {
     const user = await getCurrentUser();
     const { id } = await params;
-    const body = updateSchema.parse(await req.json());
+    const body = updateSchema.parse(await readJsonBody(req));
 
     const existing = await prisma.brandProfile.findFirst({
       where: { id, userId: user.id },

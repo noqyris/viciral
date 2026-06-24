@@ -26,9 +26,9 @@ const T = {
 } as const;
 
 const ANCHORS = [
-  { href: "#moduli", key: "modules" },
-  { href: "#primeri", key: "examples" },
-  { href: "#cena-truda", key: "effort" },
+  { href: "#modules", key: "modules" },
+  { href: "#examples", key: "examples" },
+  { href: "#cost-of-effort", key: "effort" },
 ] as const;
 
 /**

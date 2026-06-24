@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { runModule } from "@/lib/jobs/runner";
-import { AppError, jsonError } from "@/lib/http";
+import { AppError, jsonError, readJsonBody } from "@/lib/http";
 import type { GenerationMode } from "@/lib/modules/types";
 
 export const runtime = "nodejs";
@@ -15,12 +15,7 @@ interface GenerateBody {
 
 export async function POST(req: Request) {
   try {
-    let body: GenerateBody;
-    try {
-      body = (await req.json()) as GenerateBody;
-    } catch {
-      throw new AppError("Nevažeći JSON", 400);
-    }
+    const body = await readJsonBody<GenerateBody>(req);
 
     if (!body.moduleSlug) throw new AppError("moduleSlug je obavezan", 400);
 

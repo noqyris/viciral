@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
-import { AppError, jsonError } from "@/lib/http";
+import { AppError, jsonError, readJsonBody } from "@/lib/http";
 import { grantSignupTrial } from "@/lib/auth-trial";
 
 export const runtime = "nodejs";
@@ -15,7 +15,7 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const { email, password, name } = schema.parse(await req.json());
+    const { email, password, name } = schema.parse(await readJsonBody(req));
     const normEmail = email.toLowerCase().trim();
 
     const existing = await prisma.user.findUnique({ where: { email: normEmail } });

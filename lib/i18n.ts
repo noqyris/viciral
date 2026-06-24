@@ -1,7 +1,7 @@
 /** Shared (client+server safe) locale types. */
 export const LOCALES = ["sr", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
-export const DEFAULT_LOCALE: Locale = "sr";
+export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_COOKIE = "locale";
 
 export function isLocale(v: string | undefined | null): v is Locale {

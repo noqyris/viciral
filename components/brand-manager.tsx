@@ -29,6 +29,7 @@ const T = {
     referenceAlt: "Referenca",
     makeDefault: "Podrazumevani",
     delete: "Obriši",
+    genericError: "Greška",
   },
   en: {
     newBrand: "New brand",
@@ -51,6 +52,7 @@ const T = {
     referenceAlt: "Reference",
     makeDefault: "Make default",
     delete: "Delete",
+    genericError: "Error",
   },
 } as const;
 
@@ -128,7 +130,7 @@ export function BrandManager({ initial }: { initial: BrandView[] }) {
         }),
       });
       const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Greška");
+      if (!res.ok) throw new Error(data.error ?? t.genericError);
       setName("");
       setVoice("");
       setColors("");

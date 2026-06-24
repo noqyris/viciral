@@ -35,6 +35,9 @@ export interface ModelInfo {
 /** 1 credit = $0.01 of retail value. */
 export const USD_PER_CREDIT = 0.01;
 
+/** Default vertical (9:16) output resolution for video generation. */
+export const VIDEO_DIMENSIONS = { width: 720, height: 1280 } as const;
+
 export const MODEL_CATALOG: Record<string, ModelInfo> = {
   "nano-banana": {
     id: "nano-banana",
@@ -196,8 +199,8 @@ export function estimateWholesaleUsd(id: string, p: UsageParams): number {
     case "per_second":
       return model.cost.usd * (p.durationSec ?? 5);
     case "seedance_tokens": {
-      const w = p.width ?? 720;
-      const h = p.height ?? 1280;
+      const w = p.width ?? VIDEO_DIMENSIONS.width;
+      const h = p.height ?? VIDEO_DIMENSIONS.height;
       const dur = p.durationSec ?? 5;
       const tokens = (h * w * dur * 24) / 1024;
       return (tokens / 1000) * model.cost.usdPer1k;

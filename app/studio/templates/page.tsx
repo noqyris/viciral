@@ -61,8 +61,8 @@ export default async function TemplatesPage() {
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-violet-500/10 text-violet-300 ring-1 ring-inset ring-violet-400/20">
                       <TemplateIcon name={tpl.icon} className="h-5 w-5" />
                     </span>
-                    <div className="mt-3 font-semibold text-zinc-100">{tpl.title}</div>
-                    <p className="mt-1 flex-1 text-sm text-zinc-400">{tpl.description}</p>
+                    <div className="mt-3 font-semibold text-zinc-100">{tpl.title[locale]}</div>
+                    <p className="mt-1 flex-1 text-sm text-zinc-400">{tpl.description[locale]}</p>
                     <span className="mt-3 text-sm font-medium text-violet-300">{t.use}</span>
                   </Link>
                 ))}

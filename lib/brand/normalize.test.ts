@@ -69,7 +69,25 @@ describe("clampBrandDraft", () => {
         "http://10.0.0.5/x.png",
         "http://192.168.1.10/x.png",
         "http://user:pass@cdn.example.com/x.png", // credentials
+        "http://[::1]/x.png", // IPv6 loopback
+        "http://[fd00::1]/x.png", // IPv6 unique-local
       ]),
     ).toEqual(["https://cdn.example.com/ok.png"]);
+  });
+
+  it("does not mistake public domains starting with fc/fd/fe80 for private IPv6", () => {
+    // The IPv6 ULA/link-local prefix check must only apply to IPv6 literals,
+    // not to ordinary DNS names that happen to start with those characters.
+    expect(
+      referenceImagesToStrings([
+        "https://fdic.gov/logo.png",
+        "https://fcbarcelona.com/crest.png",
+        "https://fe80holdings.com/mark.png",
+      ]),
+    ).toEqual([
+      "https://fdic.gov/logo.png",
+      "https://fcbarcelona.com/crest.png",
+      "https://fe80holdings.com/mark.png",
+    ]);
   });
 });

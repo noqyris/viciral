@@ -12,6 +12,7 @@ import {
 } from "@/components/landing-mocks";
 import { ModuleIcon } from "@/components/icons";
 import { Reveal } from "@/components/reveal";
+import { prefersReducedMotion } from "@/lib/utils/motion";
 import type { Locale } from "@/lib/i18n";
 
 const T = {
@@ -93,7 +94,7 @@ function Tile({
     const el = ref.current;
     if (!el) return;
     if (!window.matchMedia("(pointer: fine)").matches) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (prefersReducedMotion()) return;
 
     const MAX = 6; // degrees, capped
 
@@ -185,13 +186,13 @@ function Tile({
   );
 }
 
-export default function Primeri({ locale }: { locale: Locale }) {
+export default function Examples({ locale }: { locale: Locale }) {
   const t = T[locale];
 
   return (
     <section
-      id="primeri"
-      aria-labelledby="primeri-title"
+      id="examples"
+      aria-labelledby="examples-title"
       className="section section-pit relative scroll-mt-24"
     >
       <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
@@ -207,7 +208,7 @@ export default function Primeri({ locale }: { locale: Locale }) {
         </Reveal>
 
         <Reveal dir="up" delay={60}>
-          <h2 id="primeri-title" className="h2-fluid mt-4 max-w-3xl text-white">
+          <h2 id="examples-title" className="h2-fluid mt-4 max-w-3xl text-white">
             {t.titleLead}{" "}
             <span className="gradient-text">{t.titleGrad}</span>.
           </h2>

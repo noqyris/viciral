@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
+import { VIDEO_DIMENSIONS } from "@/lib/credits/pricing";
 import { submitVideoJob } from "./async-video";
 import type { ModuleDef } from "./types";
 
@@ -9,8 +10,7 @@ import type { ModuleDef } from "./types";
  * persists the clip (lib/jobs/settle.ts). Premium / gated behind higher tiers.
  */
 
-const WIDTH = 720;
-const HEIGHT = 1280;
+const { width: WIDTH, height: HEIGHT } = VIDEO_DIMENSIONS;
 
 const inputSchema = z.object({
   prompt: z.string().min(2, "Opis je obavezan").max(500),

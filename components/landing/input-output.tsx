@@ -11,6 +11,7 @@ import {
   BrowserMock,
 } from "@/components/landing-mocks";
 import { Reveal } from "@/components/reveal";
+import { prefersReducedMotion, animateValue } from "@/lib/utils/motion";
 import type { Locale } from "@/lib/i18n";
 
 /**
@@ -183,13 +184,6 @@ const ORDER: SceneId[] = [
   "website",
   "short-form",
 ];
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
 
 /** Drifts its child a few px slower than the page as it scrolls past (rAF). */
 function Parallax({
@@ -413,23 +407,18 @@ function SceneMock({
     if (id !== "short-form" || !active) return;
 
     const target = 92;
-    let raf = 0;
 
     if (prefersReducedMotion()) {
-      raf = window.requestAnimationFrame(() => setScore(target));
+      const raf = window.requestAnimationFrame(() => setScore(target));
       return () => window.cancelAnimationFrame(raf);
     }
 
-    const start = performance.now();
-    const dur = 1100;
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setScore(Math.round(target * eased));
-      if (p < 1) raf = window.requestAnimationFrame(tick);
-    };
-    raf = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(raf);
+    return animateValue({
+      from: 0,
+      to: target,
+      duration: 1100,
+      onUpdate: (v) => setScore(Math.round(v)),
+    });
   }, [id, active]);
 
   switch (id) {

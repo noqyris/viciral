@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { listBrands } from "@/lib/brand/profile";
 import { referenceImagesToStrings } from "@/lib/brand/normalize";
-import { jsonError } from "@/lib/http";
+import { jsonError, readJsonBody } from "@/lib/http";
 
 export const runtime = "nodejs";
 
@@ -31,7 +31,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
-    const body = createSchema.parse(await req.json());
+    const body = createSchema.parse(await readJsonBody(req));
 
     const brand = await prisma.$transaction(async (tx) => {
       if (body.isDefault) {

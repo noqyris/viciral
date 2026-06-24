@@ -24,7 +24,11 @@ function isBlockedHost(hostname: string): boolean {
   const h = hostname.toLowerCase().replace(/^\[|\]$/g, ""); // strip IPv6 brackets
   if (h === "localhost" || h.endsWith(".local") || h.endsWith(".internal")) return true;
   // IPv6 loopback (::1), unique-local (fc00::/7 → fc/fd), link-local (fe80::/10).
-  if (h === "::1" || h.startsWith("fc") || h.startsWith("fd") || h.startsWith("fe80")) return true;
+  // Gate on a colon so the prefix checks only ever apply to IPv6 literals — a
+  // bare prefix match would wrongly block public domains like "fdic.gov".
+  if (h.includes(":")) {
+    if (h === "::1" || h.startsWith("fc") || h.startsWith("fd") || h.startsWith("fe80")) return true;
+  }
   const m = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.\d{1,3}$/);
   if (m) {
     const a = Number(m[1]);

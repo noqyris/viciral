@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { listScheduled, schedulePost } from "@/lib/publishing/schedule";
-import { jsonError } from "@/lib/http";
+import { jsonError, readJsonBody } from "@/lib/http";
 
 export const runtime = "nodejs";
 
@@ -28,7 +28,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
-    const body = createSchema.parse(await req.json());
+    const body = createSchema.parse(await readJsonBody(req));
     const post = await schedulePost(user.id, {
       platform: body.platform,
       caption: body.caption,

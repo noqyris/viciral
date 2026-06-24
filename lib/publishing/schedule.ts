@@ -32,6 +32,18 @@ export async function schedulePost(userId: string, input: ScheduleInput) {
     connectionId = conn.id;
   }
 
+  // Same ownership check for the linked generation — the column has no FK, so an
+  // unvalidated id would let a user attach another user's (or any) generation.
+  let generationId: string | undefined;
+  if (input.generationId) {
+    const gen = await prisma.generation.findFirst({
+      where: { id: input.generationId, userId },
+      select: { id: true },
+    });
+    if (!gen) throw new AppError("Generacija nije pronađena", 404);
+    generationId = gen.id;
+  }
+
   return prisma.scheduledPost.create({
     data: {
       userId,
@@ -40,7 +52,7 @@ export async function schedulePost(userId: string, input: ScheduleInput) {
       mediaUrl: input.mediaUrl,
       scheduledAt: input.scheduledAt,
       connectionId,
-      generationId: input.generationId,
+      generationId,
       status: "SCHEDULED",
     },
   });
@@ -55,12 +67,21 @@ export function listScheduled(userId: string) {
 }
 
 export async function cancelScheduled(userId: string, id: string) {
-  const post = await prisma.scheduledPost.findFirst({ where: { id, userId } });
-  if (!post) throw new AppError("Objava nije pronađena", 404);
-  if (post.status !== "SCHEDULED") {
+  // Atomic conditional cancel (mirrors runDuePosts' claim) so a concurrent cron
+  // run flipping SCHEDULED→PUBLISHING can't be clobbered back to CANCELED.
+  const res = await prisma.scheduledPost.updateMany({
+    where: { id, userId, status: "SCHEDULED" },
+    data: { status: "CANCELED" },
+  });
+  if (res.count === 0) {
+    const existing = await prisma.scheduledPost.findFirst({
+      where: { id, userId },
+      select: { status: true },
+    });
+    if (!existing) throw new AppError("Objava nije pronađena", 404);
     throw new AppError("Samo zakazane objave mogu da se otkažu", 400);
   }
-  return prisma.scheduledPost.update({ where: { id }, data: { status: "CANCELED" } });
+  return prisma.scheduledPost.findFirstOrThrow({ where: { id, userId } });
 }
 
 /**

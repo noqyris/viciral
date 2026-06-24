@@ -14,6 +14,18 @@ export class AppError extends Error {
 }
 
 /**
+ * Parses a JSON request body, mapping malformed JSON to a clean 400 instead of
+ * letting the SyntaxError fall through {@link jsonError} as a generic 500.
+ */
+export async function readJsonBody<T = unknown>(req: Request): Promise<T> {
+  try {
+    return (await req.json()) as T;
+  } catch {
+    throw new AppError("Nevažeći JSON", 400);
+  }
+}
+
+/**
  * Maps an error to a JSON response. Intentional/domain errors surface their
  * message; anything unexpected is logged server-side and returned as a generic
  * 500 so internal details (Prisma, env, file paths) never leak to clients.

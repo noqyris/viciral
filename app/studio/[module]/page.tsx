@@ -106,7 +106,7 @@ export default async function ModuleRunnerPage({
                 <Link
                   key={tpl.id}
                   href={`/studio/${slug}?template=${tpl.id}`}
-                  title={tpl.description}
+                  title={tpl.description[locale]}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors ${
                     isActive
                       ? "border-violet-400/30 bg-violet-500/15 font-medium text-violet-200"
@@ -114,7 +114,7 @@ export default async function ModuleRunnerPage({
                   }`}
                 >
                   <TemplateIcon name={tpl.icon} className="h-4 w-4" />
-                  {tpl.title}
+                  {tpl.title[locale]}
                 </Link>
               );
             })}

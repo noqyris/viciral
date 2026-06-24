@@ -23,7 +23,9 @@ const inputSchema = z.object({
 
 type Input = z.infer<typeof inputSchema>;
 
-const MODEL_BY_OP: Record<Operation, string> = {
+/** Operation → catalog model id. Exported so credit estimation can reuse it
+ * instead of re-declaring the same mapping (single source of truth). */
+export const MODEL_BY_OP: Record<Operation, string> = {
   "bg-remove": "bg-removal",
   upscale: "image-upscale",
   resize: "nano-banana-edit",

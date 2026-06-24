@@ -11,8 +11,8 @@
 export interface Template {
   id: string;
   moduleSlug: string;
-  title: string;
-  description: string;
+  title: { sr: string; en: string };
+  description: { sr: string; en: string };
   icon: string;
   inputs: Record<string, unknown>;
 }
@@ -22,8 +22,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "sp-product-launch",
     moduleSlug: "social-pack",
-    title: "Lansiranje proizvoda",
-    description: "Najava novog proizvoda sa prednostima i pozivom na akciju.",
+    title: { sr: "Lansiranje proizvoda", en: "Product launch" },
+    description: {
+      sr: "Najava novog proizvoda sa prednostima i pozivom na akciju.",
+      en: "Announce a new product with its benefits and a call to action.",
+    },
     icon: "rocket",
     inputs: {
       topic: "Lansiranje novog proizvoda — istakni ključne prednosti i jasan poziv na akciju",
@@ -35,8 +38,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "sp-weekly-tips",
     moduleSlug: "social-pack",
-    title: "Nedeljni saveti",
-    description: "Serija korisnih saveta iz tvoje oblasti za LinkedIn.",
+    title: { sr: "Nedeljni saveti", en: "Weekly tips" },
+    description: {
+      sr: "Serija korisnih saveta iz tvoje oblasti za LinkedIn.",
+      en: "A series of useful tips from your field for LinkedIn.",
+    },
     icon: "lightbulb",
     inputs: {
       topic: "Korisni saveti iz naše oblasti — jedan konkretan savet po objavi",
@@ -48,8 +54,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "sp-behind-scenes",
     moduleSlug: "social-pack",
-    title: "Iza scene",
-    description: "Pokaži tim i proces rada na opušten, autentičan način.",
+    title: { sr: "Iza scene", en: "Behind the scenes" },
+    description: {
+      sr: "Pokaži tim i proces rada na opušten, autentičan način.",
+      en: "Show your team and work process in a relaxed, authentic way.",
+    },
     icon: "film",
     inputs: {
       topic: "Iza scene — pokaži tim, radni prostor i proces nastanka proizvoda",
@@ -63,8 +72,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "web-service-landing",
     moduleSlug: "website",
-    title: "Landing za uslugu",
-    description: "Stranica koja predstavlja uslugu i prikuplja kontakte.",
+    title: { sr: "Landing za uslugu", en: "Service landing" },
+    description: {
+      sr: "Stranica koja predstavlja uslugu i prikuplja kontakte.",
+      en: "A page that presents a service and collects contacts.",
+    },
     icon: "file",
     inputs: {
       description: "Predstavi uslugu, za koga je i zašto je bolja od konkurencije",
@@ -74,8 +86,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "web-product-store",
     moduleSlug: "website",
-    title: "Stranica proizvoda",
-    description: "Prodajna stranica sa prednostima i poverenjem.",
+    title: { sr: "Stranica proizvoda", en: "Product page" },
+    description: {
+      sr: "Prodajna stranica sa prednostima i poverenjem.",
+      en: "A sales page with benefits and trust signals.",
+    },
     icon: "store",
     inputs: {
       description: "Predstavi proizvod, njegove prednosti, recenzije i garanciju",
@@ -87,8 +102,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "av-promo",
     moduleSlug: "avatar",
-    title: "Najava akcije",
-    description: "Kratka, energična najava popusta ili događaja.",
+    title: { sr: "Najava akcije", en: "Promo announcement" },
+    description: {
+      sr: "Kratka, energična najava popusta ili događaja.",
+      en: "A short, energetic announcement of a discount or event.",
+    },
     icon: "megaphone",
     inputs: {
       script:
@@ -99,8 +117,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "av-explainer",
     moduleSlug: "avatar",
-    title: "Objašnjenje u 3 koraka",
-    description: "Smiren prezenter objašnjava kako proizvod rešava problem.",
+    title: { sr: "Objašnjenje u 3 koraka", en: "3-step explainer" },
+    description: {
+      sr: "Smiren prezenter objašnjava kako proizvod rešava problem.",
+      en: "A calm presenter explains how the product solves a problem.",
+    },
     icon: "teacher",
     inputs: {
       script:
@@ -113,8 +134,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "sf-podcast",
     moduleSlug: "short-form",
-    title: "Podkast → kratki klipovi",
-    description: "Iseci najjače momente iz dugog snimka za TikTok.",
+    title: { sr: "Podkast → kratki klipovi", en: "Podcast -> short clips" },
+    description: {
+      sr: "Iseci najjače momente iz dugog snimka za TikTok.",
+      en: "Cut the strongest moments from a long recording for TikTok.",
+    },
     icon: "mic",
     inputs: { platform: "tiktok", clipCount: 5, approxMinutes: 30 },
   },
@@ -123,16 +147,22 @@ export const TEMPLATES: Template[] = [
   {
     id: "it-story",
     moduleSlug: "image-tools",
-    title: "Slika za Story (9:16)",
-    description: "Prilagodi postojeću sliku na vertikalni format.",
+    title: { sr: "Slika za Story (9:16)", en: "Story image (9:16)" },
+    description: {
+      sr: "Prilagodi postojeću sliku na vertikalni format.",
+      en: "Adapt an existing image to a vertical format.",
+    },
     icon: "phone",
     inputs: { operation: "resize", aspectRatio: "9:16" },
   },
   {
     id: "it-clean",
     moduleSlug: "image-tools",
-    title: "Ukloni pozadinu",
-    description: "Izdvoj proizvod/osobu sa providnom pozadinom.",
+    title: { sr: "Ukloni pozadinu", en: "Remove background" },
+    description: {
+      sr: "Izdvoj proizvod/osobu sa providnom pozadinom.",
+      en: "Isolate a product/person with a transparent background.",
+    },
     icon: "scissors",
     inputs: { operation: "bg-remove" },
   },
@@ -141,8 +171,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "mu-reel",
     moduleSlug: "music",
-    title: "Podloga za reels",
-    description: "Energična upbeat muzika bez vokala, ~20s.",
+    title: { sr: "Podloga za reels", en: "Reels track" },
+    description: {
+      sr: "Energična upbeat muzika bez vokala, ~20s.",
+      en: "Energetic upbeat music with no vocals, ~20s.",
+    },
     icon: "music",
     inputs: { prompt: "Energičan upbeat za reels, moderno, bez vokala", durationSec: 20 },
   },
@@ -151,8 +184,11 @@ export const TEMPLATES: Template[] = [
   {
     id: "dub-en",
     moduleSlug: "dubbing",
-    title: "Prevedi na engleski",
-    description: "Lokalizuj video na engleski sa sinhronizovanim usnama.",
+    title: { sr: "Prevedi na engleski", en: "Translate to English" },
+    description: {
+      sr: "Lokalizuj video na engleski sa sinhronizovanim usnama.",
+      en: "Localize a video to English with synchronized lips.",
+    },
     icon: "translate",
     inputs: { targetLang: "en", approxSeconds: 30 },
   },

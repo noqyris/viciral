@@ -7,7 +7,8 @@
  * Pure (only imports the pricing math), so it is safe to import in client
  * components and server components alike.
  */
-import { estimateCredits } from "./pricing";
+import { estimateCredits, VIDEO_DIMENSIONS } from "./pricing";
+import { MODEL_BY_OP } from "@/lib/modules/image-tools";
 import { clampInt as intIn } from "@/lib/utils/math";
 
 // Token budgets / image counts per module. These mirror each module's pipeline
@@ -18,8 +19,6 @@ const BRAND_OUTPUT_TOKENS = 2000;
 const WEBSITE_INPUT_TOKENS = 2500;
 const WEBSITE_OUTPUT_TOKENS = 3000;
 const WEBSITE_IMAGES = 3; // hero + up to 2 sections
-const VIDEO_WIDTH = 720;
-const VIDEO_HEIGHT = 1280;
 // Talking-head length is driven by the script (~150 wpm ≈ 2.5 words/sec), clamped.
 const AVATAR_MIN_SEC = 3;
 const AVATAR_MAX_SEC = 120;
@@ -86,14 +85,12 @@ export function estimateModuleCredits(
       const durationSec = Number(inputs.durationSec) === 10 ? 10 : 5;
       return estimateCredits("seedance-2", {
         durationSec,
-        width: VIDEO_WIDTH,
-        height: VIDEO_HEIGHT,
+        width: VIDEO_DIMENSIONS.width,
+        height: VIDEO_DIMENSIONS.height,
       });
     }
     case "image-tools": {
-      const op = inputs.operation;
-      const model =
-        op === "upscale" ? "image-upscale" : op === "resize" ? "nano-banana-edit" : "bg-removal";
+      const model = MODEL_BY_OP[inputs.operation as keyof typeof MODEL_BY_OP] ?? "bg-removal";
       return estimateCredits(model, { numImages: 1 });
     }
     case "editor":

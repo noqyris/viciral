@@ -38,7 +38,7 @@ export default function Modules({ locale }: { locale: Locale }) {
 
   return (
     <section
-      id="moduli"
+      id="modules"
       aria-labelledby="modules-heading"
       className="section mx-auto w-full max-w-6xl scroll-mt-24 px-6"
     >

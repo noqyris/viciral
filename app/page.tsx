@@ -1,9 +1,13 @@
 import { getLocale } from "@/lib/i18n-server";
+import { ScrollFX } from "@/components/scroll-fx";
+import { SpiralController } from "@/components/spiral-controller";
 import SiteNav from "@/components/landing/site-nav";
 import Hero from "@/components/landing/hero";
 import ModelRig from "@/components/landing/model-rig";
-import Primeri from "@/components/landing/primeri";
-import PrePosle from "@/components/landing/pre-posle";
+import Examples from "@/components/landing/examples";
+import BeforeAfterSection from "@/components/landing/before-after-section";
+import Industries from "@/components/landing/industries";
+import Reel from "@/components/landing/reel";
 import InputOutput from "@/components/landing/input-output";
 import Modules from "@/components/landing/modules";
 import WhyDifferent from "@/components/landing/why-different";
@@ -18,21 +22,26 @@ export default async function Home() {
 
   return (
     <>
-      {/* Ambient backdrop — fixed behind everything; pure-CSS motion, gated by prefers-reduced-motion */}
+      {/* Ambient backdrop — reduced-motion fallback (hidden behind the opaque spiral for motion users) */}
       <div className="aurora" aria-hidden>
         <div className="aurora__blob aurora__blob--v" />
         <div className="aurora__blob aurora__blob--i" />
         <div className="aurora__blob aurora__blob--s" />
       </div>
+      {/* 3D glowing helix + on-page prominence switcher (1 Subtle / 2 Bold / 3 Max) */}
+      <SpiralController />
       <div className="grain" aria-hidden />
+      <ScrollFX />
 
       <SiteNav locale={locale} />
 
-      <main className="w-full flex-1">
+      <main className="relative z-10 w-full flex-1">
         <Hero locale={locale} />
         <ModelRig locale={locale} />
-        <Primeri locale={locale} />
-        <PrePosle locale={locale} />
+        <Examples locale={locale} />
+        <BeforeAfterSection locale={locale} />
+        <Industries locale={locale} />
+        <Reel locale={locale} />
         <InputOutput locale={locale} />
         <Modules locale={locale} />
         <WhyDifferent locale={locale} />
@@ -42,7 +51,9 @@ export default async function Home() {
         <FinalCta locale={locale} />
       </main>
 
-      <Footer locale={locale} />
+      <div className="relative z-10">
+        <Footer locale={locale} />
+      </div>
     </>
   );
 }

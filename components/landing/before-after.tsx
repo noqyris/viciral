@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronsLeftRight, ArrowRight } from "lucide-react";
+import { prefersReducedMotion, animateValue } from "@/lib/utils/motion";
 import type { Locale } from "@/lib/i18n";
 
 const T = {
@@ -12,31 +13,37 @@ const T = {
 } as const;
 
 /**
- * Before / After reveal slider — the "Seedance glow-up" device. The same scene
- * is shown raw (left, desaturated + scanning sheen) and finished (right, the
- * real generated output). On first scroll-in the divider auto-sweeps from ~88%
- * to 50% (the transformation reveal), then a full-cover invisible range input
- * makes it draggable + keyboard-accessible. The CSS var --pos drives clip-path
- * and the handle imperatively, so dragging never re-renders React.
+ * Before / After reveal slider. The same scene is shown raw (left) and finished
+ * (right, the real generated output). When a real `beforeSrc` is supplied it is
+ * shown as-is; otherwise the after image is rendered with a raw treatment
+ * (desaturate + grid + sheen) as a fallback. On first scroll-in the divider
+ * auto-sweeps from ~88% to 50%, then a full-cover invisible range input makes it
+ * draggable + keyboard-accessible. The CSS var --pos drives clip-path + handle
+ * imperatively, so dragging never re-renders React.
  */
 export function BeforeAfter({
   src,
+  beforeSrc,
   alt,
   prompt,
   moduleLabel,
   slug,
   aspect = "16 / 10",
+  sizes = "(min-width: 768px) 36rem, 100vw",
   locale,
 }: {
   src: string;
+  beforeSrc?: string;
   alt: string;
   prompt: string;
   moduleLabel: string;
   slug: string;
   aspect?: string;
+  sizes?: string;
   locale: Locale;
 }) {
   const t = T[locale];
+  const fake = !beforeSrc;
   const baRef = useRef<HTMLDivElement>(null);
   const rangeRef = useRef<HTMLInputElement>(null);
   const done = useRef(false);
@@ -50,32 +57,30 @@ export function BeforeAfter({
   useEffect(() => {
     const el = baRef.current;
     if (!el) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let cancel: (() => void) | undefined;
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting || done.current) return;
         done.current = true;
         obs.disconnect();
-        if (reduce) {
+        if (prefersReducedMotion()) {
           setPos(50);
           return;
         }
-        const start = performance.now();
-        const from = 88;
-        const to = 50;
-        const dur = 1200;
-        const tick = (now: number) => {
-          const p = Math.min(1, (now - start) / dur);
-          const ease = 1 - Math.pow(1 - p, 3);
-          setPos(Math.round((from + (to - from) * ease) * 10) / 10);
-          if (p < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+        cancel = animateValue({
+          from: 88,
+          to: 50,
+          duration: 1200,
+          onUpdate: (v) => setPos(Math.round(v * 10) / 10),
+        });
       },
       { threshold: 0.45 },
     );
     obs.observe(el);
-    return () => obs.disconnect();
+    return () => {
+      obs.disconnect();
+      cancel?.();
+    };
   }, []);
 
   return (
@@ -86,19 +91,26 @@ export function BeforeAfter({
         style={{ aspectRatio: aspect }}
       >
         {/* AFTER — finished, full colour (base layer) */}
-        <Image src={src} alt={alt} fill sizes="(min-width: 768px) 36rem, 100vw" className="object-cover" />
-        <span className="chip absolute right-3 top-3 z-20 border-violet-400/40 text-white">
-          {t.after}
-        </span>
+        <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
+        <span className="chip absolute right-3 top-3 z-20 border-violet-400/40 text-white">{t.after}</span>
 
         {/* BEFORE — raw, clipped to the left of the divider */}
-        <div className="ba-before ba-sheen absolute inset-0 z-10">
-          <Image src={src} alt="" aria-hidden fill sizes="(min-width: 768px) 36rem, 100vw" className="ba-raw object-cover" />
-          <div aria-hidden className="absolute inset-0 bg-[#07070b]/40" />
-          <div
+        <div className={`ba-before absolute inset-0 z-10 ${fake ? "ba-sheen" : ""}`}>
+          <Image
+            src={beforeSrc ?? src}
+            alt=""
             aria-hidden
-            className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:26px_26px]"
+            fill
+            sizes={sizes}
+            className={`object-cover ${fake ? "ba-raw" : ""}`}
           />
+          {fake && <div aria-hidden className="absolute inset-0 bg-[#07070b]/40" />}
+          {fake && (
+            <div
+              aria-hidden
+              className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:26px_26px]"
+            />
+          )}
           <span className="chip absolute left-3 top-3 text-zinc-300">{t.before}</span>
         </div>
 

@@ -91,7 +91,7 @@ export default function WhyDifferent({ locale }: { locale: Locale }) {
 
   return (
     <section
-      id="cena-truda"
+      id="cost-of-effort"
       aria-labelledby="why-different-heading"
       className="relative w-full scroll-mt-24"
     >
