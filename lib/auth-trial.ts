@@ -10,22 +10,24 @@ export const TRIAL_CREDITS = 200;
  */
 export async function grantSignupTrial(userId: string): Promise<void> {
   try {
-    await prisma.$transaction([
-      prisma.user.update({
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.update({
         where: { id: userId },
         data: { creditBalance: { increment: TRIAL_CREDITS } },
-      }),
-      prisma.creditLedger.create({
+      });
+      await tx.creditLedger.create({
         data: {
           userId,
           type: "GRANT",
           amount: TRIAL_CREDITS,
-          balanceAfter: TRIAL_CREDITS,
+          // Derive from the real post-increment balance so the audit log stays
+          // truthful even if the user already had credits before the grant.
+          balanceAfter: user.creditBalance,
           reason: "signup-trial",
           idempotencyKey: `signup:${userId}`,
         },
-      }),
-    ]);
+      });
+    });
   } catch (err) {
     // Already granted (unique idempotencyKey) — ignore.
     if ((err as { code?: string }).code !== "P2002") throw err;

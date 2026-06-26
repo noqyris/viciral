@@ -38,9 +38,12 @@ export const falImageProvider: ImageProvider = {
       },
       logs: false,
     });
-    const data = result.data as { images?: { url: string }[] };
+    // fal returns either an `images[]` or a single `image` depending on the
+    // endpoint (e.g. recraft-vector) — normalize both, same as transformImage.
+    const data = result.data as { image?: { url: string }; images?: { url: string }[] };
+    const images = data.images ?? (data.image ? [data.image] : []);
     return {
-      images: (data.images ?? []).map((i) => ({ url: i.url })),
+      images: images.map((i) => ({ url: i.url })),
       modelId: req.modelId,
     };
   },

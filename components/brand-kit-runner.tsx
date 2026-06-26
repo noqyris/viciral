@@ -8,6 +8,15 @@ import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
+import {
+  RunnerLayout,
+  Field,
+  RunButton,
+  OutputPanel,
+  RunnerLoading,
+  RunnerError,
+  CreditsReceipt,
+} from "@/components/studio/runner-kit";
 
 const T = {
   sr: {
@@ -29,6 +38,9 @@ const T = {
     logo: "Logo",
     avatar: "Avatar",
     creditsUsed: "Potrošeno kredita:",
+    outputTitle: "Brend kit",
+    emptyLabel: "Popuni naziv i opis brenda, pa pokreni — logo, paleta i identitet pojaviće se ovde.",
+    loadingLabel: "Pravim logo, paletu i identitet brenda…",
   },
   en: {
     genError: "Generation failed",
@@ -49,6 +61,9 @@ const T = {
     logo: "Logo",
     avatar: "Avatar",
     creditsUsed: "Credits used:",
+    outputTitle: "Brand kit",
+    emptyLabel: "Fill in the brand name and description, then run — your logo, palette and identity will appear here.",
+    loadingLabel: "Building the logo, palette and brand identity…",
   },
 } as const;
 
@@ -108,69 +123,70 @@ export function BrandKitRunner({ supportsAuto }: { supportsAuto: boolean }) {
   const summary = assets?.find((a) => a.kind === "text");
   const palette = summary?.meta?.palette ?? [];
 
-  return (
-    <div className="space-y-6">
-      <div className="space-y-4 surface p-5">
-        <label className="block">
-          <span className="field-label">{t.brandName}</span>
-          <input
-            value={brandName}
-            onChange={(e) => setBrandName(e.target.value)}
-            placeholder={t.brandNamePlaceholder}
-            className="mt-1 field"
-          />
-        </label>
-        <label className="block">
-          <span className="field-label">{t.description}</span>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder={t.descriptionPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
-        <label className="block">
-          <span className="field-label">{t.style}</span>
-          <input
-            value={vibe}
-            onChange={(e) => setVibe(e.target.value)}
-            placeholder={t.stylePlaceholder}
-            className="mt-1 field"
-          />
-        </label>
-        <div className="space-y-2 pt-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              onClick={() => run("manual")}
-              disabled={loading || brandName.length < 2 || description.length < 2}
-            >
-              {loading ? t.building : t.makeBrand}
-            </Button>
-            {supportsAuto && (
-              <Button
-                variant="secondary"
-                onClick={() => run("auto")}
-                disabled={loading || brandName.length < 2 || description.length < 2}
-                title={t.autoTitle}
-              >
-                <Zap className="mr-1.5 h-4 w-4" strokeWidth={2.25} aria-hidden />
-                {t.auto}
-              </Button>
-            )}
-          </div>
-          <CostHint
-            credits={estimateModuleCredits("brand-kit")}
-            note={t.costNote}
-          />
-        </div>
-      </div>
+  const disabled = loading || brandName.length < 2 || description.length < 2;
 
-      {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
+  const controls = (
+    <div className="space-y-4">
+      <Field label={t.brandName}>
+        <input
+          value={brandName}
+          onChange={(e) => setBrandName(e.target.value)}
+          placeholder={t.brandNamePlaceholder}
+          className="field"
+        />
+      </Field>
+      <Field label={t.description}>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          placeholder={t.descriptionPlaceholder}
+          className="field"
+        />
+      </Field>
+      <Field label={t.style}>
+        <input
+          value={vibe}
+          onChange={(e) => setVibe(e.target.value)}
+          placeholder={t.stylePlaceholder}
+          className="field"
+        />
+      </Field>
+
+      <RunButton
+        onClick={() => run("manual")}
+        disabled={disabled}
+        loading={loading}
+        loadingLabel={t.building}
+        cost={<CostHint credits={estimateModuleCredits("brand-kit")} note={t.costNote} />}
+      >
+        {t.makeBrand}
+      </RunButton>
+
+      {supportsAuto && (
+        <Button
+          variant="secondary"
+          onClick={() => run("auto")}
+          disabled={disabled}
+          title={t.autoTitle}
+          className="w-full gap-2"
+        >
+          <Zap className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+          {t.auto}
+        </Button>
       )}
+    </div>
+  );
+
+  const output = (
+    <OutputPanel
+      title={t.outputTitle}
+      isEmpty={!assets && !loading && !error}
+      emptyLabel={t.emptyLabel}
+    >
+      {error && <RunnerError>{error}</RunnerError>}
+
+      {loading && <RunnerLoading label={t.loadingLabel} />}
 
       {assets && (
         <div className="space-y-5">
@@ -224,10 +240,12 @@ export function BrandKitRunner({ supportsAuto }: { supportsAuto: boolean }) {
           )}
 
           {creditsUsed != null && (
-            <div className="text-sm text-zinc-400">{t.creditsUsed} {creditsUsed}</div>
+            <CreditsReceipt label={t.creditsUsed} used={creditsUsed} />
           )}
         </div>
       )}
-    </div>
+    </OutputPanel>
   );
+
+  return <RunnerLayout controls={controls} output={output} />;
 }

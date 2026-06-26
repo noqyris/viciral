@@ -94,31 +94,37 @@ export const websiteModule: ModuleDef<Input> = {
     // Brand references → image-to-image for visual consistency across the site.
     const referenceImages = brandReferenceImages(ctx.brand);
 
+    // Best-effort image: charge only when an image actually comes back, and let a
+    // single provider failure degrade to "no image" (the HTML builder renders fine
+    // without it) instead of discarding the whole — already paid for — site.
+    const genImage = async (imgPrompt: string): Promise<string | undefined> => {
+      try {
+        const res = await ctx.providers.image.generateImage({
+          modelId: "nano-banana",
+          prompt: imgPrompt,
+          numImages: 1,
+          ...(referenceImages.length ? { imageUrls: referenceImages } : {}),
+        });
+        const url = res.images[0]?.url;
+        if (!url) return undefined;
+        ctx.spend?.(imgCredits);
+        creditsUsed += imgCredits;
+        return url;
+      } catch (err) {
+        console.error("website: image generation failed (site continues):", err);
+        return undefined;
+      }
+    };
+
     ctx.onProgress?.("Generišem hero sliku…");
-    const heroImg = await ctx.providers.image.generateImage({
-      modelId: "nano-banana",
-      prompt: spec.hero.imagePrompt,
-      numImages: 1,
-      ...(referenceImages.length ? { imageUrls: referenceImages } : {}),
-    });
-    ctx.spend?.(imgCredits);
-    creditsUsed += imgCredits;
-    const heroUrl = heroImg.images[0]?.url;
+    const heroUrl = await genImage(spec.hero.imagePrompt);
 
     const sectionUrls: (string | undefined)[] = [];
     for (let i = 0; i < spec.sections.length; i++) {
       const sec = spec.sections[i];
       if (i < MAX_SECTION_IMAGES && sec.imagePrompt) {
         ctx.onProgress?.(`Generišem sliku sekcije ${i + 1}…`);
-        const img = await ctx.providers.image.generateImage({
-          modelId: "nano-banana",
-          prompt: sec.imagePrompt,
-          numImages: 1,
-          ...(referenceImages.length ? { imageUrls: referenceImages } : {}),
-        });
-        ctx.spend?.(imgCredits);
-        creditsUsed += imgCredits;
-        sectionUrls.push(img.images[0]?.url);
+        sectionUrls.push(await genImage(sec.imagePrompt));
       } else {
         sectionUrls.push(undefined);
       }

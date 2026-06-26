@@ -17,7 +17,9 @@ const CAT_GRAD: Record<string, string> = {
 
 const T = {
   sr: {
-    title: "Napravi nešto",
+    eyebrow: "Studio",
+    titleA: "Napravi ",
+    titleHi: "nešto",
     sub: "Izaberi modul — više AI modela radi zajedno. Cenu u kreditima vidiš pre pokretanja.",
     auto: "Auto",
     soon: "Uskoro",
@@ -25,7 +27,9 @@ const T = {
     credits: "kredita",
   },
   en: {
-    title: "Make something",
+    eyebrow: "Studio",
+    titleA: "Make ",
+    titleHi: "something",
     sub: "Pick a module — multiple AI models working together. You see the credit cost before running.",
     auto: "Auto",
     soon: "Soon",
@@ -39,13 +43,25 @@ export default async function StudioHub() {
   const t = T[locale];
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-12">
-      <header className="mb-10">
-        <h1 className="text-3xl font-bold tracking-tight text-white">{t.title}</h1>
-        <p className="mt-2 text-zinc-400">{t.sub}</p>
+    <main className="relative mx-auto w-full max-w-6xl flex-1 px-6 py-12">
+      {/* Ambient top glow so the studio reads "lit", like the landing */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(75%_100%_at_50%_0%,rgba(99,102,241,0.14),transparent_70%)]"
+      />
+      <header className="relative mb-10">
+        <p className="eyebrow">
+          <span aria-hidden className="size-1.5 rounded-full bg-violet-400" />
+          {t.eyebrow}
+        </p>
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-white">
+          {t.titleA}
+          <span className="gradient-text">{t.titleHi}</span>
+        </h1>
+        <p className="mt-3 max-w-2xl text-lg leading-relaxed text-zinc-400">{t.sub}</p>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {MODULES.map((m) => {
           const available = m.status === "available";
           const estimate = estimateModuleCredits(m.slug);
@@ -54,10 +70,10 @@ export default async function StudioHub() {
 
           const inner = (
             <div
-              className={`group relative flex h-full flex-col rounded-2xl border p-5 backdrop-blur-sm transition-all ${
+              className={`group relative flex h-full flex-col rounded-2xl p-5 transition-all duration-200 ${
                 available
-                  ? "border-white/10 bg-white/[0.035] hover:border-violet-400/40 hover:bg-white/[0.06] hover:shadow-[0_0_44px_-12px_rgba(139,92,246,0.5)]"
-                  : "border-dashed border-white/10 bg-white/[0.02] opacity-70"
+                  ? "card card-frost hover:-translate-y-1 hover:border-violet-400/40 hover:shadow-[0_24px_70px_-36px_rgba(139,92,246,0.7)]"
+                  : "border border-dashed border-white/10 bg-white/[0.02] opacity-70"
               }`}
             >
               <div className="flex items-start justify-between">

@@ -1,8 +1,16 @@
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { settleVideoJob } from "@/lib/jobs/settle";
 
 export const runtime = "nodejs";
+
+/** Length-checked, constant-time string compare (avoids token timing leaks). */
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  return ab.length === bb.length && crypto.timingSafeEqual(ab, bb);
+}
 
 /**
  * fal.ai queue webhook — called when an async job (e.g. Seedance video) finishes.
@@ -21,8 +29,8 @@ export async function POST(req: Request) {
     }
     // Dev only: allow unauthenticated so local testing works without a secret.
   } else {
-    const token = new URL(req.url).searchParams.get("token");
-    if (token !== secret) {
+    const token = new URL(req.url).searchParams.get("token") ?? "";
+    if (!safeEqual(token, secret)) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
   }

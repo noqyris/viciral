@@ -6,6 +6,17 @@ import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
+import {
+  RunnerLayout,
+  ControlGroup,
+  Field,
+  RunButton,
+  OutputPanel,
+  RunnerLoading,
+  RunnerError,
+  CreditsReceipt,
+  AssetAction,
+} from "@/components/studio/runner-kit";
 
 const T = {
   sr: {
@@ -30,6 +41,10 @@ const T = {
     editHistory: "Istorija izmena",
     revertHint: "Klikni na korak da se vratiš na njega.",
     originalStep: "original",
+    outputTitle: "Pregled",
+    emptyLabel: "Učitaj sliku pomoću URL-a pa opiši izmenu da je vidiš ovde.",
+    applyingLabel: "Primenjujem izmenu…",
+    creditsUsedLabel: "Potrošeno ukupno:",
     presets: [
       "Zameni pozadinu čistom studijskom belom",
       "Ukloni objekat u prvom planu",
@@ -59,6 +74,10 @@ const T = {
     editHistory: "Edit history",
     revertHint: "Click a step to revert to it.",
     originalStep: "original",
+    outputTitle: "Preview",
+    emptyLabel: "Load an image by URL, then describe an edit to see it here.",
+    applyingLabel: "Applying the edit…",
+    creditsUsedLabel: "Total spent:",
     presets: [
       "Replace the background with clean studio white",
       "Remove the object in the foreground",
@@ -168,139 +187,142 @@ export function EditorRunner() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Source loader */}
-      <div className="space-y-3 surface p-5">
-        <label className="block">
-          <span className="field-label">{t.sourceUrl}</span>
-          <div className="mt-1 flex gap-2">
-            <input
-              value={sourceUrl}
-              onChange={(e) => setSourceUrl(e.target.value)}
-              placeholder={t.sourceUrlPlaceholder}
-              className="field"
-            />
-            <Button
-              variant="secondary"
-              onClick={loadSource}
-              disabled={loading || sourceUrl.length < 4}
-            >
-              {t.load}
-            </Button>
-          </div>
-        </label>
-      </div>
-
-      {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
-
-      {current && (
-        <>
-          {/* Current image */}
-          <div className="space-y-3">
-            <div className="overflow-hidden rounded-xl border border-white/10" style={checkerStyle}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={current.url} alt={t.currentImage} className="mx-auto max-h-[480px]" />
-            </div>
-            <div className="flex items-center justify-between text-sm text-zinc-400">
-              <span>{t.totalSpent(totalCredits)}</span>
-              <a
-                href={current.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-violet-300 hover:underline"
-              >
-                {t.openFullSize}
-              </a>
-            </div>
-          </div>
-
-          {/* Edit controls */}
-          <div className="space-y-4 surface p-5">
-            <label className="block">
-              <span className="field-label">{t.describeEdit}</span>
-              <textarea
-                value={instruction}
-                onChange={(e) => setInstruction(e.target.value)}
-                rows={2}
-                placeholder={t.editPlaceholder}
-                className="mt-1 field"
-              />
-            </label>
-
-            <div className="flex flex-wrap gap-2">
-              {t.presets.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setInstruction(p)}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-400 transition-colors hover:border-violet-300 hover:text-violet-300"
+    <RunnerLayout
+      controls={
+        <div className="space-y-6">
+          {/* Source loader */}
+          <ControlGroup>
+            <Field label={t.sourceUrl}>
+              <div className="flex gap-2">
+                <input
+                  value={sourceUrl}
+                  onChange={(e) => setSourceUrl(e.target.value)}
+                  placeholder={t.sourceUrlPlaceholder}
+                  className="field"
+                />
+                <Button
+                  variant="secondary"
+                  onClick={loadSource}
+                  disabled={loading || sourceUrl.length < 4}
                 >
-                  {p}
-                </button>
-              ))}
-            </div>
-
-            <label className="block sm:max-w-[12rem]">
-              <span className="field-label">{t.format}</span>
-              <select
-                value={aspectRatio}
-                onChange={(e) => setAspectRatio(e.target.value)}
-                className="mt-1 field"
-              >
-                {ASPECT_RATIOS.map((r) => (
-                  <option key={r} value={r}>
-                    {r === "original" ? t.original : r}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <div className="space-y-2 pt-1">
-              <div className="flex flex-wrap items-center gap-3">
-                <Button onClick={applyEdit} disabled={loading || instruction.length < 2}>
-                  {loading ? t.applying : t.applyEdit}
+                  {t.load}
                 </Button>
-                <Button variant="ghost" onClick={reset} disabled={loading}>
+              </div>
+            </Field>
+          </ControlGroup>
+
+          {current && (
+            <>
+              {/* Edit controls */}
+              <ControlGroup>
+                <Field label={t.describeEdit}>
+                  <textarea
+                    value={instruction}
+                    onChange={(e) => setInstruction(e.target.value)}
+                    rows={2}
+                    placeholder={t.editPlaceholder}
+                    className="field"
+                  />
+                </Field>
+
+                <div className="flex flex-wrap gap-2">
+                  {t.presets.map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setInstruction(p)}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-400 transition-colors hover:border-violet-300 hover:text-violet-300"
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+
+                <Field label={t.format} className="sm:max-w-[12rem]">
+                  <select
+                    value={aspectRatio}
+                    onChange={(e) => setAspectRatio(e.target.value)}
+                    className="field"
+                  >
+                    {ASPECT_RATIOS.map((r) => (
+                      <option key={r} value={r}>
+                        {r === "original" ? t.original : r}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <RunButton
+                  onClick={applyEdit}
+                  disabled={loading || instruction.length < 2}
+                  loading={loading}
+                  loadingLabel={t.applying}
+                  cost={
+                    <CostHint
+                      credits={estimateModuleCredits("editor")}
+                      note={t.costNote}
+                    />
+                  }
+                >
+                  {t.applyEdit}
+                </RunButton>
+
+                <Button variant="ghost" onClick={reset} disabled={loading} className="w-full">
                   {t.startOver}
                 </Button>
-              </div>
-              <CostHint
-                credits={estimateModuleCredits("editor")}
-                note={t.costNote}
-              />
-            </div>
-          </div>
+              </ControlGroup>
 
-          {/* Edit history */}
-          {history.length > 1 && (
-            <div className="space-y-2">
-              <div className="field-label">{t.editHistory}</div>
-              <div className="flex flex-wrap gap-3">
-                {history.map((step, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => revertTo(i)}
-                    disabled={loading}
-                    title={step.instruction}
-                    className={`overflow-hidden rounded-lg border transition-opacity disabled:cursor-not-allowed disabled:opacity-50 ${
-                      i === history.length - 1 ? "border-violet-400" : "border-white/10"
-                    }`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={step.url} alt={step.instruction} className="h-16 w-16 object-cover" />
-                  </button>
-                ))}
+              {/* Edit history */}
+              {history.length > 1 && (
+                <ControlGroup title={t.editHistory}>
+                  <div className="flex flex-wrap gap-3">
+                    {history.map((step, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => revertTo(i)}
+                        disabled={loading}
+                        title={step.instruction}
+                        className={`overflow-hidden rounded-lg border transition-opacity disabled:cursor-not-allowed disabled:opacity-50 ${
+                          i === history.length - 1 ? "border-violet-400" : "border-white/10"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={step.url} alt={step.instruction} className="h-16 w-16 object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-zinc-400">{t.revertHint}</p>
+                </ControlGroup>
+              )}
+            </>
+          )}
+        </div>
+      }
+      output={
+        <OutputPanel
+          title={t.outputTitle}
+          isEmpty={!current && !loading && !error}
+          emptyLabel={t.emptyLabel}
+        >
+          {error && <RunnerError>{error}</RunnerError>}
+
+          {loading && !current && <RunnerLoading label={t.applyingLabel} />}
+
+          {current && (
+            <div className="space-y-3">
+              <div className="overflow-hidden rounded-xl border border-white/10" style={checkerStyle}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={current.url} alt={t.currentImage} className="mx-auto max-h-[480px]" />
               </div>
-              <p className="text-xs text-zinc-400">{t.revertHint}</p>
+              <div className="flex items-center justify-between gap-3">
+                <CreditsReceipt label={t.creditsUsedLabel} used={totalCredits} />
+                <AssetAction href={current.url}>{t.openFullSize}</AssetAction>
+              </div>
             </div>
           )}
-        </>
-      )}
-    </div>
+        </OutputPanel>
+      }
+    />
   );
 }

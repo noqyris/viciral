@@ -1,11 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
+import {
+  RunnerLayout,
+  Field,
+  RunButton,
+  OutputPanel,
+  RunnerError,
+  CreditsReceipt,
+  AssetAction,
+} from "@/components/studio/runner-kit";
 
 const T = {
   sr: {
@@ -19,6 +27,8 @@ const T = {
     creditsUsed: "Potrošeno kredita:",
     result: "Rezultat",
     openFullSize: "Otvori u punoj veličini →",
+    outputTitle: "Obrađena slika",
+    emptyLabel: "Unesi URL slike i izaberi operaciju — rezultat se pojavljuje ovde.",
     ops: {
       "bg-remove": "Ukloni pozadinu",
       upscale: "Povećaj rezoluciju",
@@ -36,6 +46,8 @@ const T = {
     creditsUsed: "Credits used:",
     result: "Result",
     openFullSize: "Open full size →",
+    outputTitle: "Processed image",
+    emptyLabel: "Enter an image URL and pick an operation — the result appears here.",
     ops: {
       "bg-remove": "Remove background",
       upscale: "Upscale resolution",
@@ -104,94 +116,90 @@ export function ImageToolsRunner({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 surface p-5">
-        <label className="block">
-          <span className="field-label">{t.imageUrl}</span>
-          <input
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder={t.imageUrlPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
+    <RunnerLayout
+      controls={
+        <div className="space-y-4">
+          <Field label={t.imageUrl}>
+            <input
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder={t.imageUrlPlaceholder}
+              className="field"
+            />
+          </Field>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="field-label">{t.operation}</span>
-            <select
-              value={operation}
-              onChange={(e) => setOperation(e.target.value)}
-              className="mt-1 field"
-            >
-              {OPERATIONS.map((o) => (
-                <option key={o} value={o}>
-                  {t.ops[o]}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {operation === "resize" && (
-            <label className="block">
-              <span className="field-label">{t.format}</span>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label={t.operation}>
               <select
-                value={aspectRatio}
-                onChange={(e) => setAspectRatio(e.target.value)}
-                className="mt-1 field"
+                value={operation}
+                onChange={(e) => setOperation(e.target.value)}
+                className="field"
               >
-                {ASPECT_RATIOS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
+                {OPERATIONS.map((o) => (
+                  <option key={o} value={o}>
+                    {t.ops[o]}
                   </option>
                 ))}
               </select>
-            </label>
-          )}
-        </div>
+            </Field>
 
-        <div className="space-y-2 pt-1">
-          <Button onClick={run} disabled={loading || imageUrl.length < 4}>
-            {loading ? t.processing : t.refine}
-          </Button>
-          <CostHint credits={estimateModuleCredits("image-tools", { operation })} />
-        </div>
-      </div>
-
-      {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
-
-      {resultUrl && (
-        <div className="space-y-3">
-          {creditsUsed != null && (
-            <div className="text-sm text-zinc-400">{t.creditsUsed} {creditsUsed}</div>
-          )}
-          {/* Light checkerboard-ish backdrop so transparent (bg-removed) PNGs read clearly. */}
-          <div
-            className="overflow-hidden rounded-xl border border-white/10 bg-white/10"
-            style={{
-              backgroundImage:
-                "linear-gradient(45deg, #e4e4e7 25%, transparent 25%), linear-gradient(-45deg, #e4e4e7 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e4e4e7 75%), linear-gradient(-45deg, transparent 75%, #e4e4e7 75%)",
-              backgroundSize: "20px 20px",
-              backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={resultUrl} alt={t.result} className="w-full" />
+            {operation === "resize" && (
+              <Field label={t.format}>
+                <select
+                  value={aspectRatio}
+                  onChange={(e) => setAspectRatio(e.target.value)}
+                  className="field"
+                >
+                  {ASPECT_RATIOS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
           </div>
-          <a
-            href={resultUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block text-sm font-medium text-violet-300 hover:underline"
+
+          <RunButton
+            onClick={run}
+            disabled={loading || imageUrl.length < 4}
+            loading={loading}
+            loadingLabel={t.processing}
+            cost={<CostHint credits={estimateModuleCredits("image-tools", { operation })} />}
           >
-            {t.openFullSize}
-          </a>
+            {t.refine}
+          </RunButton>
         </div>
-      )}
-    </div>
+      }
+      output={
+        <OutputPanel
+          title={t.outputTitle}
+          isEmpty={!resultUrl && !loading && !error}
+          emptyLabel={t.emptyLabel}
+        >
+          {error && <RunnerError>{error}</RunnerError>}
+
+          {resultUrl && (
+            <div className="space-y-3">
+              {creditsUsed != null && <CreditsReceipt label={t.creditsUsed} used={creditsUsed} />}
+              {/* Light checkerboard-ish backdrop so transparent (bg-removed) PNGs read clearly. */}
+              <div
+                className="overflow-hidden rounded-xl border border-white/10 bg-white/10"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(45deg, #e4e4e7 25%, transparent 25%), linear-gradient(-45deg, #e4e4e7 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e4e4e7 75%), linear-gradient(-45deg, transparent 75%, #e4e4e7 75%)",
+                  backgroundSize: "20px 20px",
+                  backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={resultUrl} alt={t.result} className="w-full" />
+              </div>
+              <AssetAction href={resultUrl}>{t.openFullSize}</AssetAction>
+            </div>
+          )}
+        </OutputPanel>
+      }
+    />
   );
 }

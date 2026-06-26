@@ -89,16 +89,8 @@ export const socialPackModule: ModuleDef<Input> = {
       const post = posts[i];
       ctx.onProgress?.(`Generišem sliku ${i + 1}/${posts.length}…`);
 
-      const img = await ctx.providers.image.generateImage({
-        modelId: "nano-banana",
-        prompt: post.imagePrompt,
-        numImages: input.variantsPerPost,
-        ...(referenceImages.length ? { imageUrls: referenceImages } : {}),
-      });
-      const imageCredits = estimateCredits("nano-banana", { numImages: input.variantsPerPost });
-      ctx.spend?.(imageCredits);
-      creditsUsed += imageCredits;
-
+      // Emit the caption first: it's already produced (and paid for) by the text
+      // step, so a later image failure must never discard it.
       const hashtags = post.hashtags.map((h) => "#" + h.replace(/^#/, "")).join(" ");
       assets.push({
         kind: "text",
@@ -106,15 +98,35 @@ export const socialPackModule: ModuleDef<Input> = {
         meta: { index: i },
       });
 
-      // One or more image variants per post (batch).
-      img.images.forEach((im, v) => {
-        assets.push({
-          kind: "image",
-          url: im.url,
+      // Image generation is best-effort per post: one provider failure (5xx,
+      // moderation, timeout) shouldn't sink the whole pack and throw away the
+      // posts already produced. We only spend for images that actually came back,
+      // so the charge tracks delivered work (and stays within the reservation).
+      try {
+        const img = await ctx.providers.image.generateImage({
           modelId: "nano-banana",
-          meta: { index: i, variant: v, prompt: post.imagePrompt },
+          prompt: post.imagePrompt,
+          numImages: input.variantsPerPost,
+          ...(referenceImages.length ? { imageUrls: referenceImages } : {}),
         });
-      });
+        if (img.images.length === 0) continue;
+
+        const imageCredits = estimateCredits("nano-banana", { numImages: input.variantsPerPost });
+        ctx.spend?.(imageCredits);
+        creditsUsed += imageCredits;
+
+        // One or more image variants per post (batch).
+        img.images.forEach((im, v) => {
+          assets.push({
+            kind: "image",
+            url: im.url,
+            modelId: "nano-banana",
+            meta: { index: i, variant: v, prompt: post.imagePrompt },
+          });
+        });
+      } catch (err) {
+        console.error(`social-pack: image ${i + 1}/${posts.length} failed (gen continues):`, err);
+      }
     }
 
     return { assets, creditsUsed };

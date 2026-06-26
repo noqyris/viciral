@@ -7,6 +7,15 @@ import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
+import {
+  RunnerLayout,
+  Field,
+  RunButton,
+  OutputPanel,
+  RunnerLoading,
+  RunnerError,
+  CreditsReceipt,
+} from "@/components/studio/runner-kit";
 
 const T = {
   sr: {
@@ -24,8 +33,12 @@ const T = {
     costNote: "tekst + hero i slike sekcija",
     fallbackFile: "sajt",
     creditsUsed: (n: number) => `Potrošeno kredita: ${n}`,
+    creditsUsedLabel: "Potrošeno kredita:",
     sitePreview: "Pregled sajta",
     downloadHtml: "Preuzmi HTML",
+    outputTitle: "Sajt",
+    emptyLabel: "Opiši svoj brend pa će se ovde pojaviti pregled spremnog sajta.",
+    loading: "Pravim tvoj sajt…",
   },
   en: {
     genError: "Generation failed",
@@ -42,8 +55,12 @@ const T = {
     costNote: "text + hero and section images",
     fallbackFile: "site",
     creditsUsed: (n: number) => `Credits used: ${n}`,
+    creditsUsedLabel: "Credits used:",
     sitePreview: "Site preview",
     downloadHtml: "Download HTML",
+    outputTitle: "Site",
+    emptyLabel: "Describe your brand and a preview of the finished site will appear here.",
+    loading: "Building your site…",
   },
 } as const;
 
@@ -118,88 +135,90 @@ export function WebsiteRunner({
     URL.revokeObjectURL(url);
   }
 
+  const disabled = loading || siteName.length < 2 || description.length < 2;
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 surface p-5">
-        <label className="block">
-          <span className="field-label">{t.siteName}</span>
-          <input
-            value={siteName}
-            onChange={(e) => setSiteName(e.target.value)}
-            placeholder={t.siteNamePlaceholder}
-            className="mt-1 field"
-          />
-        </label>
-        <label className="block">
-          <span className="field-label">{t.description}</span>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            placeholder={t.descriptionPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
-        <label className="block">
-          <span className="field-label">{t.goal}</span>
-          <input
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-            placeholder={t.goalPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
-        <div className="space-y-2 pt-1">
-          <div className="flex flex-wrap items-center gap-3">
+    <RunnerLayout
+      controls={
+        <div className="space-y-4">
+          <Field label={t.siteName}>
+            <input
+              value={siteName}
+              onChange={(e) => setSiteName(e.target.value)}
+              placeholder={t.siteNamePlaceholder}
+              className="field"
+            />
+          </Field>
+          <Field label={t.description}>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              placeholder={t.descriptionPlaceholder}
+              className="field"
+            />
+          </Field>
+          <Field label={t.goal}>
+            <input
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              placeholder={t.goalPlaceholder}
+              className="field"
+            />
+          </Field>
+          <RunButton
+            onClick={() => run("manual")}
+            disabled={disabled}
+            loading={loading}
+            loadingLabel={t.building}
+            cost={<CostHint credits={estimateModuleCredits("website")} note={t.costNote} />}
+          >
+            {t.makeSite}
+          </RunButton>
+          {supportsAuto && (
             <Button
-              onClick={() => run("manual")}
-              disabled={loading || siteName.length < 2 || description.length < 2}
+              variant="secondary"
+              onClick={() => run("auto")}
+              disabled={disabled}
+              title={t.autoTitle}
+              className="w-full gap-2"
             >
-              {loading ? t.building : t.makeSite}
+              <Zap className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+              {t.auto}
             </Button>
-            {supportsAuto && (
-              <Button
-                variant="secondary"
-                onClick={() => run("auto")}
-                disabled={loading || siteName.length < 2 || description.length < 2}
-                title={t.autoTitle}
-              >
-                <Zap className="mr-1.5 h-4 w-4" strokeWidth={2.25} aria-hidden />
-                {t.auto}
-              </Button>
-            )}
-          </div>
-          <CostHint
-            credits={estimateModuleCredits("website")}
-            note={t.costNote}
-          />
+          )}
         </div>
-      </div>
-
-      {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
-
-      {html && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-zinc-400">
-              {creditsUsed != null ? t.creditsUsed(creditsUsed) : t.sitePreview}
-            </span>
-            <Button variant="secondary" onClick={download}>
-              {t.downloadHtml}
-            </Button>
-          </div>
-          <iframe
-            title={t.sitePreview}
-            srcDoc={html}
-            sandbox="allow-scripts"
-            className="h-[600px] w-full rounded-xl border border-white/10 bg-white"
-          />
-        </div>
-      )}
-    </div>
+      }
+      output={
+        <OutputPanel
+          title={t.outputTitle}
+          isEmpty={!html && !loading && !error}
+          emptyLabel={t.emptyLabel}
+        >
+          {error && <RunnerError>{error}</RunnerError>}
+          {loading && <RunnerLoading label={t.loading} />}
+          {html && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                {creditsUsed != null ? (
+                  <CreditsReceipt label={t.creditsUsedLabel} used={creditsUsed} />
+                ) : (
+                  <span className="text-sm text-zinc-400">{t.sitePreview}</span>
+                )}
+                <Button variant="secondary" onClick={download}>
+                  {t.downloadHtml}
+                </Button>
+              </div>
+              <iframe
+                title={t.sitePreview}
+                srcDoc={html}
+                sandbox="allow-scripts"
+                className="h-[600px] w-full rounded-xl border border-white/10 bg-white"
+              />
+            </div>
+          )}
+        </OutputPanel>
+      }
+    />
   );
 }

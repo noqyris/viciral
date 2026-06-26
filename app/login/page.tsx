@@ -1,18 +1,15 @@
 import { redirect } from "next/navigation";
 import { auth, googleEnabled } from "@/auth";
 import { AuthForm } from "@/components/auth-form";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { AuthShell } from "@/components/auth-shell";
 
 export default async function LoginPage() {
   const session = await auth();
   if (session?.user) redirect("/studio");
 
   return (
-    <main className="relative flex min-h-screen w-full flex-1 items-center justify-center px-6 py-12">
-      <div className="absolute right-6 top-6">
-        <LanguageSwitcher />
-      </div>
+    <AuthShell>
       <AuthForm mode="login" googleEnabled={googleEnabled} />
-    </main>
+    </AuthShell>
   );
 }

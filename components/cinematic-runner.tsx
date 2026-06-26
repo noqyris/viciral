@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Film } from "lucide-react";
 import { CostHint } from "@/components/cost-hint";
+import {
+  RunnerLayout,
+  Field,
+  RunButton,
+  OutputPanel,
+  RunnerError,
+  RunnerNote,
+  AssetAction,
+} from "@/components/studio/runner-kit";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { useAsyncGeneration } from "@/hooks/use-async-generation";
 import { useLocale } from "@/components/locale-context";
@@ -22,6 +31,9 @@ const T = {
     costNote: "premium · video se naplaćuje po trajanju",
     processing: "Video se generiše… ovo može potrajati minut-dva. Status se osvežava sam.",
     failed: "Generisanje nije uspelo.",
+    outputTitle: "Video",
+    emptyLabel: "Tvoj kinematski video će se pojaviti ovde nakon generisanja.",
+    downloadVideo: "Preuzmi video",
   },
   en: {
     startImageLabel: "Starting image (URL)",
@@ -37,6 +49,9 @@ const T = {
     costNote: "premium · video is billed by duration",
     processing: "The video is being generated… this can take a minute or two. The status refreshes on its own.",
     failed: "Generation failed.",
+    outputTitle: "Video",
+    emptyLabel: "Your cinematic video will appear here after it's generated.",
+    downloadVideo: "Download video",
   },
 } as const;
 
@@ -50,90 +65,95 @@ export function CinematicRunner() {
   const { submitting, error, generation, processing, video, submit } =
     useAsyncGeneration("cinematic");
 
+  const failed = generation?.status === "FAILED";
+  const isEmpty = !video?.url && !error && !processing && !failed;
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 surface p-5">
-        <label className="block">
-          <span className="field-label">{t.startImageLabel}</span>
-          <input
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder={t.startImagePlaceholder}
-            className="mt-1 field"
-          />
-        </label>
+    <RunnerLayout
+      controls={
+        <div className="space-y-4">
+          <Field label={t.startImageLabel}>
+            <input
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder={t.startImagePlaceholder}
+              className="field"
+            />
+          </Field>
 
-        <label className="block">
-          <span className="field-label">{t.motionLabel}</span>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            rows={2}
-            placeholder={t.motionPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
+          <Field label={t.motionLabel}>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={2}
+              placeholder={t.motionPlaceholder}
+              className="field"
+            />
+          </Field>
 
-        <label className="block">
-          <span className="field-label">{t.durationLabel}</span>
-          <select
-            value={durationSec}
-            onChange={(e) => setDurationSec(Number(e.target.value) === 10 ? 10 : 5)}
-            className="mt-1 field"
-          >
-            <option value={5}>{t.duration5}</option>
-            <option value={10}>{t.duration10}</option>
-          </select>
-        </label>
+          <Field label={t.durationLabel}>
+            <select
+              value={durationSec}
+              onChange={(e) => setDurationSec(Number(e.target.value) === 10 ? 10 : 5)}
+              className="field"
+            >
+              <option value={5}>{t.duration5}</option>
+              <option value={10}>{t.duration10}</option>
+            </select>
+          </Field>
 
-        <label className="flex items-center gap-2 text-sm text-zinc-300">
-          <input
-            type="checkbox"
-            checked={withAudio}
-            onChange={(e) => setWithAudio(e.target.checked)}
-          />
-          {t.withAudio}
-        </label>
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              checked={withAudio}
+              onChange={(e) => setWithAudio(e.target.checked)}
+            />
+            {t.withAudio}
+          </label>
 
-        <div className="space-y-2">
-          <Button
+          <RunButton
             onClick={() => submit({ prompt, imageUrl, durationSec, withAudio })}
             disabled={submitting || processing || prompt.length < 2 || imageUrl.length < 4}
+            loading={submitting}
+            loadingLabel={t.starting}
+            cost={
+              <CostHint
+                credits={estimateModuleCredits("cinematic", { durationSec })}
+                note={t.costNote}
+              />
+            }
           >
-            {submitting ? t.starting : t.makeVideo}
-          </Button>
-          <CostHint
-            credits={estimateModuleCredits("cinematic", { durationSec })}
-            note={t.costNote}
-          />
+            {t.makeVideo}
+          </RunButton>
         </div>
-      </div>
+      }
+      output={
+        <OutputPanel
+          title={t.outputTitle}
+          isEmpty={isEmpty}
+          emptyLabel={t.emptyLabel}
+          emptyIcon={<Film className="size-5" strokeWidth={1.75} aria-hidden />}
+        >
+          {error && <RunnerError>{error}</RunnerError>}
 
-      {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
+          {processing && <RunnerNote tone="amber">{t.processing}</RunnerNote>}
 
-      {processing && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-300">
-          {t.processing}
-        </div>
-      )}
+          {failed && <RunnerError>{generation?.error ?? t.failed}</RunnerError>}
 
-      {generation?.status === "FAILED" && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {generation.error ?? t.failed}
-        </div>
-      )}
-
-      {video?.url && (
-        <video
-          src={video.url}
-          controls
-          className="w-full rounded-xl border border-white/10"
-        />
-      )}
-    </div>
+          {video?.url && (
+            <>
+              <video
+                src={video.url}
+                controls
+                className="w-full rounded-xl border border-white/10"
+              />
+              <AssetAction href={video.url} download>
+                {t.downloadVideo}
+              </AssetAction>
+            </>
+          )}
+        </OutputPanel>
+      }
+    />
   );
 }

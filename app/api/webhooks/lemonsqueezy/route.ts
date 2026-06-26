@@ -51,16 +51,23 @@ export async function POST(req: Request) {
   const planConfig = PLAN_BY_VARIANT[variantId];
 
   if (eventName === "subscription_created" || eventName === "subscription_updated") {
+    if (!planConfig) {
+      // An unmapped variant (PLAN_BY_VARIANT not yet filled, or LS sent a benign
+      // update for a variant we don't price). Never overwrite a stored plan/credits
+      // with free/0 — that would silently downgrade a real subscriber. Only update
+      // the always-safe fields and let the plan/credits stand.
+      console.warn(`LS webhook: unmapped variant ${variantId} (${eventName}); plan/credits untouched.`);
+    }
     await prisma.subscription.upsert({
       where: { userId },
       update: {
         lsSubscriptionId: payload.data?.id,
         lsCustomerId: attrs?.customer_id != null ? String(attrs.customer_id) : undefined,
         variantId,
-        plan: planConfig?.plan ?? "free",
         status: attrs?.status ?? "active",
-        monthlyCredits: planConfig?.monthlyCredits ?? 0,
         renewsAt: attrs?.renews_at ? new Date(attrs.renews_at) : null,
+        // Only (re)write plan/credits when we actually know the variant's plan.
+        ...(planConfig ? { plan: planConfig.plan, monthlyCredits: planConfig.monthlyCredits } : {}),
       },
       create: {
         userId,

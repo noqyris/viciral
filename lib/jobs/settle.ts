@@ -30,7 +30,9 @@ export interface VideoJobResult {
  * idempotent and crash-recoverable: it does NOT use a one-way claim, so a
  * delivery that crashes mid-settle is simply re-run by the next delivery. The
  * refund carries a per-generation idempotency key, so it can never double-refund;
- * the asset/generation updates are deterministic last-writer-wins.
+ * the asset + generation updates commit in one transaction, so a crash can never
+ * leave the asset terminal while the generation is still RUNNING (which the
+ * fast-path guard below keys off, and the reaper can't recover).
  */
 export async function settleVideoJob(requestId: string, result: VideoJobResult) {
   const asset = await prisma.asset.findFirst({ where: { providerJobId: requestId } });
@@ -60,11 +62,13 @@ export async function settleVideoJob(requestId: string, result: VideoJobResult) 
     if (refund > 0) {
       await refundCredits(generation.userId, refund, "video-failed", generation.id, refundKey);
     }
-    await prisma.asset.update({ where: { id: asset.id }, data: { jobStatus: "failed" } });
-    await prisma.generation.update({
-      where: { id: generation.id },
-      data: { status: "FAILED", creditsUsed: charged, error: result.error ?? "Video nije uspeo" },
-    });
+    await prisma.$transaction([
+      prisma.asset.update({ where: { id: asset.id }, data: { jobStatus: "failed" } }),
+      prisma.generation.update({
+        where: { id: generation.id },
+        data: { status: "FAILED", creditsUsed: charged, error: result.error ?? "Video nije uspeo" },
+      }),
+    ]);
     return { ok: true, status: "failed" as const };
   }
 
@@ -89,13 +93,15 @@ export async function settleVideoJob(requestId: string, result: VideoJobResult) 
     await refundCredits(generation.userId, refund, "video-reconcile", generation.id, refundKey);
   }
 
-  await prisma.asset.update({
-    where: { id: asset.id },
-    data: { jobStatus: "completed", url, sourceUrl: result.videoUrl },
-  });
-  await prisma.generation.update({
-    where: { id: generation.id },
-    data: { status: "COMPLETED", creditsUsed: charged },
-  });
+  await prisma.$transaction([
+    prisma.asset.update({
+      where: { id: asset.id },
+      data: { jobStatus: "completed", url, sourceUrl: result.videoUrl },
+    }),
+    prisma.generation.update({
+      where: { id: generation.id },
+      data: { status: "COMPLETED", creditsUsed: charged },
+    }),
+  ]);
   return { ok: true, status: "completed" as const };
 }

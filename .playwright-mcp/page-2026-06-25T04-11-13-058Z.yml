@@ -1,0 +1,101 @@
+- generic [active] [ref=e1]:
+  - complementary [ref=e2]:
+    - link "Viciral" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Viciral
+    - navigation [ref=e13]:
+      - link "Studio" [ref=e14] [cursor=pointer]:
+        - /url: /studio
+        - img [ref=e15]
+        - text: Studio
+      - link "Templates" [ref=e20] [cursor=pointer]:
+        - /url: /studio/templates
+        - img [ref=e21]
+        - text: Templates
+      - link "Calendar" [ref=e25] [cursor=pointer]:
+        - /url: /studio/calendar
+        - img [ref=e26]
+        - text: Calendar
+      - link "History" [ref=e28] [cursor=pointer]:
+        - /url: /studio/history
+        - img [ref=e29]
+        - text: History
+      - link "Brands" [ref=e33] [cursor=pointer]:
+        - /url: /studio/brand
+        - img [ref=e34]
+        - text: Brands
+      - link "Connections" [ref=e40] [cursor=pointer]:
+        - /url: /studio/connections
+        - img [ref=e41]
+        - text: Connections
+    - generic [ref=e44]:
+      - generic [ref=e45]:
+        - generic "credits" [ref=e46]:
+          - img [ref=e47]
+          - text: …
+          - generic [ref=e50]: credits
+        - generic [ref=e51]:
+          - button "SR" [ref=e52]
+          - button "EN" [pressed] [ref=e53]
+      - generic [ref=e54]:
+        - generic "Dev User" [ref=e55]
+        - button "Sign out" [ref=e56]:
+          - img [ref=e57]
+          - text: Sign out
+  - main [ref=e61]:
+    - link "← Studio" [ref=e62] [cursor=pointer]:
+      - /url: /studio
+    - generic [ref=e63]:
+      - img [ref=e65]
+      - generic [ref=e68]:
+        - heading "Social Media Pack" [level=1] [ref=e69]
+        - paragraph [ref=e70]: Theme → a set of posts (images + caption + hashtags) for IG/TikTok/LinkedIn.
+    - generic [ref=e71]:
+      - generic [ref=e72]: Quick-start recipes
+      - generic [ref=e73]:
+        - link "Product launch" [ref=e74] [cursor=pointer]:
+          - /url: /studio/social-pack?template=sp-product-launch
+          - img [ref=e75]
+          - text: Product launch
+        - link "Weekly tips" [ref=e80] [cursor=pointer]:
+          - /url: /studio/social-pack?template=sp-weekly-tips
+          - img [ref=e81]
+          - text: Weekly tips
+        - link "Behind the scenes" [ref=e83] [cursor=pointer]:
+          - /url: /studio/social-pack?template=sp-behind-scenes
+          - img [ref=e84]
+          - text: Behind the scenes
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - text: Topic
+        - textbox "Topic" [ref=e91]:
+          - /placeholder: e.g. launching a new sneaker collection
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - text: Platform
+          - combobox "Platform" [ref=e94]:
+            - option "Instagram" [selected]
+            - option "TikTok"
+            - option "LinkedIn"
+        - generic [ref=e95]:
+          - text: Number of posts
+          - spinbutton "Number of posts" [ref=e96]: "3"
+        - generic [ref=e97]:
+          - text: Tone
+          - textbox "Tone" [ref=e98]: prijateljski
+      - generic [ref=e99]:
+        - text: Variants per post
+        - spinbutton "Variants per post" [ref=e100]: "1"
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - button "Create" [disabled]
+          - button "Auto" [disabled]:
+            - img
+            - text: Auto
+        - paragraph [ref=e103]:
+          - text: "Estimate: ≈ 60 credits"
+          - generic [ref=e104]: "· Auto: AI runs the whole process"
+  - button "Open Next.js Dev Tools" [ref=e110] [cursor=pointer]:
+    - img [ref=e111]

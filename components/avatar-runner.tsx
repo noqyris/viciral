@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
+import {
+  RunnerLayout,
+  Field,
+  RunButton,
+  OutputPanel,
+  RunnerError,
+  RunnerNote,
+  AssetAction,
+} from "@/components/studio/runner-kit";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { useAsyncGeneration } from "@/hooks/use-async-generation";
 import { useLocale } from "@/components/locale-context";
@@ -28,6 +36,9 @@ const T = {
     costNote: "premium · dužina prati skriptu",
     processing: "Avatar video se generiše… ovo može potrajati minut-dva. Status se osvežava sam.",
     failed: "Generisanje nije uspelo.",
+    outputTitle: "Avatar video",
+    emptyLabel: "Tvoj avatar video će se pojaviti ovde nakon generisanja.",
+    downloadVideo: "Preuzmi video",
   },
   en: {
     portraitLabel: "Portrait / avatar (URL)",
@@ -46,6 +57,9 @@ const T = {
     costNote: "premium · length follows the script",
     processing: "The avatar video is being generated… this can take a minute or two. The status refreshes on its own.",
     failed: "Generation failed.",
+    outputTitle: "Avatar video",
+    emptyLabel: "Your avatar video will appear here once it's generated.",
+    downloadVideo: "Download video",
   },
 } as const;
 
@@ -58,80 +72,80 @@ export function AvatarRunner({ initialInputs }: { initialInputs?: Record<string,
   const { submitting, error, generation, processing, video, submit } =
     useAsyncGeneration("avatar");
 
+  const failed = generation?.status === "FAILED";
+  const isEmpty = !video?.url && !processing && !error && !failed;
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 surface p-5">
-        <label className="block">
-          <span className="field-label">{t.portraitLabel}</span>
-          <input
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder={t.portraitPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
+    <RunnerLayout
+      controls={
+        <>
+          <Field label={t.portraitLabel}>
+            <input
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              placeholder={t.portraitPlaceholder}
+              className="field"
+            />
+          </Field>
 
-        <label className="block">
-          <span className="field-label">{t.scriptLabel}</span>
-          <textarea
-            value={script}
-            onChange={(e) => setScript(e.target.value)}
-            rows={4}
-            placeholder={t.scriptPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
+          <Field label={t.scriptLabel} className="mt-4">
+            <textarea
+              value={script}
+              onChange={(e) => setScript(e.target.value)}
+              rows={4}
+              placeholder={t.scriptPlaceholder}
+              className="field"
+            />
+          </Field>
 
-        <label className="block sm:max-w-[16rem]">
-          <span className="field-label">{t.voiceLabel}</span>
-          <select
-            value={voiceId}
-            onChange={(e) => setVoiceId(e.target.value)}
-            className="mt-1 field"
-          >
-            {VOICE_IDS.map((id) => (
-              <option key={id} value={id}>
-                {t.voices[id]}
-              </option>
-            ))}
-          </select>
-        </label>
+          <Field label={t.voiceLabel} className="mt-4 sm:max-w-[16rem]">
+            <select
+              value={voiceId}
+              onChange={(e) => setVoiceId(e.target.value)}
+              className="field"
+            >
+              {VOICE_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {t.voices[id]}
+                </option>
+              ))}
+            </select>
+          </Field>
 
-        <div className="space-y-2 pt-1">
-          <Button
+          <RunButton
             onClick={() => submit({ imageUrl, script, voiceId })}
             disabled={submitting || processing || imageUrl.length < 4 || script.length < 2}
+            loading={submitting}
+            loadingLabel={t.starting}
+            cost={
+              <CostHint
+                credits={estimateModuleCredits("avatar", { script })}
+                note={t.costNote}
+              />
+            }
           >
-            {submitting ? t.starting : t.makeAvatar}
-          </Button>
-          <CostHint
-            credits={estimateModuleCredits("avatar", { script })}
-            note={t.costNote}
-          />
-        </div>
-      </div>
+            {t.makeAvatar}
+          </RunButton>
+        </>
+      }
+      output={
+        <OutputPanel title={t.outputTitle} isEmpty={isEmpty} emptyLabel={t.emptyLabel}>
+          {error && <RunnerError>{error}</RunnerError>}
 
-      {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
+          {processing && <RunnerNote tone="amber">{t.processing}</RunnerNote>}
 
-      {processing && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-300">
-          {t.processing}
-        </div>
-      )}
+          {failed && <RunnerError>{generation?.error ?? t.failed}</RunnerError>}
 
-      {generation?.status === "FAILED" && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {generation.error ?? t.failed}
-        </div>
-      )}
-
-      {video?.url && (
-        <video src={video.url} controls className="w-full rounded-xl border border-white/10" />
-      )}
-    </div>
+          {video?.url && (
+            <div className="space-y-3">
+              <video src={video.url} controls className="w-full rounded-xl border border-white/10" />
+              <AssetAction href={video.url} download>
+                {t.downloadVideo}
+              </AssetAction>
+            </div>
+          )}
+        </OutputPanel>
+      }
+    />
   );
 }

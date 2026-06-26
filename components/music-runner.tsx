@@ -1,11 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { useLocale } from "@/components/locale-context";
+import {
+  RunnerLayout,
+  Field,
+  RunButton,
+  OutputPanel,
+  RunnerLoading,
+  RunnerError,
+  CreditsReceipt,
+  AssetAction,
+} from "@/components/studio/runner-kit";
 
 const T = {
   sr: {
@@ -23,6 +32,9 @@ const T = {
     costNote: "po sekundi",
     creditsUsed: "Potrošeno kredita:",
     download: "Preuzmi / otvori →",
+    outputTitle: "Numera",
+    emptyLabel: "Opišite muziku koju želite i ona će se pojaviti ovde.",
+    composingLabel: "Komponujem vašu numeru…",
   },
   en: {
     generationError: "Generation error",
@@ -39,6 +51,9 @@ const T = {
     costNote: "per second",
     creditsUsed: "Credits used:",
     download: "Download / open →",
+    outputTitle: "Track",
+    emptyLabel: "Describe the music you want and it will appear here.",
+    composingLabel: "Composing your track…",
   },
 } as const;
 
@@ -91,74 +106,77 @@ export function MusicRunner({ initialInputs }: { initialInputs?: Record<string, 
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 surface p-5">
-        <label className="block">
-          <span className="field-label">{t.musicDescLabel}</span>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            rows={2}
-            placeholder={t.musicDescPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
+    <RunnerLayout
+      controls={
+        <div className="space-y-4">
+          <Field label={t.musicDescLabel}>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              rows={2}
+              placeholder={t.musicDescPlaceholder}
+              className="field"
+            />
+          </Field>
 
-        <div className="flex flex-wrap gap-2">
-          {t.presets.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setPrompt(p)}
-              className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-400 transition-colors hover:border-violet-300 hover:text-violet-300"
-            >
-              {p}
-            </button>
-          ))}
-        </div>
+          <div className="flex flex-wrap gap-2">
+            {t.presets.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPrompt(p)}
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-400 transition-colors hover:border-violet-300 hover:text-violet-300"
+              >
+                {p}
+              </button>
+            ))}
+          </div>
 
-        <label className="block sm:max-w-[12rem]">
-          <span className="field-label">{t.durationLabel}</span>
-          <input
-            type="number"
-            min={5}
-            max={120}
-            value={durationSec}
-            onChange={(e) => setDurationSec(Number(e.target.value))}
-            className="mt-1 field"
-          />
-        </label>
+          <Field label={t.durationLabel} className="sm:max-w-[12rem]">
+            <input
+              type="number"
+              min={5}
+              max={120}
+              value={durationSec}
+              onChange={(e) => setDurationSec(Number(e.target.value))}
+              className="field"
+            />
+          </Field>
 
-        <div className="space-y-2 pt-1">
-          <Button onClick={run} disabled={loading || prompt.length < 2}>
-            {loading ? t.composing : t.makeMusic}
-          </Button>
-          <CostHint credits={estimateModuleCredits("music", { durationSec })} note={t.costNote} />
-        </div>
-      </div>
-
-      {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
-
-      {audioUrl && (
-        <div className="space-y-2 surface p-4">
-          {creditsUsed != null && (
-            <div className="text-sm text-zinc-400">{t.creditsUsed} {creditsUsed}</div>
-          )}
-          <audio src={audioUrl} controls className="w-full" />
-          <a
-            href={audioUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-medium text-violet-300 hover:underline"
+          <RunButton
+            onClick={run}
+            disabled={loading || prompt.length < 2}
+            loading={loading}
+            loadingLabel={t.composing}
+            cost={<CostHint credits={estimateModuleCredits("music", { durationSec })} note={t.costNote} />}
           >
-            {t.download}
-          </a>
+            {t.makeMusic}
+          </RunButton>
         </div>
-      )}
-    </div>
+      }
+      output={
+        <OutputPanel
+          title={t.outputTitle}
+          isEmpty={!loading && !error && !audioUrl}
+          emptyLabel={t.emptyLabel}
+        >
+          {error ? <RunnerError>{error}</RunnerError> : null}
+
+          {loading ? <RunnerLoading label={t.composingLabel} /> : null}
+
+          {audioUrl ? (
+            <div className="space-y-3">
+              {creditsUsed != null ? (
+                <CreditsReceipt label={t.creditsUsed} used={creditsUsed} />
+              ) : null}
+              <audio src={audioUrl} controls className="w-full" />
+              <AssetAction href={audioUrl} download>
+                {t.download}
+              </AssetAction>
+            </div>
+          ) : null}
+        </OutputPanel>
+      }
+    />
   );
 }

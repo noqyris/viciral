@@ -104,7 +104,8 @@ export function AuthForm({
         <p className="mt-1 text-sm text-zinc-400">{isSignup ? t.signupSub : t.loginSub}</p>
       </div>
 
-      <div className="surface p-6">
+      <div className="card card-frost relative overflow-hidden rounded-2xl p-6 shadow-[0_34px_90px_-46px_rgba(139,92,246,0.55)] sm:p-7">
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400/50 to-transparent" />
         {googleEnabled && (
           <>
             <Button

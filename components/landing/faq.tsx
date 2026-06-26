@@ -152,8 +152,9 @@ export default function Faq({ locale }: { locale: Locale }) {
 
   return (
     <section
+      id="faq"
       aria-labelledby={`${baseId}-heading`}
-      className="section relative mx-auto w-full max-w-3xl px-5 sm:px-6"
+      className="section relative mx-auto w-full max-w-3xl scroll-mt-24 px-5 sm:px-6"
     >
       <Reveal dir="up">
         <p className="eyebrow">
@@ -183,7 +184,13 @@ export default function Faq({ locale }: { locale: Locale }) {
           const panelId = `${baseId}-panel-${i}`;
           return (
             <li key={item.q}>
-              <Reveal dir="up" delay={i * 70} className="card block overflow-hidden rounded-2xl">
+              <Reveal
+                dir="up"
+                delay={i * 70}
+                className={`card block overflow-hidden rounded-2xl transition-shadow duration-300 ${
+                  isOpen ? "ring-1 ring-inset ring-violet-400/25" : ""
+                }`}
+              >
                 <h3 className="m-0">
                   <button
                     type="button"
@@ -191,31 +198,43 @@ export default function Faq({ locale }: { locale: Locale }) {
                     aria-expanded={isOpen}
                     aria-controls={panelId}
                     onClick={() => setOpen(isOpen ? null : i)}
-                    className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:px-6"
+                    className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left transition-colors hover:bg-white/[0.02] sm:px-6"
                   >
                     <span className="text-lg font-semibold text-[#e7e7ea]">
                       {item.q}
                     </span>
                     <span
                       aria-hidden="true"
-                      className={`grid size-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.03] text-violet-300 transition-transform duration-300 ${
-                        isOpen ? "rotate-45" : "rotate-0"
+                      className={`grid size-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.03] text-violet-300 transition-[transform,background,border-color] duration-300 ease-out ${
+                        isOpen
+                          ? "rotate-45 border-violet-400/30 bg-violet-500/10"
+                          : "rotate-0"
                       }`}
                     >
                       <Plus className="size-4" strokeWidth={2} />
                     </span>
                   </button>
                 </h3>
+                {/* grid-rows 0fr→1fr animates the panel height in pure CSS; the inner
+                    overflow-hidden clips it while collapsed, and the copy fades in. */}
                 <div
                   id={panelId}
                   role="region"
                   aria-labelledby={btnId}
-                  hidden={!isOpen}
-                  className="px-5 pb-5 sm:px-6"
+                  inert={!isOpen}
+                  className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
+                    isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                  }`}
                 >
-                  <p className="max-w-prose text-base leading-relaxed text-pretty text-zinc-400">
-                    {item.a}
-                  </p>
+                  <div className="overflow-hidden">
+                    <p
+                      className={`max-w-prose px-5 pb-5 text-base leading-relaxed text-pretty text-zinc-400 transition-opacity duration-300 ease-out motion-reduce:transition-none sm:px-6 ${
+                        isOpen ? "opacity-100 delay-100" : "opacity-0"
+                      }`}
+                    >
+                      {item.a}
+                    </p>
+                  </div>
                 </div>
               </Reveal>
             </li>

@@ -32,7 +32,15 @@ export async function runJsonText<T>(
     model: MODEL_CATALOG[modelId].providerModel,
     maxTokens: args.maxTokens,
   });
-  const value = schema.parse(JSON.parse(extractJson(res.text)));
+  // The model can emit truncated/non-JSON (e.g. when it hits the output-token
+  // cap mid-object). Turn the raw SyntaxError into a friendly, retryable error.
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(extractJson(res.text));
+  } catch {
+    throw new Error("Model je vratio nevalidan odgovor. Pokušaj ponovo.");
+  }
+  const value = schema.parse(parsed);
   const creditsUsed = estimateCredits(modelId, {
     inputTokens: res.inputTokens,
     outputTokens: res.outputTokens,

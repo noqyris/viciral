@@ -7,6 +7,14 @@ import { CostHint } from "@/components/cost-hint";
 import { notifyCreditsChanged } from "@/components/credits-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { useLocale } from "@/components/locale-context";
+import {
+  RunnerLayout,
+  Field,
+  RunButton,
+  OutputPanel,
+  RunnerError,
+  CreditsReceipt,
+} from "@/components/studio/runner-kit";
 
 const T = {
   sr: {
@@ -21,6 +29,8 @@ const T = {
     autoTitle: "Jača orkestracija (Opus) za bolji izbor momenata",
     costNote: "transkripcija + AI izbor momenata · render klipova uskoro",
     creditsUsed: "Potrošeno kredita:",
+    outputTitle: "Klipovi",
+    emptyLabel: "Unesite link i nađite najbolje momente za kratke klipove.",
   },
   en: {
     processingError: "Processing error",
@@ -34,6 +44,8 @@ const T = {
     autoTitle: "Stronger orchestration (Opus) for a better choice of moments",
     costNote: "transcription + AI moment selection · clip rendering coming soon",
     creditsUsed: "Credits used:",
+    outputTitle: "Clips",
+    emptyLabel: "Paste a link and find the best moments for short clips.",
   },
 } as const;
 
@@ -93,104 +105,110 @@ export function ShortFormRunner({
     }
   }
 
+  const hasResult = creditsUsed != null || (clips != null && clips.length > 0);
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-4 surface p-5">
-        <label className="block">
-          <span className="field-label">{t.mediaUrlLabel}</span>
-          <input
-            value={mediaUrl}
-            onChange={(e) => setMediaUrl(e.target.value)}
-            placeholder={t.mediaUrlPlaceholder}
-            className="mt-1 field"
-          />
-        </label>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <label className="block">
-            <span className="field-label">{t.platformLabel}</span>
-            <select
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-              className="mt-1 field"
-            >
-              <option value="tiktok">TikTok</option>
-              <option value="instagram">Instagram Reels</option>
-              <option value="youtube">YouTube Shorts</option>
-            </select>
-          </label>
-
-          <label className="block">
-            <span className="field-label">{t.clipCountLabel}</span>
+    <RunnerLayout
+      controls={
+        <div className="space-y-4">
+          <Field label={t.mediaUrlLabel}>
             <input
-              type="number"
-              min={1}
-              max={10}
-              value={clipCount}
-              onChange={(e) => setClipCount(Number(e.target.value))}
-              className="mt-1 field"
+              value={mediaUrl}
+              onChange={(e) => setMediaUrl(e.target.value)}
+              placeholder={t.mediaUrlPlaceholder}
+              className="field"
             />
-          </label>
+          </Field>
 
-          <label className="block">
-            <span className="field-label">{t.sourceLengthLabel}</span>
-            <input
-              type="number"
-              min={1}
-              max={60}
-              value={approxMinutes}
-              onChange={(e) => setApproxMinutes(Number(e.target.value))}
-              className="mt-1 field"
-            />
-          </label>
-        </div>
-
-        <div className="space-y-2 pt-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={() => run("manual")} disabled={loading || mediaUrl.length < 4}>
-              {loading ? t.processing : t.findClips}
-            </Button>
-            {supportsAuto && (
-              <Button
-                variant="secondary"
-                onClick={() => run("auto")}
-                disabled={loading || mediaUrl.length < 4}
-                title={t.autoTitle}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Field label={t.platformLabel}>
+              <select
+                value={platform}
+                onChange={(e) => setPlatform(e.target.value)}
+                className="field"
               >
-                <Zap className="mr-1.5 h-4 w-4" strokeWidth={2.25} aria-hidden />
-                Auto
-              </Button>
-            )}
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram Reels</option>
+                <option value="youtube">YouTube Shorts</option>
+              </select>
+            </Field>
+
+            <Field label={t.clipCountLabel}>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={clipCount}
+                onChange={(e) => setClipCount(Number(e.target.value))}
+                className="field"
+              />
+            </Field>
+
+            <Field label={t.sourceLengthLabel}>
+              <input
+                type="number"
+                min={1}
+                max={60}
+                value={approxMinutes}
+                onChange={(e) => setApproxMinutes(Number(e.target.value))}
+                className="field"
+              />
+            </Field>
           </div>
-          <CostHint
-            credits={estimateModuleCredits("short-form", { approxMinutes })}
-            note={t.costNote}
-          />
-        </div>
-      </div>
 
-      {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
+          <RunButton
+            onClick={() => run("manual")}
+            disabled={loading || mediaUrl.length < 4}
+            loading={loading}
+            loadingLabel={t.processing}
+            cost={
+              <CostHint
+                credits={estimateModuleCredits("short-form", { approxMinutes })}
+                note={t.costNote}
+              />
+            }
+          >
+            {t.findClips}
+          </RunButton>
 
-      {creditsUsed != null && (
-        <div className="text-sm text-zinc-400">{t.creditsUsed} {creditsUsed}</div>
-      )}
-
-      {clips && clips.length > 0 && (
-        <div className="space-y-3">
-          {clips.map((c, i) => (
-            <div
-              key={i}
-              className="whitespace-pre-wrap surface p-4 text-sm text-zinc-200"
+          {supportsAuto && (
+            <Button
+              variant="secondary"
+              onClick={() => run("auto")}
+              disabled={loading || mediaUrl.length < 4}
+              title={t.autoTitle}
+              className="w-full gap-2"
             >
-              {c.text}
-            </div>
-          ))}
+              <Zap className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+              Auto
+            </Button>
+          )}
         </div>
-      )}
-    </div>
+      }
+      output={
+        <OutputPanel
+          title={t.outputTitle}
+          isEmpty={!loading && !error && !hasResult}
+          emptyLabel={t.emptyLabel}
+        >
+          {error && <RunnerError>{error}</RunnerError>}
+
+          {creditsUsed != null && <CreditsReceipt label={t.creditsUsed} used={creditsUsed} />}
+
+          {clips && clips.length > 0 && (
+            <div className="space-y-3">
+              {clips.map((c, i) => (
+                <div
+                  key={i}
+                  className="whitespace-pre-wrap surface p-4 text-sm text-zinc-200"
+                >
+                  {c.text}
+                </div>
+              ))}
+            </div>
+          )}
+        </OutputPanel>
+      }
+    />
   );
 }
