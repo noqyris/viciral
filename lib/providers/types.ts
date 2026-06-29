@@ -111,6 +111,8 @@ export interface VideoRequest {
   durationSec?: number;
   width?: number;
   height?: number;
+  /** Output aspect ratio (e.g. "9:16", "16:9", "1:1") — Seedance accepts this directly. */
+  aspectRatio?: string;
   /** Generate native synchronized audio (music/SFX/dialogue) with the clip. */
   withAudio?: boolean;
   /** Talking-head script (text the avatar speaks). */
@@ -140,4 +142,11 @@ export interface VideoResult {
 export interface VideoProvider {
   submitVideo(req: VideoRequest): Promise<VideoSubmitResponse>;
   fetchResult(requestId: string, modelId: string): Promise<VideoResult>;
+  /**
+   * Arbitrary-length video is built by chaining clips: these utilities extract a
+   * clip's last frame (to seed the next clip) and merge the finished clips into
+   * one. Optional — not every video backend exposes ffmpeg utilities.
+   */
+  extractLastFrame?(videoUrl: string): Promise<string>;
+  mergeVideos?(videoUrls: string[]): Promise<string>;
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
+import { getActiveOrg } from "@/lib/active-org";
 import { listScheduled, schedulePost } from "@/lib/publishing/schedule";
 import { jsonError, readJsonBody } from "@/lib/http";
 
@@ -18,7 +19,8 @@ const createSchema = z.object({
 export async function GET() {
   try {
     const user = await getCurrentUser();
-    const posts = await listScheduled(user.id);
+    const org = await getActiveOrg(user.id);
+    const posts = await listScheduled(user.id, org.id);
     return NextResponse.json({ posts });
   } catch (err) {
     return jsonError(err);
@@ -28,15 +30,20 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
+    const org = await getActiveOrg(user.id);
     const body = createSchema.parse(await readJsonBody(req));
-    const post = await schedulePost(user.id, {
-      platform: body.platform,
-      caption: body.caption,
-      mediaUrl: body.mediaUrl,
-      scheduledAt: new Date(body.scheduledAt),
-      connectionId: body.connectionId,
-      generationId: body.generationId,
-    });
+    const post = await schedulePost(
+      user.id,
+      {
+        platform: body.platform,
+        caption: body.caption,
+        mediaUrl: body.mediaUrl,
+        scheduledAt: new Date(body.scheduledAt),
+        connectionId: body.connectionId,
+        generationId: body.generationId,
+      },
+      org.id,
+    );
     return NextResponse.json({ post }, { status: 201 });
   } catch (err) {
     return jsonError(err);

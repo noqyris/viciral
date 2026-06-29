@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { runModule } from "@/lib/jobs/runner";
+import { getActiveOrg } from "@/lib/active-org";
 import { AppError, jsonError, readJsonBody } from "@/lib/http";
 import type { GenerationMode } from "@/lib/modules/types";
 
@@ -20,8 +21,10 @@ export async function POST(req: Request) {
     if (!body.moduleSlug) throw new AppError("moduleSlug je obavezan", 400);
 
     const user = await getCurrentUser();
+    const org = await getActiveOrg(user.id);
     const generation = await runModule({
       userId: user.id,
+      organizationId: org.id,
       moduleSlug: body.moduleSlug,
       mode: body.mode === "auto" ? "auto" : "manual",
       inputs: body.inputs ?? {},

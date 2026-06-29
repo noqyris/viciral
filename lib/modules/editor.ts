@@ -27,7 +27,7 @@ export const editorModule: ModuleDef<Input> = {
   name: "Editor slike",
   tagline: "Doteruj sliku rečima — izmeni detalj, zameni pozadinu, ponovi po sloj.",
   category: "image",
-  status: "available",
+  status: "soon",
   supportsAuto: false,
   icon: "✏️",
   inputSchema,

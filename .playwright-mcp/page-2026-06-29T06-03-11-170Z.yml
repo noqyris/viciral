@@ -1,0 +1,119 @@
+- generic [ref=e1]:
+  - complementary [ref=e2]:
+    - link "Viciral" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Viciral
+    - button "D Brand Dev User" [ref=e15]:
+      - generic [ref=e16]: D
+      - generic [ref=e17]:
+        - generic [ref=e18]: Brand
+        - generic [ref=e19]: Dev User
+      - img [ref=e20]
+    - navigation [ref=e23]:
+      - link "Home" [ref=e24] [cursor=pointer]:
+        - /url: /studio
+        - img [ref=e25]
+        - text: Home
+      - link "Brand" [ref=e30] [cursor=pointer]:
+        - /url: /studio/brand
+        - img [ref=e31]
+        - text: Brand
+      - link "Content" [ref=e37] [cursor=pointer]:
+        - /url: /studio/content
+        - img [ref=e38]
+        - text: Content
+      - link "Web" [ref=e41] [cursor=pointer]:
+        - /url: /studio/website
+        - img [ref=e42]
+        - text: Web
+      - link "App" [ref=e45] [cursor=pointer]:
+        - /url: /studio/app-builder
+        - img [ref=e46]
+        - text: App
+      - link "Logo" [ref=e48] [cursor=pointer]:
+        - /url: /studio/logo
+        - img [ref=e49]
+        - text: Logo
+      - link "History" [ref=e51] [cursor=pointer]:
+        - /url: /studio/history
+        - img [ref=e52]
+        - text: History
+      - link "Calendar" [ref=e56] [cursor=pointer]:
+        - /url: /studio/calendar
+        - img [ref=e57]
+        - text: Calendar
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic "credits" [ref=e61]:
+          - img [ref=e62]
+          - text: "5000"
+          - generic [ref=e65]: credits
+        - generic [ref=e66]:
+          - button "SR" [ref=e67]
+          - button "EN" [pressed] [ref=e68]
+      - generic [ref=e69]:
+        - generic "Dev User" [ref=e70]
+        - button "Sign out" [ref=e71]:
+          - img [ref=e72]
+          - text: Sign out
+  - main [ref=e76]:
+    - link "← Studio" [ref=e77] [cursor=pointer]:
+      - /url: /studio
+    - generic [ref=e78]:
+      - img [ref=e80]
+      - generic [ref=e83]:
+        - heading "Content creation" [level=1] [ref=e84]
+        - paragraph [ref=e85]: Make an image, video or post — all in your brand's style.
+    - generic [ref=e87]:
+      - generic [ref=e88]:
+        - button "Image" [ref=e89]:
+          - img [ref=e90]
+          - text: Image
+        - button "Video" [ref=e94]:
+          - img [ref=e95]
+          - text: Video
+        - button "Post" [active] [pressed] [ref=e100]:
+          - img [ref=e101]
+          - text: Post
+      - generic [ref=e188]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e193]: Topic
+            - textbox "Topic" [ref=e195]:
+              - /placeholder: e.g. launching a new sneaker collection
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - generic [ref=e199]: Platform
+              - combobox "Platform" [ref=e201]:
+                - option "Instagram" [selected]
+                - option "TikTok"
+                - option "LinkedIn"
+            - generic [ref=e202]:
+              - generic [ref=e204]: Number of posts
+              - spinbutton "Number of posts" [ref=e206]: "3"
+            - generic [ref=e207]:
+              - generic [ref=e209]: Tone
+              - textbox "Tone" [ref=e211]: prijateljski
+          - generic [ref=e212]:
+            - generic [ref=e214]: Variants per post
+            - spinbutton "Variants per post" [ref=e216]: "1"
+          - generic [ref=e217]:
+            - button "Create" [disabled]:
+              - img
+              - text: Create
+            - paragraph [ref=e218]:
+              - text: "Estimate: ≈ 60 credits"
+              - generic [ref=e219]: "· Auto: AI runs the whole process"
+          - button "Auto" [disabled]:
+            - img
+            - text: Auto
+        - generic [ref=e221]:
+          - generic [ref=e223]: Output
+          - generic [ref=e224]:
+            - img [ref=e226]
+            - paragraph [ref=e229]: Enter a topic and run — your post images and captions will appear here.
+  - button "Open Next.js Dev Tools" [ref=e151] [cursor=pointer]:
+    - img [ref=e152]
+  - alert [ref=e187]

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { History } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
+import { getActiveOrg } from "@/lib/active-org";
 import { prisma } from "@/lib/db";
 import { getModuleDef } from "@/lib/modules/registry";
 import { ModuleIcon } from "@/components/icons";
@@ -55,8 +56,9 @@ export default async function HistoryPage() {
   const locale = await getLocale();
   const t = T[locale];
   const user = await getCurrentUser();
+  const org = await getActiveOrg(user.id);
   const generations = await prisma.generation.findMany({
-    where: { userId: user.id },
+    where: { userId: user.id, organizationId: org.id },
     orderBy: { createdAt: "desc" },
     take: 50,
     include: {

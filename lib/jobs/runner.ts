@@ -4,6 +4,7 @@ import { providers } from "@/lib/providers";
 import { getModuleDef } from "@/lib/modules/registry";
 import { debitCredits, refundCredits } from "@/lib/credits/ledger";
 import { createBrandFromKit, loadBrand } from "@/lib/brand/profile";
+import { buildBrandContext } from "@/lib/brand/inject";
 import { AppError } from "@/lib/http";
 import { reconcileCharge } from "@/lib/jobs/settle";
 import { rewriteEmbeddedUrls } from "@/lib/jobs/rewrite";
@@ -12,6 +13,8 @@ import type { GeneratedAsset, GenerationMode, ModuleDef } from "@/lib/modules/ty
 
 export interface RunModuleInput {
   userId: string;
+  /** Active brand/org the run belongs to (scopes the generation + attributes the spend). */
+  organizationId: string;
   moduleSlug: string;
   mode: GenerationMode;
   inputs: unknown;
@@ -54,6 +57,7 @@ async function createAndReserve(
   const generation = await prisma.generation.create({
     data: {
       userId: run.userId,
+      organizationId: run.organizationId,
       module: run.moduleSlug,
       mode: run.mode,
       status: "PENDING",
@@ -62,7 +66,7 @@ async function createAndReserve(
     },
   });
   try {
-    await debitCredits(run.userId, estimate, "reserve", generation.id);
+    await debitCredits(run.userId, estimate, "reserve", generation.id, run.organizationId);
   } catch (err) {
     await prisma.generation.update({
       where: { id: generation.id },
@@ -134,12 +138,14 @@ async function runSyncModule(
       data: { status: "RUNNING" },
     });
 
-    const brand = await loadBrand(run.userId, run.brandId);
+    const brand = await loadBrand(run.userId, run.organizationId, run.brandId);
+    const brandContext = buildBrandContext(brand);
     const result = await mod.generate({
       userId: run.userId,
       mode: run.mode,
       inputs,
       brand,
+      brandContext,
       providers,
       spend,
     });
@@ -174,7 +180,7 @@ async function runSyncModule(
     // Brand-memory side effect (Brand Kit): save the result as a BrandProfile,
     // wiring the generated logo's persisted URL. Best-effort — the generation is
     // already paid for and COMPLETED, so a brand-write failure must not fail it.
-    if (result.brandProfile) {
+    if (result.brandProfile && run.organizationId) {
       try {
         const logo = persisted.find((a) => a.kind === "image" && a.meta?.role === "logo");
         const avatar = persisted.find((a) => a.kind === "image" && a.meta?.role === "avatar");
@@ -183,9 +189,9 @@ async function runSyncModule(
         const referenceImages = [avatar?.url, logo?.url].filter(
           (u): u is string => typeof u === "string" && u.length > 0,
         );
-        await createBrandFromKit(run.userId, result.brandProfile, logo?.url, referenceImages);
+        await createBrandFromKit(run.organizationId, result.brandProfile, logo?.url, referenceImages);
       } catch (err) {
-        console.error(`Brand kit: saving BrandProfile failed (gen ${generation.id}):`, err);
+        console.error(`Brand kit: saving brand identity failed (gen ${generation.id}):`, err);
       }
     }
 
@@ -226,12 +232,14 @@ async function runAsyncModule(
       data: { status: "RUNNING" },
     });
 
-    const brand = await loadBrand(run.userId, run.brandId);
+    const brand = await loadBrand(run.userId, run.organizationId, run.brandId);
+    const brandContext = buildBrandContext(brand);
     const submitResult = await mod.submit({
       userId: run.userId,
       mode: run.mode,
       inputs,
       brand,
+      brandContext,
       providers,
       spend,
     });

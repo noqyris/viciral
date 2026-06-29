@@ -48,3 +48,27 @@ export async function runJsonText<T>(
   ctx.spend?.(creditsUsed);
   return { value, creditsUsed };
 }
+
+/**
+ * Runs the text model for a PLAIN-text result (no JSON parse) and reports credits
+ * via `ctx.spend`. Used for short helper steps like prompt enhancement, where we
+ * want the model's prose directly. Same model-by-mode policy as {@link runJsonText}.
+ */
+export async function runText(
+  ctx: TextCtx,
+  args: { system: string; prompt: string; maxTokens: number },
+): Promise<{ text: string; creditsUsed: number }> {
+  const modelId = pickTextModel(ctx.mode);
+  const res = await ctx.providers.text.generateText({
+    system: args.system,
+    prompt: args.prompt,
+    model: MODEL_CATALOG[modelId].providerModel,
+    maxTokens: args.maxTokens,
+  });
+  const creditsUsed = estimateCredits(modelId, {
+    inputTokens: res.inputTokens,
+    outputTokens: res.outputTokens,
+  });
+  ctx.spend?.(creditsUsed);
+  return { text: res.text.trim(), creditsUsed };
+}

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { cinematicModule } from "./cinematic";
 
-const base = {
+const base = cinematicModule.inputSchema.parse({
   prompt: "spori zoom na proizvod",
   imageUrl: "https://example.com/img.png",
-  durationSec: 5 as const,
+  durationSec: 5,
   withAudio: true,
-};
+});
 
 describe("cinematic estimate", () => {
   it("estimates a positive cost and is async", () => {

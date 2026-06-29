@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { AppError, jsonError, readJsonBody } from "@/lib/http";
 import { grantSignupTrial } from "@/lib/auth-trial";
+import { ensureUserHasOrg } from "@/lib/org";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
       data: { email: normEmail, name: name?.trim() || null, passwordHash },
     });
     await grantSignupTrial(user.id);
+    await ensureUserHasOrg(user.id);
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {

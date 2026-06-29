@@ -1,0 +1,56 @@
+[     148ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[     152ms] [LOG] [Fast Refresh] done in 106ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[     576ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[     585ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[     700ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[     730ms] [LOG] [Fast Refresh] done in 131ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2073798ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2073902ms] [LOG] [Fast Refresh] done in 176ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2349997ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2350209ms] [LOG] [Fast Refresh] done in 312ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2350539ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2350631ms] [LOG] [Fast Refresh] done in 192ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2350974ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2351016ms] [LOG] [Fast Refresh] done in 142ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2351211ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2351260ms] [LOG] [Fast Refresh] done in 150ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2519555ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2519763ms] [LOG] [Fast Refresh] done in 88ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2519879ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2519904ms] [LOG] [Fast Refresh] done in 125ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2547998ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2548191ms] [LOG] [Fast Refresh] done in 203ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2548314ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2548436ms] [LOG] [Fast Refresh] done in 223ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2548551ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2548565ms] [LOG] [Fast Refresh] done in 115ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2559724ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2559895ms] [LOG] [Fast Refresh] done in 48ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2731548ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2731742ms] [LOG] [Fast Refresh] done in 28ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2731998ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2732001ms] [LOG] [Fast Refresh] done in 105ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2739000ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2739138ms] [LOG] [Fast Refresh] done in 26ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2739835ms] PrismaClientUnknownRequestError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$db$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].membership.findFirst()` invocation in
+/Users/djosubotic/Desktop/Noqyris/repository/viciral/.next/dev/server/chunks/ssr/[root-of-the-server]__1i3579r._.js:188:155
+
+  185     });
+  186 }
+  187 async function ensureUserHasOrg(userId) {
+→ 188     const existing = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$db$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["prisma"].membership.findFirst(
+Error in connector: Error querying the database: FATAL: (EMAXCONNSESSION) max clients reached in session mode - max clients are limited to pool_size: 15
+    at  ensureUserHasOrg (about://React/Server/file:///Users/djosubotic/Desktop/Noqyris/repository/viciral/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__1i3579r._.js?67:188:22)
+    at  getActiveOrg (about://React/Server/file:///Users/djosubotic/Desktop/Noqyris/repository/viciral/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__1i3579r._.js?68:491:17)
+    at  StudioLayout (about://React/Server/file:///Users/djosubotic/Desktop/Noqyris/repository/viciral/.next/dev/server/chunks/ssr/%5Broot-of-the-server%5D__1i3579r._.js?53:526:31)
+    at resolveErrorDev (http://localhost:3000/_next/static/chunks/0k5d_next_dist_compiled_react-server-dom-turbopack_0pvk2an._.js:1919:150)
+    at processFullStringRow (http://localhost:3000/_next/static/chunks/0k5d_next_dist_compiled_react-server-dom-turbopack_0pvk2an._.js:2434:29)
+    at processFullBinaryRow (http://localhost:3000/_next/static/chunks/0k5d_next_dist_compiled_react-server-dom-turbopack_0pvk2an._.js:2393:9)
+    at processBinaryChunk (http://localhost:3000/_next/static/chunks/0k5d_next_dist_compiled_react-server-dom-turbopack_0pvk2an._.js:2502:221)
+    at progress (http://localhost:3000/_next/static/chunks/0k5d_next_dist_compiled_react-server-dom-turbopack_0pvk2an._.js:2689:13)
+[ 2852445ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2852545ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2852683ms] [LOG] [Fast Refresh] done in 201ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2852936ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 2852945ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477

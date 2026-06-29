@@ -11,29 +11,82 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  image     String? // avatar (Auth.js)
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String? // avatar (Auth.js)
   emailVerified DateTime?
   /// bcrypt hash for the email+password (Credentials) login; null for OAuth-only users.
-  passwordHash String?
-  imageUrl  String?
+  passwordHash  String?
+  imageUrl      String?
   /// Authoritative credit balance. Mutated atomically (conditional decrement);
   /// the CreditLedger is the audit log. balance == SUM(ledger.amount).
-  creditBalance Int   @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  creditBalance Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
-  brandProfiles BrandProfile[]
-  projects      Project[]
-  generations   Generation[]
-  ledger        CreditLedger[]
-  subscription  Subscription?
+  accounts          Account[]
+  sessions          Session[]
+  brandProfiles     BrandProfile[]
+  projects          Project[]
+  generations       Generation[]
+  ledger            CreditLedger[]
+  subscription      Subscription?
   socialConnections SocialConnection[]
   scheduledPosts    ScheduledPost[]
+  memberships       Membership[]
+}
+
+/// A brand workspace. org = brand (1:1) — carries the brand identity that today
+/// lives on BrandProfile. Org-scoped resources (projects, generations, social
+/// connections, scheduled posts) belong to it. Credits & subscription stay on
+/// User (shared across all of a user's orgs).
+model Organization {
+  id              String   @id @default(cuid())
+  slug            String   @unique // for /[slug]/… routing
+  name            String // brand name
+  // Brand identity (the org IS the brand)
+  colors          Json? // palette, e.g. ["#111", "#f5f5f5"]
+  voice           String? // tone of voice
+  logoUrl         String?
+  referenceImages Json? // persistent character/product reference image urls
+  fonts           Json?
+  notes           String?
+  /// the auto-created default workspace for a user
+  personal        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  members           Membership[]
+  projects          Project[]
+  generations       Generation[]
+  socialConnections SocialConnection[]
+  scheduledPosts    ScheduledPost[]
+  ledgerEntries     CreditLedger[]
+
+  @@index([slug])
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+/// A user's membership in an organization. Team-ready (roles) but solo for now —
+/// every org the user creates gives them an OWNER membership; invite UI ships later.
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           OrgRole      @default(OWNER)
+  createdAt      DateTime     @default(now())
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@index([userId])
 }
 
 /// Auth.js — linked OAuth account (Google, etc.).
@@ -79,21 +132,24 @@ model VerificationToken {
 /// A connected social account (Publishing). OAuth tokens are filled in once the
 /// platform apps are registered; the skeleton models the shape without live keys.
 model SocialConnection {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  platform    String // 'instagram' | 'tiktok' | 'linkedin' | 'facebook'
-  accountName String
-  externalId  String? // platform account id
-  accessToken String? // set after OAuth (absent in the skeleton)
-  status      String   @default("connected") // 'connected' | 'disconnected'
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  platform       String // 'instagram' | 'tiktok' | 'linkedin' | 'facebook'
+  accountName    String
+  externalId     String? // platform account id
+  accessToken    String? // set after OAuth (absent in the skeleton)
+  status         String       @default("connected") // 'connected' | 'disconnected'
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   scheduledPosts ScheduledPost[]
 
   @@unique([userId, platform, externalId])
   @@index([userId])
+  @@index([organizationId])
 }
 
 enum ScheduledPostStatus {
@@ -106,58 +162,64 @@ enum ScheduledPostStatus {
 
 /// A post queued to publish to a platform at a time (content calendar).
 model ScheduledPost {
-  id           String              @id @default(cuid())
-  userId       String
-  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  connectionId String?
-  connection   SocialConnection?   @relation(fields: [connectionId], references: [id], onDelete: SetNull)
-  platform     String
-  caption      String
-  mediaUrl     String?
-  scheduledAt  DateTime
-  status       ScheduledPostStatus @default(SCHEDULED)
-  externalId   String? // post id on the platform after publish
-  error        String?
-  generationId String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  id             String              @id @default(cuid())
+  userId         String
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  connectionId   String?
+  connection     SocialConnection?   @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  platform       String
+  caption        String
+  mediaUrl       String?
+  scheduledAt    DateTime
+  status         ScheduledPostStatus @default(SCHEDULED)
+  externalId     String? // post id on the platform after publish
+  error          String?
+  generationId   String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@index([userId])
+  @@index([organizationId])
   @@index([status, scheduledAt])
 }
 
 /// A user's brand: colors, voice, logo. Injected into every generation — the data moat.
 model BrandProfile {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  colors    Json? // palette, e.g. ["#111", "#f5f5f5"]
-  voice     String? // tone of voice description
-  logoUrl   String?
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  colors          Json? // palette, e.g. ["#111", "#f5f5f5"]
+  voice           String? // tone of voice description
+  logoUrl         String?
   /// Persistent character/face/product reference image URLs. Injected as
   /// image-to-image references into generations for visual consistency (the moat).
   referenceImages Json?
-  fonts     Json?
-  notes     String?
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  fonts           Json?
+  notes           String?
+  isDefault       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([userId])
 }
 
 model Project {
-  id          String       @id @default(cuid())
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  module      String // module slug
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  generations Generation[]
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  module         String // module slug
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  generations    Generation[]
 
   @@index([userId])
+  @@index([organizationId])
 }
 
 enum GenerationStatus {
@@ -169,41 +231,44 @@ enum GenerationStatus {
 
 /// One run of a module (e.g. a Social Pack generation).
 model Generation {
-  id          String           @id @default(cuid())
-  userId      String
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projectId   String?
-  project     Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  module      String
-  mode        String // 'manual' | 'auto'
-  status      GenerationStatus @default(PENDING)
-  inputs      Json
-  creditsEst  Int              @default(0)
-  creditsUsed Int              @default(0)
-  error       String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  assets      Asset[]
+  id             String           @id @default(cuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  projectId      String?
+  project        Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  module         String
+  mode           String // 'manual' | 'auto'
+  status         GenerationStatus @default(PENDING)
+  inputs         Json
+  creditsEst     Int              @default(0)
+  creditsUsed    Int              @default(0)
+  error          String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  assets         Asset[]
 
   @@index([userId])
+  @@index([organizationId])
   @@index([status])
 }
 
 /// A generated output (image/video/text) belonging to a Generation.
 model Asset {
-  id           String     @id @default(cuid())
-  generationId String
-  generation   Generation @relation(fields: [generationId], references: [id], onDelete: Cascade)
-  kind         String // 'image' | 'video' | 'text'
-  url          String? // persisted (R2) url
-  sourceUrl    String? // original provider url (temporary)
-  text         String?
-  modelId      String?
-  meta         Json?
+  id            String     @id @default(cuid())
+  generationId  String
+  generation    Generation @relation(fields: [generationId], references: [id], onDelete: Cascade)
+  kind          String // 'image' | 'video' | 'text'
+  url           String? // persisted (R2) url
+  sourceUrl     String? // original provider url (temporary)
+  text          String?
+  modelId       String?
+  meta          Json?
   // For async (queued) video jobs:
   providerJobId String?
   jobStatus     String? // 'queued' | 'completed' | 'failed'
-  createdAt    DateTime   @default(now())
+  createdAt     DateTime   @default(now())
 
   @@index([generationId])
   @@index([providerJobId])
@@ -218,19 +283,24 @@ enum LedgerType {
 
 /// Append-only credit ledger — the source of truth for billing. Amount is signed.
 model CreditLedger {
-  id           String     @id @default(cuid())
-  userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type         LedgerType
-  amount       Int // positive = added, negative = consumed
-  balanceAfter Int
-  reason       String?
-  refId        String? // generation id / lemon squeezy order id
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Which brand/org the spend is attributed to (billing stays per-user; this is
+  /// for per-brand reporting). Nullable + SetNull so the audit log survives a deleted org.
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  type           LedgerType
+  amount         Int // positive = added, negative = consumed
+  balanceAfter   Int
+  reason         String?
+  refId          String? // generation id / lemon squeezy order id
   /// Dedup key for idempotent grants (e.g. Lemon Squeezy webhook retries).
-  idempotencyKey String? @unique
-  createdAt    DateTime   @default(now())
+  idempotencyKey String?       @unique
+  createdAt      DateTime      @default(now())
 
   @@index([userId])
+  @@index([organizationId])
 }
 
 model Subscription {

@@ -1,128 +1,151 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
-import { MODULES } from "@/lib/modules/registry";
-import { ModuleIcon } from "@/components/icons";
-import { estimateModuleCredits } from "@/lib/credits/estimate";
+import { Sparkles, Globe, Smartphone, Hexagon, ArrowRight, Wand2 } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth";
+import { getActiveOrg } from "@/lib/active-org";
+import { colorsToStrings } from "@/lib/brand/inject";
 import { getLocale } from "@/lib/i18n-server";
-import { moduleName, moduleTagline, CATEGORY_LABEL } from "@/lib/modules/i18n";
 
-const CAT_GRAD: Record<string, string> = {
-  social: "from-pink-500 to-rose-500",
-  video: "from-violet-500 to-indigo-500",
-  brand: "from-amber-500 to-orange-500",
-  web: "from-emerald-500 to-teal-500",
-  image: "from-sky-500 to-blue-500",
-  audio: "from-fuchsia-500 to-purple-500",
-};
+const BUILDERS = [
+  { id: "content", href: "/studio/content", icon: Sparkles, grad: "from-pink-500 to-rose-500" },
+  { id: "web", href: "/studio/website", icon: Globe, grad: "from-emerald-500 to-teal-500" },
+  { id: "app", href: "/studio/app-builder", icon: Smartphone, grad: "from-sky-500 to-blue-500" },
+  { id: "logo", href: "/studio/logo", icon: Hexagon, grad: "from-amber-500 to-orange-500" },
+] as const;
 
 const T = {
   sr: {
-    eyebrow: "Studio",
-    titleA: "Napravi ",
-    titleHi: "nešto",
-    sub: "Izaberi modul — više AI modela radi zajedno. Cenu u kreditima vidiš pre pokretanja.",
-    auto: "Auto",
-    soon: "Uskoro",
-    from: "od ≈",
-    credits: "kredita",
+    eyebrow: "Brend workspace",
+    titleA: "Pravi za ",
+    sub: "Sve usluge za tvoj brend — jedan identitet u svemu što napraviš.",
+    identity: "Identitet brenda",
+    editBrand: "Uredi brend →",
+    noVoice: "Ton glasa nije postavljen.",
+    defineTitle: "Definiši svoj brend",
+    defineSub:
+      "Boje, glas i logo se ubacuju u SVAKU generaciju (look-alike). Postavi ih, ili pusti Brand Kit da ih napravi, pre nego što kreneš.",
+    defineCta: "Podesi brend",
+    brandKit: "Brand Kit (auto)",
+    builders: {
+      content: { name: "Content creation", tag: "Slike, video i objave — u stilu brenda." },
+      web: { name: "Web builder", tag: "Responsive sajt iz opisa brenda." },
+      app: { name: "App builder", tag: "Interaktivna multi-screen aplikacija." },
+      logo: { name: "Logo builder", tag: "SVG logo varijante u bojama brenda." },
+    } as Record<string, { name: string; tag: string }>,
   },
   en: {
-    eyebrow: "Studio",
-    titleA: "Make ",
-    titleHi: "something",
-    sub: "Pick a module — multiple AI models working together. You see the credit cost before running.",
-    auto: "Auto",
-    soon: "Soon",
-    from: "from ≈",
-    credits: "credits",
+    eyebrow: "Brand workspace",
+    titleA: "Build for ",
+    sub: "Every service for your brand — one identity across everything you make.",
+    identity: "Brand identity",
+    editBrand: "Edit brand →",
+    noVoice: "No tone of voice set yet.",
+    defineTitle: "Define your brand",
+    defineSub:
+      "Colors, voice and logo are injected into EVERY generation (look-alike). Set them, or let Brand Kit make them, before you start.",
+    defineCta: "Set up brand",
+    brandKit: "Brand Kit (auto)",
+    builders: {
+      content: { name: "Content creation", tag: "Images, video and posts — in your brand style." },
+      web: { name: "Web builder", tag: "Responsive site from a brand description." },
+      app: { name: "App builder", tag: "Interactive multi-screen app." },
+      logo: { name: "Logo builder", tag: "SVG logo variants in your brand colors." },
+    } as Record<string, { name: string; tag: string }>,
   },
 } as const;
 
 export default async function StudioHub() {
   const locale = await getLocale();
   const t = T[locale];
+  const user = await getCurrentUser();
+  const org = await getActiveOrg(user.id);
+  const colors = colorsToStrings(org.colors);
+  const hasIdentity = Boolean(org.voice?.trim() || colors.length || org.logoUrl);
 
   return (
     <main className="relative mx-auto w-full max-w-6xl flex-1 px-6 py-12">
-      {/* Ambient top glow so the studio reads "lit", like the landing */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(75%_100%_at_50%_0%,rgba(99,102,241,0.14),transparent_70%)]"
       />
-      <header className="relative mb-10">
+      <header className="relative mb-8">
         <p className="eyebrow">
           <span aria-hidden className="size-1.5 rounded-full bg-violet-400" />
           {t.eyebrow}
         </p>
         <h1 className="mt-4 text-4xl font-bold tracking-tight text-white">
           {t.titleA}
-          <span className="gradient-text">{t.titleHi}</span>
+          <span className="gradient-text">{org.name}</span>
         </h1>
         <p className="mt-3 max-w-2xl text-lg leading-relaxed text-zinc-400">{t.sub}</p>
       </header>
 
-      <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.map((m) => {
-          const available = m.status === "available";
-          const estimate = estimateModuleCredits(m.slug);
-          const grad = CAT_GRAD[m.category] ?? "from-zinc-600 to-zinc-700";
-          const catLabel = CATEGORY_LABEL[m.category]?.[locale] ?? m.category;
-
-          const inner = (
-            <div
-              className={`group relative flex h-full flex-col rounded-2xl p-5 transition-all duration-200 ${
-                available
-                  ? "card card-frost hover:-translate-y-1 hover:border-violet-400/40 hover:shadow-[0_24px_70px_-36px_rgba(139,92,246,0.7)]"
-                  : "border border-dashed border-white/10 bg-white/[0.02] opacity-70"
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <span
-                  className={`grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br ${grad} shadow-lg`}
-                >
-                  <ModuleIcon slug={m.slug} className="h-[22px] w-[22px] text-white" strokeWidth={2} />
-                </span>
-                <div className="flex items-center gap-1.5">
-                  {available && m.supportsAuto && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-300 ring-1 ring-inset ring-violet-400/20">
-                      <Zap className="h-3 w-3 fill-violet-300" strokeWidth={0} aria-hidden />
-                      {t.auto}
-                    </span>
-                  )}
-                  {!available && (
-                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-zinc-400">
-                      {t.soon}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="mt-4 font-semibold text-zinc-100">
-                {moduleName(m.slug, locale, m.name)}
-              </div>
-              <p className="mt-1 flex-1 text-sm text-zinc-400">
-                {moduleTagline(m.slug, locale, m.tagline)}
-              </p>
-              <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3 text-xs">
-                <span className="rounded-full bg-white/5 px-2 py-0.5 font-medium text-zinc-400">
-                  {catLabel}
-                </span>
-                {available && estimate > 0 && (
-                  <span className="text-zinc-500">
-                    {t.from} {estimate} {t.credits}
-                  </span>
-                )}
-              </div>
+      {/* Brand identity at a glance — the source of the universal context */}
+      {hasIdentity ? (
+        <div className="card card-frost relative mb-8 flex flex-wrap items-center gap-4 rounded-2xl p-5">
+          {org.logoUrl ? (
+            <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/10 bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={org.logoUrl} alt="" className="max-h-full max-w-full object-contain p-1.5" />
+            </span>
+          ) : null}
+          <div className="min-w-0 flex-1">
+            <p className="mono text-[11px] uppercase tracking-[0.16em] text-zinc-500">{t.identity}</p>
+            <p className="mt-0.5 truncate text-sm text-zinc-300">{org.voice?.trim() || t.noVoice}</p>
+            {colors.length > 0 && (
+              <span className="mt-2 flex flex-wrap gap-1.5">
+                {colors.map((c) => (
+                  <span key={c} title={c} className="size-5 rounded-md ring-1 ring-inset ring-white/15" style={{ backgroundColor: c }} />
+                ))}
+              </span>
+            )}
+          </div>
+          <Link href="/studio/brand" className="shrink-0 text-sm font-medium text-violet-300 transition-colors hover:text-violet-200">
+            {t.editBrand}
+          </Link>
+        </div>
+      ) : (
+        <div className="card card-frost relative mb-8 flex flex-col gap-4 rounded-2xl border-violet-400/20 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/15 text-violet-300 ring-1 ring-inset ring-violet-400/30">
+              <Wand2 className="size-5" strokeWidth={1.75} aria-hidden />
+            </span>
+            <div>
+              <p className="font-semibold text-white">{t.defineTitle}</p>
+              <p className="mt-1 max-w-xl text-sm leading-relaxed text-zinc-400">{t.defineSub}</p>
             </div>
-          );
-
-          return available ? (
-            <Link key={m.slug} href={`/studio/${m.slug}`}>
-              {inner}
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <Link href="/studio/brand-kit" className="rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-violet-400/40">
+              {t.brandKit}
             </Link>
-          ) : (
-            <div key={m.slug} aria-disabled>
-              {inner}
-            </div>
+            <Link href="/studio/brand" className="rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500 px-3.5 py-2 text-sm font-semibold text-white">
+              {t.defineCta}
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* The builders */}
+      <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {BUILDERS.map((b) => {
+          const info = t.builders[b.id];
+          return (
+            <Link
+              key={b.id}
+              href={b.href}
+              className="card card-frost group flex items-start gap-4 rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1 hover:border-violet-400/40 hover:shadow-[0_24px_70px_-36px_rgba(139,92,246,0.7)]"
+            >
+              <span className={`grid size-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${b.grad} shadow-lg`}>
+                <b.icon className="size-6 text-white" strokeWidth={2} aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-white">{info.name}</span>
+                  <ArrowRight className="size-4 text-zinc-600 transition-colors group-hover:text-violet-300" aria-hidden />
+                </div>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-400">{info.tag}</p>
+              </div>
+            </Link>
           );
         })}
       </div>

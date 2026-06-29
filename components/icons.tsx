@@ -23,6 +23,8 @@ import {
   GraduationCap,
   Mic2,
   Smartphone,
+  Image as ImageIcon,
+  Hexagon,
   type LucideIcon,
 } from "lucide-react";
 import type { ReactElement } from "react";
@@ -48,6 +50,9 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   avatar: Speech,
   dubbing: Languages,
   music: Music,
+  image: ImageIcon,
+  logo: Hexagon,
+  "app-builder": Smartphone,
 };
 
 export function ModuleIcon({
@@ -66,6 +71,11 @@ export function ModuleIcon({
 // ---- Studio nav (keyed by nav id) ----
 const NAV_ICONS: Record<string, LucideIcon> = {
   studio: LayoutGrid,
+  brand: Palette,
+  content: Sparkles,
+  web: Globe,
+  app: Smartphone,
+  logo: Hexagon,
   templates: LayoutTemplate,
   calendar: Calendar,
   history: History,

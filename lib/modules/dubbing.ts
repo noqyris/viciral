@@ -35,7 +35,7 @@ export const dubbingModule: ModuleDef<Input> = {
   name: "Dubbing / Lokalizacija",
   tagline: "Video → isti video na drugom jeziku (prevod + sinhronizovane usne).",
   category: "video",
-  status: "available",
+  status: "soon",
   kind: "async",
   supportsAuto: false,
   icon: "🌍",

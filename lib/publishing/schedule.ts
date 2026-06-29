@@ -13,7 +13,7 @@ export interface ScheduleInput {
 }
 
 /** Queues a post to publish at a time (content calendar). */
-export async function schedulePost(userId: string, input: ScheduleInput) {
+export async function schedulePost(userId: string, input: ScheduleInput, organizationId: string) {
   if (!isPlatform(input.platform)) throw new AppError("Nepoznata platforma", 400);
   if (input.caption.trim().length === 0) throw new AppError("Tekst objave je obavezan", 400);
   if (Number.isNaN(input.scheduledAt.getTime())) throw new AppError("Neispravan datum", 400);
@@ -47,6 +47,7 @@ export async function schedulePost(userId: string, input: ScheduleInput) {
   return prisma.scheduledPost.create({
     data: {
       userId,
+      organizationId,
       platform: input.platform,
       caption: input.caption.slice(0, 4000),
       mediaUrl: input.mediaUrl,
@@ -58,9 +59,9 @@ export async function schedulePost(userId: string, input: ScheduleInput) {
   });
 }
 
-export function listScheduled(userId: string) {
+export function listScheduled(userId: string, organizationId?: string) {
   return prisma.scheduledPost.findMany({
-    where: { userId },
+    where: { userId, ...(organizationId ? { organizationId } : {}) },
     orderBy: { scheduledAt: "asc" },
     take: 100,
   });

@@ -42,7 +42,7 @@ export const imageToolsModule: ModuleDef<Input> = {
   name: "Doterivanje slike",
   tagline: "Ukloni pozadinu, povećaj rezoluciju ili promeni format slike.",
   category: "image",
-  status: "available",
+  status: "soon",
   supportsAuto: false,
   icon: "🪄",
   inputSchema,

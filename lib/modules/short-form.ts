@@ -71,7 +71,7 @@ export const shortFormModule: ModuleDef<Input> = {
   name: "Short-Form Klipovi",
   tagline: "Dug video → plan najboljih kratkih klipova (hook + caption + score).",
   category: "video",
-  status: "available",
+  status: "soon",
   supportsAuto: true,
   icon: "✂️",
   inputSchema,

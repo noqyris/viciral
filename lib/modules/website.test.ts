@@ -2,18 +2,38 @@ import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/credits/pricing";
 import { websiteModule } from "./website";
 
-const input = { siteName: "Acme", description: "kafa za mlade", goal: "" };
+const base = { siteName: "Acme", description: "kafa za mlade" };
+const est = (extra: Record<string, unknown> = {}) =>
+  websiteModule.estimateCredits(websiteModule.inputSchema.parse({ ...base, ...extra }));
+
+const opusMedium = estimateCredits("claude-opus", { inputTokens: 2500, outputTokens: 3000 });
 
 describe("website estimate (reservation upper bound)", () => {
   it("produces a positive estimate", () => {
-    expect(websiteModule.estimateCredits(input)).toBeGreaterThan(0);
+    expect(est()).toBeGreaterThan(0);
   });
 
-  it("covers a real run (Sonnet text + up to 3 images)", () => {
-    const estimate = websiteModule.estimateCredits(input);
+  it("default (images=hero) covers a real Sonnet run + 1 hero image", () => {
     const actual =
-      estimateCredits("nano-banana", { numImages: 3 }) +
+      estimateCredits("nano-banana", { numImages: 1 }) +
       estimateCredits("claude-sonnet", { inputTokens: 2000, outputTokens: 3000 });
-    expect(estimate).toBeGreaterThanOrEqual(actual);
+    expect(est()).toBeGreaterThanOrEqual(actual);
+  });
+
+  it("images=all reserves the hero + the section-image cap", () => {
+    const actual =
+      estimateCredits("nano-banana", { numImages: 5 }) + // 1 hero + 4 section cap
+      estimateCredits("claude-sonnet", { inputTokens: 2000, outputTokens: 3000 });
+    expect(est({ imagesMode: "all" })).toBeGreaterThanOrEqual(actual);
+  });
+
+  it("images=none reserves text only (no image credits)", () => {
+    expect(est({ imagesMode: "none" })).toBe(opusMedium);
+  });
+
+  it("longer copy reserves more text than shorter", () => {
+    expect(est({ copyLength: "long", imagesMode: "none" })).toBeGreaterThan(
+      est({ copyLength: "short", imagesMode: "none" }),
+    );
   });
 });

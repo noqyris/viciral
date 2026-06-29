@@ -17,8 +17,9 @@ const OPUS_INPUT_TOKENS = 2000;
 const SOCIAL_OUTPUT_TOKENS = 2000;
 const BRAND_OUTPUT_TOKENS = 2000;
 const WEBSITE_INPUT_TOKENS = 2500;
-const WEBSITE_OUTPUT_TOKENS = 3000;
-const WEBSITE_IMAGES = 3; // hero + up to 2 sections
+const WEBSITE_MAX_SECTION_IMAGES = 4; // hard cap on section images in "all" mode
+// Output-token budget by copy length (mirrors website.ts OUTPUT_BY_LENGTH).
+const WEBSITE_OUTPUT_BY_LENGTH = { short: 2200, medium: 3000, long: 4200 } as const;
 // Talking-head length is driven by the script (~150 wpm ≈ 2.5 words/sec), clamped.
 const AVATAR_MIN_SEC = 3;
 const AVATAR_MAX_SEC = 120;
@@ -53,8 +54,10 @@ export function estimateModuleCredits(
       const postCount = intIn(inputs.postCount, 1, 10, 3);
       const variants = intIn(inputs.variantsPerPost, 1, 3, 1);
       // Sum per-post (the generate loop spends once PER POST) — same rounding
-      // granularity as the actual charge, so reserve == charge exactly.
-      const imagesPerPost = estimateCredits("nano-banana", { numImages: variants });
+      // granularity as the actual charge, so reserve == charge exactly. Images
+      // can be turned off (captions only), which removes their cost entirely.
+      const includeImage = inputs.includeImage !== false;
+      const imagesPerPost = includeImage ? estimateCredits("nano-banana", { numImages: variants }) : 0;
       return (
         postCount * imagesPerPost +
         estimateCredits("claude-opus", {
@@ -73,22 +76,70 @@ export function estimateModuleCredits(
           outputTokens: BRAND_OUTPUT_TOKENS,
         })
       );
-    case "website":
+    case "website": {
+      // Reserve at the MAX images a config can emit (hero + up to N section
+      // images), priced with Opus text at the copy-length output cap. Manual runs
+      // use the cheaper Sonnet and fewer images → the ledger refunds the rest.
+      const imagesMode = typeof inputs.imagesMode === "string" ? inputs.imagesMode : "hero";
+      const sections = Array.isArray(inputs.sections) ? inputs.sections : [];
+      const copyLength = (["short", "medium", "long"] as const).includes(
+        inputs.copyLength as "short" | "medium" | "long",
+      )
+        ? (inputs.copyLength as "short" | "medium" | "long")
+        : "medium";
+
+      const maxHero = imagesMode === "none" ? 0 : 1;
+      const maxSections =
+        imagesMode !== "all"
+          ? 0
+          : sections.length > 0
+            ? Math.min(
+                sections.filter((s) => (s as { image?: unknown })?.image === true).length,
+                WEBSITE_MAX_SECTION_IMAGES,
+              )
+            : WEBSITE_MAX_SECTION_IMAGES;
+      const maxImages = maxHero + maxSections;
+
       return (
-        estimateCredits("nano-banana", { numImages: WEBSITE_IMAGES }) +
+        (maxImages > 0 ? estimateCredits("nano-banana", { numImages: maxImages }) : 0) +
         estimateCredits("claude-opus", {
           inputTokens: WEBSITE_INPUT_TOKENS,
-          outputTokens: WEBSITE_OUTPUT_TOKENS,
+          outputTokens: WEBSITE_OUTPUT_BY_LENGTH[copyLength],
         })
       );
+    }
     case "cinematic": {
-      const durationSec = Number(inputs.durationSec) === 10 ? 10 : 5;
+      // Seedance caps one clip at 15s (longer videos chain multiple clips).
+      const durationSec = intIn(inputs.durationSec, 4, 15, 5);
       return estimateCredits("seedance-2", {
         durationSec,
         width: VIDEO_DIMENSIONS.width,
         height: VIDEO_DIMENSIONS.height,
       });
     }
+    case "image": {
+      const variants = intIn(inputs.variants, 1, 4, 2);
+      // Optional AI prompt-enhance adds one short text call. Reserve it at Opus
+      // (the priciest) so the reservation always covers the actual run (manual
+      // uses the cheaper Sonnet, so the unused remainder is refunded).
+      const enhance = inputs.enhancePrompt === true;
+      return (
+        estimateCredits("nano-banana", { numImages: variants }) +
+        (enhance ? estimateCredits("claude-opus", { inputTokens: 700, outputTokens: 500 }) : 0)
+      );
+    }
+    case "logo": {
+      const variants = intIn(inputs.variants, 1, 4, 3);
+      return (
+        estimateCredits("recraft-vector", { numImages: variants }) +
+        estimateCredits("claude-opus", { inputTokens: 1500, outputTokens: 1200 })
+      );
+    }
+    case "app-builder":
+      return (
+        estimateCredits("nano-banana", { numImages: 3 }) +
+        estimateCredits("claude-opus", { inputTokens: 2500, outputTokens: 3500 })
+      );
     case "image-tools": {
       const model = MODEL_BY_OP[inputs.operation as keyof typeof MODEL_BY_OP] ?? "bg-removal";
       return estimateCredits(model, { numImages: 1 });

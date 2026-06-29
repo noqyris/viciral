@@ -2,6 +2,7 @@ import type { ZodType } from "zod";
 import type { BrandProfile } from "@prisma/client";
 import type { Providers } from "@/lib/providers";
 import type { UsageParams } from "@/lib/credits/pricing";
+import type { BrandContext } from "@/lib/brand/inject";
 
 /**
  * A module is an integrated, multi-model workflow (the product's moat).
@@ -27,6 +28,12 @@ export interface ModuleContext<I> {
   mode: GenerationMode;
   inputs: I;
   brand?: BrandProfile | null;
+  /**
+   * Precomputed universal brand context (versioned text block + reference images).
+   * Inject `brandContext.promptBlock` into text prompts and spread
+   * `brandContext.referenceImages` into image/video calls for "look-alike" output.
+   */
+  brandContext?: BrandContext;
   providers: Providers;
   /** Optional progress reporting (e.g. for SSE/log). */
   onProgress?: (message: string) => void;

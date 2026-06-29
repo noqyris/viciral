@@ -21,7 +21,7 @@ export const musicModule: ModuleDef<Input> = {
   name: "Muzika / Soundtrack",
   tagline: "Opis → muzička podloga za video i reels (po sekundi).",
   category: "audio",
-  status: "available",
+  status: "soon",
   supportsAuto: false,
   icon: "🎵",
   inputSchema,

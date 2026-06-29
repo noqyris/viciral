@@ -1,0 +1,111 @@
+- generic [active] [ref=e1]:
+  - complementary [ref=e2]:
+    - link "Viciral" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Viciral
+    - button "D Brand Dev User" [ref=e15]:
+      - generic [ref=e16]: D
+      - generic [ref=e17]:
+        - generic [ref=e18]: Brand
+        - generic [ref=e19]: Dev User
+      - img [ref=e20]
+    - navigation [ref=e23]:
+      - link "Home" [ref=e24] [cursor=pointer]:
+        - /url: /studio
+        - img [ref=e25]
+        - text: Home
+      - link "Brand" [ref=e30] [cursor=pointer]:
+        - /url: /studio/brand
+        - img [ref=e31]
+        - text: Brand
+      - link "Content" [ref=e37] [cursor=pointer]:
+        - /url: /studio/content
+        - img [ref=e38]
+        - text: Content
+      - link "Web" [ref=e41] [cursor=pointer]:
+        - /url: /studio/website
+        - img [ref=e42]
+        - text: Web
+      - link "App" [ref=e45] [cursor=pointer]:
+        - /url: /studio/app-builder
+        - img [ref=e46]
+        - text: App
+      - link "Logo" [ref=e48] [cursor=pointer]:
+        - /url: /studio/logo
+        - img [ref=e49]
+        - text: Logo
+      - link "History" [ref=e51] [cursor=pointer]:
+        - /url: /studio/history
+        - img [ref=e52]
+        - text: History
+      - link "Calendar" [ref=e56] [cursor=pointer]:
+        - /url: /studio/calendar
+        - img [ref=e57]
+        - text: Calendar
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic "credits" [ref=e61]:
+          - img [ref=e62]
+          - text: …
+          - generic [ref=e65]: credits
+        - generic [ref=e66]:
+          - button "SR" [ref=e67]
+          - button "EN" [pressed] [ref=e68]
+      - generic [ref=e69]:
+        - generic "Dev User" [ref=e70]
+        - button "Sign out" [ref=e71]:
+          - img [ref=e72]
+          - text: Sign out
+  - main [ref=e76]:
+    - generic [ref=e77]:
+      - paragraph [ref=e78]: Brand workspace
+      - heading "Build for Dev User" [level=1] [ref=e80]
+      - paragraph [ref=e81]: Every service for your brand — one identity across everything you make.
+    - generic [ref=e82]:
+      - generic [ref=e83]:
+        - img [ref=e85]
+        - generic [ref=e88]:
+          - paragraph [ref=e89]: Define your brand
+          - paragraph [ref=e90]: Colors, voice and logo are injected into EVERY generation (look-alike). Set them, or let Brand Kit make them, before you start.
+      - generic [ref=e91]:
+        - link "Brand Kit (auto)" [ref=e92] [cursor=pointer]:
+          - /url: /studio/brand-kit
+        - link "Set up brand" [ref=e93] [cursor=pointer]:
+          - /url: /studio/brand
+    - generic [ref=e94]:
+      - link "Content creation Images, video and posts — in your brand style." [ref=e95] [cursor=pointer]:
+        - /url: /studio/content
+        - img [ref=e97]
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - generic [ref=e102]: Content creation
+            - img [ref=e103]
+          - paragraph [ref=e105]: Images, video and posts — in your brand style.
+      - link "Web builder Responsive site from a brand description." [ref=e106] [cursor=pointer]:
+        - /url: /studio/website
+        - img [ref=e108]
+        - generic [ref=e111]:
+          - generic [ref=e112]:
+            - generic [ref=e113]: Web builder
+            - img [ref=e114]
+          - paragraph [ref=e116]: Responsive site from a brand description.
+      - link "App builder Interactive multi-screen app." [ref=e117] [cursor=pointer]:
+        - /url: /studio/app-builder
+        - img [ref=e119]
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - generic [ref=e123]: App builder
+            - img [ref=e124]
+          - paragraph [ref=e126]: Interactive multi-screen app.
+      - link "Logo builder SVG logo variants in your brand colors." [ref=e127] [cursor=pointer]:
+        - /url: /studio/logo
+        - img [ref=e129]
+        - generic [ref=e131]:
+          - generic [ref=e132]:
+            - generic [ref=e133]: Logo builder
+            - img [ref=e134]
+          - paragraph [ref=e136]: SVG logo variants in your brand colors.
+  - button "Open Next.js Dev Tools" [ref=e142] [cursor=pointer]:
+    - img [ref=e143]

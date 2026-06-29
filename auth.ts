@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { grantSignupTrial } from "@/lib/auth-trial";
+import { ensureUserHasOrg } from "@/lib/org";
 
 /** Google is only wired when its OAuth keys are present (email+password always works). */
 export const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
@@ -46,7 +47,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   events: {
     // OAuth (Google) signups are created by the adapter — give them the same trial.
     async createUser({ user }) {
-      if (user.id) await grantSignupTrial(user.id);
+      if (user.id) {
+        await grantSignupTrial(user.id);
+        await ensureUserHasOrg(user.id);
+      }
     },
   },
   callbacks: {

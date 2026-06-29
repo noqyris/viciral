@@ -39,6 +39,7 @@ async function addCredits(
   reason: string,
   refId?: string,
   idempotencyKey?: string,
+  organizationId?: string,
 ) {
   if (amount <= 0) throw new Error("amount must be positive");
   try {
@@ -54,6 +55,7 @@ async function addCredits(
       return tx.creditLedger.create({
         data: {
           userId,
+          organizationId,
           type,
           amount,
           balanceAfter: user.creditBalance,
@@ -98,8 +100,9 @@ export function refundCredits(
   reason: string,
   refId?: string,
   idempotencyKey?: string,
+  organizationId?: string,
 ) {
-  return addCredits(userId, amount, "REFUND", reason, refId, idempotencyKey);
+  return addCredits(userId, amount, "REFUND", reason, refId, idempotencyKey, organizationId);
 }
 
 /**
@@ -112,6 +115,7 @@ export async function debitCredits(
   amount: number,
   reason: string,
   refId?: string,
+  organizationId?: string,
 ) {
   if (amount <= 0) throw new Error("debit amount must be positive");
   return prisma.$transaction(async (tx) => {
@@ -132,6 +136,7 @@ export async function debitCredits(
     return tx.creditLedger.create({
       data: {
         userId,
+        organizationId,
         type: "DEBIT",
         amount: -amount,
         balanceAfter: user.creditBalance,

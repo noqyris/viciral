@@ -1,0 +1,202 @@
+- generic [ref=e1]:
+  - complementary [ref=e2]:
+    - link "Viciral" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Viciral
+    - generic [ref=e14]:
+      - button "D Brand Dev User" [expanded] [active] [ref=e15]:
+        - generic [ref=e16]: D
+        - generic [ref=e17]:
+          - generic [ref=e18]: Brand
+          - generic [ref=e19]: Dev User
+        - img [ref=e20]
+      - generic [ref=e280]:
+        - button "D Dev User" [ref=e283]:
+          - generic [ref=e284]: D
+          - generic [ref=e285]: Dev User
+          - img [ref=e286]
+        - button "New brand" [ref=e289]:
+          - img [ref=e290]
+          - text: New brand
+    - navigation [ref=e23]:
+      - link "Studio" [ref=e24] [cursor=pointer]:
+        - /url: /studio
+        - img [ref=e25]
+        - text: Studio
+      - link "Templates" [ref=e30] [cursor=pointer]:
+        - /url: /studio/templates
+        - img [ref=e31]
+        - text: Templates
+      - link "Calendar" [ref=e35] [cursor=pointer]:
+        - /url: /studio/calendar
+        - img [ref=e36]
+        - text: Calendar
+      - link "History" [ref=e38] [cursor=pointer]:
+        - /url: /studio/history
+        - img [ref=e39]
+        - text: History
+      - link "Brands" [ref=e43] [cursor=pointer]:
+        - /url: /studio/brand
+        - img [ref=e44]
+        - text: Brands
+      - link "Connections" [ref=e50] [cursor=pointer]:
+        - /url: /studio/connections
+        - img [ref=e51]
+        - text: Connections
+    - generic [ref=e54]:
+      - generic [ref=e55]:
+        - generic "credits" [ref=e56]:
+          - img [ref=e57]
+          - text: "5000"
+          - generic [ref=e60]: credits
+        - generic [ref=e61]:
+          - button "SR" [ref=e62]
+          - button "EN" [pressed] [ref=e63]
+      - generic [ref=e64]:
+        - generic "Dev User" [ref=e65]
+        - button "Sign out" [ref=e66]:
+          - img [ref=e67]
+          - text: Sign out
+  - main [ref=e71]:
+    - generic [ref=e72]:
+      - paragraph [ref=e73]: Studio
+      - heading "Make something" [level=1] [ref=e75]
+      - paragraph [ref=e76]: Pick a module — multiple AI models working together. You see the credit cost before running.
+    - generic [ref=e77]:
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - heading "Social media" [level=2] [ref=e80]
+          - generic [ref=e81]: "1"
+        - link "Auto Social Media Pack Theme → a set of posts (images + caption + hashtags) for IG/TikTok/LinkedIn. from ≈ 60 credits" [ref=e84] [cursor=pointer]:
+          - /url: /studio/social-pack
+          - generic [ref=e85]:
+            - generic [ref=e86]:
+              - img [ref=e88]
+              - generic [ref=e91]:
+                - img [ref=e92]
+                - text: Auto
+            - generic [ref=e94]: Social Media Pack
+            - paragraph [ref=e95]: Theme → a set of posts (images + caption + hashtags) for IG/TikTok/LinkedIn.
+            - generic [ref=e96]:
+              - generic [ref=e97]: from ≈ 60 credits
+              - img [ref=e98]
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - heading "Video" [level=2] [ref=e102]
+          - generic [ref=e103]: "4"
+        - generic [ref=e105]:
+          - link "Cinematic Video Image + prompt → a cinematic video clip (Seedance). from ≈ 197 credits" [ref=e106] [cursor=pointer]:
+            - /url: /studio/cinematic
+            - generic [ref=e107]:
+              - img [ref=e110]
+              - generic [ref=e115]: Cinematic Video
+              - paragraph [ref=e116]: Image + prompt → a cinematic video clip (Seedance).
+              - generic [ref=e117]:
+                - generic [ref=e118]: from ≈ 197 credits
+                - img [ref=e119]
+          - link "Auto Short-Form Clips Long video → a plan of the best short clips (hook + caption + score). from ≈ 65 credits" [ref=e121] [cursor=pointer]:
+            - /url: /studio/short-form
+            - generic [ref=e122]:
+              - generic [ref=e123]:
+                - img [ref=e125]
+                - generic [ref=e131]:
+                  - img [ref=e132]
+                  - text: Auto
+              - generic [ref=e134]: Short-Form Clips
+              - paragraph [ref=e135]: Long video → a plan of the best short clips (hook + caption + score).
+              - generic [ref=e136]:
+                - generic [ref=e137]: from ≈ 65 credits
+                - img [ref=e138]
+          - link "Avatar / Presenter Portrait + script → a video where a person speaks the text (lip-sync). from ≈ 20 credits" [ref=e140] [cursor=pointer]:
+            - /url: /studio/avatar
+            - generic [ref=e141]:
+              - img [ref=e144]
+              - generic [ref=e148]: Avatar / Presenter
+              - paragraph [ref=e149]: Portrait + script → a video where a person speaks the text (lip-sync).
+              - generic [ref=e150]:
+                - generic [ref=e151]: from ≈ 20 credits
+                - img [ref=e152]
+          - link "Dubbing / Localization Video → the same video in another language (translation + lip-sync). from ≈ 156 credits" [ref=e154] [cursor=pointer]:
+            - /url: /studio/dubbing
+            - generic [ref=e155]:
+              - img [ref=e158]
+              - generic [ref=e162]: Dubbing / Localization
+              - paragraph [ref=e163]: Video → the same video in another language (translation + lip-sync).
+              - generic [ref=e164]:
+                - generic [ref=e165]: from ≈ 156 credits
+                - img [ref=e166]
+      - generic [ref=e168]:
+        - generic [ref=e169]:
+          - heading "Images" [level=2] [ref=e170]
+          - generic [ref=e171]: "2"
+        - generic [ref=e173]:
+          - link "Image Tools Remove the background, upscale, or reframe an image. from ≈ 6 credits" [ref=e174] [cursor=pointer]:
+            - /url: /studio/image-tools
+            - generic [ref=e175]:
+              - img [ref=e178]
+              - generic [ref=e181]: Image Tools
+              - paragraph [ref=e182]: Remove the background, upscale, or reframe an image.
+              - generic [ref=e183]:
+                - generic [ref=e184]: from ≈ 6 credits
+                - img [ref=e185]
+          - link "Image Editor Edit an image with words — fix a detail, swap the background, layer by layer. from ≈ 12 credits" [ref=e187] [cursor=pointer]:
+            - /url: /studio/editor
+            - generic [ref=e188]:
+              - img [ref=e191]
+              - generic [ref=e196]: Image Editor
+              - paragraph [ref=e197]: Edit an image with words — fix a detail, swap the background, layer by layer.
+              - generic [ref=e198]:
+                - generic [ref=e199]: from ≈ 12 credits
+                - img [ref=e200]
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - heading "Brand" [level=2] [ref=e204]
+          - generic [ref=e205]: "1"
+        - link "Auto Brand Kit Name + description → voice, palette, logo and avatar (fills brand memory). from ≈ 60 credits" [ref=e208] [cursor=pointer]:
+          - /url: /studio/brand-kit
+          - generic [ref=e209]:
+            - generic [ref=e210]:
+              - img [ref=e212]
+              - generic [ref=e218]:
+                - img [ref=e219]
+                - text: Auto
+            - generic [ref=e221]: Brand Kit
+            - paragraph [ref=e222]: Name + description → voice, palette, logo and avatar (fills brand memory).
+            - generic [ref=e223]:
+              - generic [ref=e224]: from ≈ 60 credits
+              - img [ref=e225]
+      - generic [ref=e227]:
+        - generic [ref=e228]:
+          - heading "Web" [level=2] [ref=e229]
+          - generic [ref=e230]: "1"
+        - link "Auto Website Builder Brand description → a responsive site with copy and images. from ≈ 71 credits" [ref=e233] [cursor=pointer]:
+          - /url: /studio/website
+          - generic [ref=e234]:
+            - generic [ref=e235]:
+              - img [ref=e237]
+              - generic [ref=e240]:
+                - img [ref=e241]
+                - text: Auto
+            - generic [ref=e243]: Website Builder
+            - paragraph [ref=e244]: Brand description → a responsive site with copy and images.
+            - generic [ref=e245]:
+              - generic [ref=e246]: from ≈ 71 credits
+              - img [ref=e247]
+      - generic [ref=e249]:
+        - generic [ref=e250]:
+          - heading "Audio" [level=2] [ref=e251]
+          - generic [ref=e252]: "1"
+        - link "Music / Soundtrack Description → a music track for video and reels (per second). from ≈ 12 credits" [ref=e255] [cursor=pointer]:
+          - /url: /studio/music
+          - generic [ref=e256]:
+            - img [ref=e259]
+            - generic [ref=e263]: Music / Soundtrack
+            - paragraph [ref=e264]: Description → a music track for video and reels (per second).
+            - generic [ref=e265]:
+              - generic [ref=e266]: from ≈ 12 credits
+              - img [ref=e267]
+  - button "Open Next.js Dev Tools" [ref=e274] [cursor=pointer]:
+    - img [ref=e275]
+  - alert [ref=e278]

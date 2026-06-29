@@ -1,0 +1,25 @@
+[     626ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[     635ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[   32666ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed:  @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   33675ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   34677ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   35679ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   36681ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   37683ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   42686ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   47701ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   52720ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   57734ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   62774ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   67936ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[   73230ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=RA2xF0CD3z4vzUB322mYK' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_client_1z1on1h._.js:13422
+[ 8270450ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 8270488ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 8329341ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[ 8329396ms] [LOG] [Fast Refresh] done in 157ms @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[10294262ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[63653511ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[71371714ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[102773754ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[103648167ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477
+[114873225ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/0k5d_next_dist_1qmvpb9._.js:2477

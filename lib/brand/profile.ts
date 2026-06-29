@@ -5,13 +5,36 @@ import type { BrandProfileDraft } from "@/lib/modules/types";
 import { clampBrandDraft } from "./normalize";
 
 /**
- * Brand memory: load a user's brand profile to inject into generations.
- * Falls back to the user's default profile when no id is given.
+ * Brand memory injected into generations. org = brand: prefer the ACTIVE
+ * organization's identity (colors/voice/logo/reference images). Falls back to the
+ * legacy per-user BrandProfile only when no org is given (deprecated path).
  */
 export async function loadBrand(
   userId: string,
+  organizationId?: string,
   brandId?: string,
 ): Promise<BrandProfile | null> {
+  if (organizationId) {
+    const org = await prisma.organization.findUnique({ where: { id: organizationId } });
+    if (org) {
+      // Map the org onto the BrandProfile shape the modules already consume.
+      return {
+        id: org.id,
+        userId,
+        name: org.name,
+        colors: org.colors,
+        voice: org.voice,
+        logoUrl: org.logoUrl,
+        referenceImages: org.referenceImages,
+        fonts: org.fonts,
+        notes: org.notes,
+        isDefault: org.personal,
+        createdAt: org.createdAt,
+        updatedAt: org.updatedAt,
+      };
+    }
+  }
+  // Legacy fallback (per-user BrandProfile) — kept until fully removed.
   if (brandId) {
     return prisma.brandProfile.findFirst({ where: { id: brandId, userId } });
   }
@@ -27,60 +50,31 @@ export function listBrands(userId: string): Promise<BrandProfile[]> {
 }
 
 /**
- * Saves a Brand Kit result as a BrandProfile (the data moat). Upserts by
- * (userId, name) so re-running Brand Kit for the same brand refreshes it instead
- * of accumulating duplicates. The first brand a user makes becomes their default.
- * Model output is clamped ({@link clampBrandDraft}) to the same bounds as the
- * human form before it touches durable brand memory. Runs in a transaction.
+ * Saves a Brand Kit result into the ACTIVE organization's brand identity (the
+ * data moat — org = brand). Fills voice/notes/colors/logo and seeds the brand's
+ * reference images so later generations stay visually consistent. Model output is
+ * clamped ({@link clampBrandDraft}) to the same bounds as the human form. The
+ * brand kit does NOT rename the workspace — the user names the org.
  */
 export async function createBrandFromKit(
-  userId: string,
+  organizationId: string,
   draft: BrandProfileDraft,
   logoUrl?: string,
   referenceImages?: string[],
-): Promise<BrandProfile> {
-  // Clamp through the same choke point as the human form (referenceImages are
-  // http(s)-only and bounded by clampBrandDraft → referenceImagesToStrings).
+) {
   const brand = clampBrandDraft({ ...draft, referenceImages });
   const colors = (brand.colors ?? undefined) as Prisma.InputJsonValue | undefined;
   const refs = (brand.referenceImages ?? undefined) as Prisma.InputJsonValue | undefined;
 
-  return prisma.$transaction(async (tx) => {
-    const existing = await tx.brandProfile.findFirst({
-      where: { userId, name: brand.name },
-      select: { id: true, logoUrl: true },
-    });
-
-    if (existing) {
-      return tx.brandProfile.update({
-        where: { id: existing.id },
-        data: {
-          voice: brand.voice,
-          notes: brand.notes,
-          colors,
-          logoUrl: logoUrl ?? existing.logoUrl,
-          // Only overwrite references when this run produced some.
-          ...(refs !== undefined ? { referenceImages: refs } : {}),
-        },
-      });
-    }
-
-    const hasDefault = await tx.brandProfile.findFirst({
-      where: { userId, isDefault: true },
-      select: { id: true },
-    });
-
-    return tx.brandProfile.create({
-      data: {
-        userId,
-        name: brand.name,
-        voice: brand.voice,
-        notes: brand.notes,
-        colors,
-        logoUrl,
-        referenceImages: refs,
-        isDefault: !hasDefault,
-      },
-    });
+  return prisma.organization.update({
+    where: { id: organizationId },
+    data: {
+      voice: brand.voice,
+      notes: brand.notes,
+      colors,
+      // Only overwrite logo / references when this run produced them.
+      ...(logoUrl ? { logoUrl } : {}),
+      ...(refs !== undefined ? { referenceImages: refs } : {}),
+    },
   });
 }

@@ -9,6 +9,9 @@ import { editorModule } from "./editor";
 import { avatarModule } from "./avatar";
 import { dubbingModule } from "./dubbing";
 import { musicModule } from "./music";
+import { imageModule } from "./image";
+import { logoModule } from "./logo";
+import { appBuilderModule } from "./app-builder";
 
 /**
  * Module registry. The hub and the studio runner render from this list, so
@@ -26,6 +29,9 @@ export const MODULES: ModuleDef<any>[] = [
   avatarModule,
   dubbingModule,
   musicModule,
+  imageModule,
+  logoModule,
+  appBuilderModule,
 ];
 
 export function getModuleDef(slug: string): ModuleDef | undefined {

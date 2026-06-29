@@ -124,6 +124,8 @@ export const falVideoProvider: VideoProvider = {
         ...(req.prompt ? { prompt: req.prompt } : {}),
         ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
         ...(req.durationSec ? { duration: req.durationSec } : {}),
+        // Seedance accepts aspect_ratio directly (auto/16:9/9:16/1:1/4:3/3:4/21:9).
+        ...(req.aspectRatio ? { aspect_ratio: req.aspectRatio } : {}),
         // Seedance 2 generates native synchronized audio; opt in/out explicitly.
         ...(req.withAudio !== undefined ? { generate_audio: req.withAudio } : {}),
         // Talking-head models: spoken script + voice.
@@ -151,5 +153,33 @@ export const falVideoProvider: VideoProvider = {
       return { status: "queued" };
     }
     return { status: "failed", error: "Unknown queue status" };
+  },
+
+  // ---- Video-chain utilities (synchronous ffmpeg endpoints) ----
+
+  async extractLastFrame(videoUrl: string): Promise<string> {
+    ensureConfigured();
+    const model = getModel("ffmpeg-extract-frame");
+    const result = await fal.subscribe(model.providerModel, {
+      input: { video_url: videoUrl, frame_type: "last" },
+      logs: false,
+    });
+    const data = result.data as { images?: { url: string }[] };
+    const url = data.images?.[0]?.url;
+    if (!url) throw new Error("Frame extraction returned no image");
+    return url;
+  },
+
+  async mergeVideos(videoUrls: string[]): Promise<string> {
+    ensureConfigured();
+    const model = getModel("ffmpeg-merge");
+    const result = await fal.subscribe(model.providerModel, {
+      input: { video_urls: videoUrls },
+      logs: false,
+    });
+    const data = result.data as { video?: { url: string } };
+    const url = data.video?.url;
+    if (!url) throw new Error("Video merge returned no video");
+    return url;
   },
 };

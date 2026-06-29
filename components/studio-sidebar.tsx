@@ -9,35 +9,44 @@ import { useLocale } from "@/components/locale-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Logo } from "@/components/logo";
 import { NavIcon } from "@/components/icons";
+import { OrgSwitcher } from "@/components/org-switcher";
+
+type OrgItem = { id: string; slug: string; name: string; personal: boolean };
 
 const NAV = [
   { id: "studio", href: "/studio", exact: true },
-  { id: "templates", href: "/studio/templates" },
-  { id: "calendar", href: "/studio/calendar" },
+  { id: "brand", href: "/studio/brand" },
+  { id: "content", href: "/studio/content" },
+  { id: "web", href: "/studio/website" },
+  { id: "app", href: "/studio/app-builder" },
+  { id: "logo", href: "/studio/logo" },
   { id: "history", href: "/studio/history" },
-  { id: "brands", href: "/studio/brand" },
-  { id: "connections", href: "/studio/connections" },
+  { id: "calendar", href: "/studio/calendar" },
 ] as const;
 
 const T = {
   sr: {
-    studio: "Studio",
-    templates: "Recepti",
-    calendar: "Kalendar",
+    studio: "Početna",
+    brand: "Brend",
+    content: "Content",
+    web: "Web",
+    app: "App",
+    logo: "Logo",
     history: "Istorija",
-    brands: "Brendovi",
-    connections: "Povezivanje",
+    calendar: "Kalendar",
     credits: "kredita",
     signOut: "Odjavi se",
     signOutShort: "Odjavi",
   },
   en: {
-    studio: "Studio",
-    templates: "Templates",
-    calendar: "Calendar",
+    studio: "Home",
+    brand: "Brand",
+    content: "Content",
+    web: "Web",
+    app: "App",
+    logo: "Logo",
     history: "History",
-    brands: "Brands",
-    connections: "Connections",
+    calendar: "Calendar",
     credits: "credits",
     signOut: "Sign out",
     signOutShort: "Sign out",
@@ -64,7 +73,15 @@ function CreditPill({ creditsLabel }: { creditsLabel: string }) {
   );
 }
 
-export function StudioSidebar({ userLabel }: { userLabel: string }) {
+export function StudioSidebar({
+  userLabel,
+  activeOrg,
+  orgs,
+}: {
+  userLabel: string;
+  activeOrg: { slug: string; name: string };
+  orgs: OrgItem[];
+}) {
   const pathname = usePathname();
   const t = T[useLocale()];
   const logout = () => signOut({ callbackUrl: "/login" });
@@ -96,8 +113,11 @@ export function StudioSidebar({ userLabel }: { userLabel: string }) {
     <>
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-white/10 bg-white/[0.02] px-4 py-5 backdrop-blur-xl md:flex">
-        <div className="mb-8 px-2">
-          <Logo size={26} />
+        <div className="mb-4 px-1">
+          <Logo size={24} />
+        </div>
+        <div className="mb-5">
+          <OrgSwitcher activeOrg={activeOrg} orgs={orgs} />
         </div>
         <nav className="flex flex-1 flex-col gap-1">{links}</nav>
         <div className="mt-4 space-y-3 border-t border-white/10 px-1 pt-4">
@@ -121,15 +141,14 @@ export function StudioSidebar({ userLabel }: { userLabel: string }) {
       </aside>
 
       {/* Mobile top bar + scrollable nav */}
-      <div className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-white/10 bg-[#0a0a0f]/80 px-4 py-3 backdrop-blur-xl md:hidden">
-        <Logo size={22} />
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <CreditPill creditsLabel={t.credits} />
-          <button onClick={logout} className="text-xs text-zinc-400 hover:text-white">
-            {t.signOutShort}
-          </button>
+      <div className="sticky top-0 z-30 flex items-center gap-2 border-b border-white/10 bg-[#0a0a0f]/80 px-3 py-2.5 backdrop-blur-xl md:hidden">
+        <div className="min-w-0 flex-1">
+          <OrgSwitcher activeOrg={activeOrg} orgs={orgs} />
         </div>
+        <CreditPill creditsLabel={t.credits} />
+        <button onClick={logout} className="shrink-0 text-xs text-zinc-400 hover:text-white">
+          {t.signOutShort}
+        </button>
       </div>
       <nav className="sticky top-[57px] z-20 flex gap-1 overflow-x-auto border-b border-white/10 bg-[#0a0a0f]/80 px-3 py-2 backdrop-blur-xl md:hidden">
         {NAV.map((item) => {

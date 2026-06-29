@@ -158,6 +158,30 @@ export const MODEL_CATALOG: Record<string, ModelInfo> = {
     margin: 3,
     cost: { type: "per_second", usd: 0.002 },
   },
+  // Video-chain utilities (arbitrary-length video = chained Seedance clips).
+  // extract-frame pulls the last frame to seed the next clip; merge-videos stitches
+  // the clips into one. Wholesale figures are approximate placeholders — confirm
+  // fal's ffmpeg-api pricing/license before launch (per the whitelist discipline).
+  "ffmpeg-extract-frame": {
+    id: "ffmpeg-extract-frame",
+    label: "Frame extract (ffmpeg)",
+    provider: "fal",
+    providerModel: "fal-ai/ffmpeg-api/extract-frame",
+    kind: "video",
+    commercial: true,
+    margin: 3,
+    cost: { type: "per_image", usd: 0.005 },
+  },
+  "ffmpeg-merge": {
+    id: "ffmpeg-merge",
+    label: "Video merge (ffmpeg)",
+    provider: "fal",
+    providerModel: "fal-ai/ffmpeg-api/merge-videos",
+    kind: "video",
+    commercial: true,
+    margin: 3,
+    cost: { type: "per_second", usd: 0.0005 },
+  },
   // Vector logo / SVG (Faza 12 — Brand Kit credibility). Placeholder price.
   "recraft-vector": {
     id: "recraft-vector",

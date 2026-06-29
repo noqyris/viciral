@@ -14,6 +14,9 @@ import { EditorRunner } from "@/components/editor-runner";
 import { AvatarRunner } from "@/components/avatar-runner";
 import { DubbingRunner } from "@/components/dubbing-runner";
 import { MusicRunner } from "@/components/music-runner";
+import { ImageRunner } from "@/components/image-runner";
+import { LogoRunner } from "@/components/logo-runner";
+import { AppBuilderRunner } from "@/components/app-builder-runner";
 import { ModuleIcon, TemplateIcon } from "@/components/icons";
 import { getLocale } from "@/lib/i18n-server";
 import { moduleName, moduleTagline } from "@/lib/modules/i18n";
@@ -55,6 +58,9 @@ const RUNNERS: Record<string, (mod: ModuleDef, initial: Initial) => ReactNode> =
   avatar: (_mod, initial) => <AvatarRunner initialInputs={initial} />,
   dubbing: (_mod, initial) => <DubbingRunner initialInputs={initial} />,
   music: (_mod, initial) => <MusicRunner initialInputs={initial} />,
+  image: (_mod, initial) => <ImageRunner initialInputs={initial} />,
+  logo: (_mod, initial) => <LogoRunner initialInputs={initial} />,
+  "app-builder": (_mod, initial) => <AppBuilderRunner initialInputs={initial} />,
 };
 
 export default async function ModuleRunnerPage({

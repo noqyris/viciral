@@ -52,10 +52,19 @@ describe("estimateModuleCredits", () => {
       expect(ten).toBeGreaterThan(five);
     });
 
-    it("clamps a junk / unsupported duration to 5s", () => {
+    it("clamps junk / out-of-range duration (valid 4–15s; longer videos chain clips)", () => {
+      // Non-numeric / missing → the 5s default.
       expect(estimateModuleCredits("cinematic", { durationSec: "abc" })).toBe(five);
-      expect(estimateModuleCredits("cinematic", { durationSec: 7 })).toBe(five);
       expect(estimateModuleCredits("cinematic", {})).toBe(five);
+      // 7s is now a real, supported length (not clamped to 5s).
+      expect(estimateModuleCredits("cinematic", { durationSec: 7 })).toBeGreaterThan(five);
+      // Out-of-range numbers clamp to the nearest bound (4s floor, 15s ceiling).
+      expect(estimateModuleCredits("cinematic", { durationSec: 2 })).toBe(
+        estimateModuleCredits("cinematic", { durationSec: 4 }),
+      );
+      expect(estimateModuleCredits("cinematic", { durationSec: 99 })).toBe(
+        estimateModuleCredits("cinematic", { durationSec: 15 }),
+      );
     });
   });
 

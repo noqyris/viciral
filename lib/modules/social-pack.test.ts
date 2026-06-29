@@ -3,13 +3,15 @@ import type { Providers } from "@/lib/providers";
 import { estimateCredits } from "@/lib/credits/pricing";
 import { socialPackModule } from "./social-pack";
 
-const input = {
+// Parse through the schema so the new optional fields get their defaults — the
+// module's typed `estimateCredits`/`generate` expect the full resolved Input.
+const input = socialPackModule.inputSchema.parse({
   topic: "test",
-  platform: "instagram" as const,
+  platform: "instagram",
   postCount: 3,
   tone: "neutralan",
   variantsPerPost: 1,
-};
+});
 
 const PLAN = {
   posts: [

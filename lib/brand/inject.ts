@@ -37,3 +37,39 @@ export function brandPromptLine(
 
   return parts.join(" ");
 }
+
+/** Bumped when the brand-context format changes (greppable in prompts/logs). */
+export const BRAND_CONTEXT_VERSION = 1;
+
+/**
+ * The single canonical brand context injected into EVERY generation — the
+ * "look-alike" moat. A versioned text block (prepended to model prompts) plus the
+ * brand reference images (image-to-image). Pure aggregator over the existing
+ * helpers; brand data is already clamped at write time, so this is safe to inject
+ * everywhere. Computed ONCE per run in the runner and passed via `ModuleContext`.
+ */
+export interface BrandContext {
+  /** Versioned brand block to prepend to text prompts. */
+  promptBlock: string;
+  /** Safe public reference image URLs for image-to-image consistency. */
+  referenceImages: string[];
+  /** True when the brand has any usable identity (voice/colors/notes/refs). */
+  hasIdentity: boolean;
+}
+
+export function buildBrandContext(
+  brand: BrandProfile | null | undefined,
+  fallbackTone = "profesionalan",
+): BrandContext {
+  const referenceImages = brandReferenceImages(brand);
+  const colors = colorsToStrings(brand?.colors);
+  const hasIdentity = Boolean(
+    brand &&
+      ((brand.voice?.trim()?.length ?? 0) > 0 ||
+        colors.length > 0 ||
+        (brand.notes?.trim()?.length ?? 0) > 0 ||
+        referenceImages.length > 0),
+  );
+  const promptBlock = `[brend v${BRAND_CONTEXT_VERSION}] ${brandPromptLine(brand, fallbackTone)}`;
+  return { promptBlock, referenceImages, hasIdentity };
+}

@@ -1,0 +1,112 @@
+- generic [ref=e1]:
+  - complementary [ref=e2]:
+    - link "Viciral" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Viciral
+    - button "D Brand Dev User" [ref=e15]:
+      - generic [ref=e16]: D
+      - generic [ref=e17]:
+        - generic [ref=e18]: Brand
+        - generic [ref=e19]: Dev User
+      - img [ref=e20]
+    - navigation [ref=e23]:
+      - link "Home" [ref=e24] [cursor=pointer]:
+        - /url: /studio
+        - img [ref=e25]
+        - text: Home
+      - link "Brand" [ref=e30] [cursor=pointer]:
+        - /url: /studio/brand
+        - img [ref=e31]
+        - text: Brand
+      - link "Content" [ref=e37] [cursor=pointer]:
+        - /url: /studio/content
+        - img [ref=e38]
+        - text: Content
+      - link "Web" [ref=e41] [cursor=pointer]:
+        - /url: /studio/website
+        - img [ref=e42]
+        - text: Web
+      - link "App" [ref=e45] [cursor=pointer]:
+        - /url: /studio/app-builder
+        - img [ref=e46]
+        - text: App
+      - link "Logo" [ref=e48] [cursor=pointer]:
+        - /url: /studio/logo
+        - img [ref=e49]
+        - text: Logo
+      - link "History" [ref=e51] [cursor=pointer]:
+        - /url: /studio/history
+        - img [ref=e52]
+        - text: History
+      - link "Calendar" [ref=e56] [cursor=pointer]:
+        - /url: /studio/calendar
+        - img [ref=e57]
+        - text: Calendar
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic "credits" [ref=e61]:
+          - img [ref=e62]
+          - text: "5000"
+          - generic [ref=e65]: credits
+        - generic [ref=e66]:
+          - button "SR" [ref=e67]
+          - button "EN" [pressed] [ref=e68]
+      - generic [ref=e69]:
+        - generic "Dev User" [ref=e70]
+        - button "Sign out" [ref=e71]:
+          - img [ref=e72]
+          - text: Sign out
+  - main [ref=e76]:
+    - link "← Studio" [ref=e77] [cursor=pointer]:
+      - /url: /studio
+    - generic [ref=e78]:
+      - img [ref=e80]
+      - generic [ref=e83]:
+        - heading "Content creation" [level=1] [ref=e84]
+        - paragraph [ref=e85]: Make an image, video or post — all in your brand's style.
+    - generic [ref=e87]:
+      - generic [ref=e88]:
+        - button "Image" [ref=e89]:
+          - img [ref=e90]
+          - text: Image
+        - button "Video" [active] [pressed] [ref=e94]:
+          - img [ref=e95]
+          - text: Video
+        - button "Post" [ref=e100]:
+          - img [ref=e101]
+          - text: Post
+      - generic [ref=e155]:
+        - generic [ref=e157]:
+          - generic [ref=e158]:
+            - generic [ref=e160]: Starting image (URL)
+            - textbox "Starting image (URL)" [ref=e162]:
+              - /placeholder: https://…/image.png
+          - generic [ref=e163]:
+            - generic [ref=e165]: Motion / scene description
+            - textbox "Motion / scene description" [ref=e167]:
+              - /placeholder: e.g. slow zoom on the product, warm light, cinematic
+          - generic [ref=e168]:
+            - generic [ref=e170]: Duration
+            - combobox "Duration" [ref=e172]:
+              - option "5 seconds" [selected]
+              - option "10 seconds"
+          - generic [ref=e173]:
+            - checkbox "With audio (music / SFX, no extra charge)" [checked] [ref=e174]
+            - text: With audio (music / SFX, no extra charge)
+          - generic [ref=e175]:
+            - button "Make video" [disabled]:
+              - img
+              - text: Make video
+            - paragraph [ref=e176]:
+              - text: "Estimate: ≈ 197 credits"
+              - generic [ref=e177]: · premium · video is billed by duration
+        - generic [ref=e179]:
+          - generic [ref=e181]: Video
+          - generic [ref=e182]:
+            - img [ref=e184]
+            - paragraph [ref=e186]: Your cinematic video will appear here after it's generated.
+  - button "Open Next.js Dev Tools" [ref=e151] [cursor=pointer]:
+    - img [ref=e152]
+  - alert [ref=e187]

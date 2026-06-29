@@ -32,7 +32,7 @@ export const avatarModule: ModuleDef<Input> = {
   name: "Avatar / Presenter",
   tagline: "Portret + skripta → video u kom osoba izgovara tekst (lip-sync).",
   category: "video",
-  status: "available",
+  status: "soon",
   kind: "async",
   supportsAuto: false,
   icon: "🗣️",

@@ -39,11 +39,13 @@ const accepts = (slug: string, input: unknown) => schemaOf(slug).safeParse(input
 const rejects = (slug: string, input: unknown) => !schemaOf(slug).safeParse(input).success;
 
 describe("module input-schema boundaries", () => {
-  it("cinematic accepts 5s and 10s and rejects 7s", () => {
+  it("cinematic accepts 4–15s (per-clip) and rejects out-of-range", () => {
     const base = { prompt: "spori zoom", imageUrl: "https://example.com/img.png" };
     expect(accepts("cinematic", { ...base, durationSec: 5 })).toBe(true);
-    expect(accepts("cinematic", { ...base, durationSec: 10 })).toBe(true);
-    expect(rejects("cinematic", { ...base, durationSec: 7 })).toBe(true);
+    expect(accepts("cinematic", { ...base, durationSec: 7 })).toBe(true);
+    expect(accepts("cinematic", { ...base, durationSec: 15 })).toBe(true);
+    expect(rejects("cinematic", { ...base, durationSec: 3 })).toBe(true);
+    expect(rejects("cinematic", { ...base, durationSec: 16 })).toBe(true);
   });
 
   it("cinematic rejects a missing image url", () => {

@@ -1,0 +1,191 @@
+- generic [active] [ref=e1]:
+  - complementary [ref=e2]:
+    - link "Viciral" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Viciral
+    - button "D Brand Dev User" [ref=e15]:
+      - generic [ref=e16]: D
+      - generic [ref=e17]:
+        - generic [ref=e18]: Brand
+        - generic [ref=e19]: Dev User
+      - img [ref=e20]
+    - navigation [ref=e23]:
+      - link "Home" [ref=e24] [cursor=pointer]:
+        - /url: /studio
+        - img [ref=e25]
+        - text: Home
+      - link "Brand" [ref=e30] [cursor=pointer]:
+        - /url: /studio/brand
+        - img [ref=e31]
+        - text: Brand
+      - link "Content" [ref=e37] [cursor=pointer]:
+        - /url: /studio/content
+        - img [ref=e38]
+        - text: Content
+      - link "Web" [ref=e41] [cursor=pointer]:
+        - /url: /studio/website
+        - img [ref=e42]
+        - text: Web
+      - link "App" [ref=e45] [cursor=pointer]:
+        - /url: /studio/app-builder
+        - img [ref=e46]
+        - text: App
+      - link "Logo" [ref=e48] [cursor=pointer]:
+        - /url: /studio/logo
+        - img [ref=e49]
+        - text: Logo
+      - link "History" [ref=e51] [cursor=pointer]:
+        - /url: /studio/history
+        - img [ref=e52]
+        - text: History
+      - link "Calendar" [ref=e56] [cursor=pointer]:
+        - /url: /studio/calendar
+        - img [ref=e57]
+        - text: Calendar
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic "credits" [ref=e61]:
+          - img [ref=e62]
+          - text: …
+          - generic [ref=e65]: credits
+        - generic [ref=e66]:
+          - button "SR" [ref=e67]
+          - button "EN" [pressed] [ref=e68]
+      - generic [ref=e69]:
+        - generic "Dev User" [ref=e70]
+        - button "Sign out" [ref=e71]:
+          - img [ref=e72]
+          - text: Sign out
+  - main [ref=e76]:
+    - link "← Studio" [ref=e77] [cursor=pointer]:
+      - /url: /studio
+    - generic [ref=e78]:
+      - img [ref=e80]
+      - generic [ref=e83]:
+        - generic [ref=e84]:
+          - heading "Website Builder" [level=1] [ref=e85]
+          - generic [ref=e86]: Auto
+        - paragraph [ref=e87]: Brand description → a responsive site with copy and images.
+    - generic [ref=e88]:
+      - generic [ref=e89]: Quick-start recipes
+      - generic [ref=e90]:
+        - link "Service landing" [ref=e91] [cursor=pointer]:
+          - /url: /studio/website?template=web-service-landing
+          - img [ref=e92]
+          - text: Service landing
+        - link "Product page" [ref=e95] [cursor=pointer]:
+          - /url: /studio/website?template=web-product-store
+          - img [ref=e96]
+          - text: Product page
+    - generic [ref=e100]:
+      - generic [ref=e102]:
+        - generic [ref=e103]:
+          - generic [ref=e104]:
+            - generic [ref=e106]: Site / brand name
+            - textbox "Site / brand name" [ref=e108]:
+              - /placeholder: e.g. Lunar Coffee
+          - generic [ref=e109]:
+            - generic [ref=e111]: Description
+            - textbox "Description" [ref=e113]:
+              - /placeholder: What you do, who you speak to…
+          - generic [ref=e114]:
+            - generic [ref=e116]: Site goal / CTA
+            - textbox "Site goal / CTA" [ref=e118]:
+              - /placeholder: e.g. collect sign-ups, sell a product
+          - generic [ref=e119]:
+            - generic [ref=e121]: Site type
+            - combobox "Site type" [ref=e123]:
+              - option "Landing" [selected]
+              - option "One-pager"
+              - option "Multi-section"
+              - option "Portfolio"
+              - option "Product"
+              - option "Event"
+        - group [ref=e124]:
+          - generic "Look & feel" [ref=e125] [cursor=pointer]
+          - option "Auto" [selected]
+          - option "Minimal"
+          - option "Bold"
+          - option "Elegant"
+          - option "Corporate"
+          - option "Auto" [selected]
+          - option "Light"
+          - option "Dark"
+          - option "Auto" [selected]
+          - option "Compact"
+          - option "Cozy"
+          - option "Spacious"
+          - option "Auto" [selected]
+          - option "Sharp"
+          - option "Subtle"
+          - option "Rounded"
+          - option "Pill"
+          - option "Auto" [selected]
+          - option "System"
+          - option "Sans"
+          - option "Editorial"
+          - option "Geometric"
+          - option "Elegant serif"
+          - option "Auto" [selected]
+          - option "Narrow"
+          - option "Standard"
+          - option "Wide"
+          - option "Brand" [selected]
+          - option "Custom"
+          - option "Auto"
+        - group [ref=e126]:
+          - generic "Content & language" [ref=e127] [cursor=pointer]
+          - option "SR" [selected]
+          - option "EN"
+          - option "DE"
+          - option "FR"
+          - option "ES"
+          - option "HR"
+          - option "Short"
+          - option "Medium" [selected]
+          - option "Long"
+          - option "Add section…" [selected]
+          - option "Features"
+          - option "Steps"
+          - option "Stats"
+          - option "Testimonials"
+          - option "Logos"
+          - option "Pricing"
+          - option "FAQ"
+          - option "Gallery"
+          - option "About"
+          - option "Team"
+          - option "Call to action"
+          - option "Contact"
+          - option "Newsletter"
+          - option "Text"
+        - group [ref=e128]:
+          - generic "SEO & meta" [ref=e129] [cursor=pointer]
+          - option "Initial" [selected]
+          - option "Dot"
+          - option "None"
+        - generic [ref=e130]:
+          - generic [ref=e132]: Images
+          - combobox "Images" [ref=e134]:
+            - option "Hero only" [selected]
+            - option "All sections"
+            - option "No images"
+        - generic [ref=e135]:
+          - button "Build site" [disabled]:
+            - img
+            - text: Build site
+          - paragraph [ref=e136]:
+            - text: "Estimate: ≈ 47 credits"
+            - generic [ref=e137]: · text + images (your choice)
+        - button "Auto" [disabled]:
+          - img
+          - text: Auto
+      - generic [ref=e139]:
+        - generic [ref=e141]: Site
+        - generic [ref=e142]:
+          - img [ref=e144]
+          - paragraph [ref=e147]: Describe your brand and a preview of the finished site will appear here.
+  - button "Open Next.js Dev Tools" [ref=e153] [cursor=pointer]:
+    - img [ref=e154]
