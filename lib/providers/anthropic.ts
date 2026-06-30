@@ -33,6 +33,24 @@ export const DEFAULT_TEXT_MODEL = "claude-sonnet-4-6";
 /** Heavier reasoning / agentic orchestration (auto mode). */
 export const ORCHESTRATION_MODEL = "claude-opus-4-8";
 
+/**
+ * Resolves `output_config.effort` to a value the target model actually accepts.
+ * Haiku 4.5 rejects the effort param outright (400), and `xhigh` is Opus-only —
+ * Sonnet 4.6 accepts low/medium/high/max but 400s on `xhigh`. Without this gate,
+ * a user picking "Fast (Haiku)" quality (or Sonnet quality + max reasoning) plus
+ * a reasoning-depth value would fail the whole generation. Returns undefined to
+ * omit the field, in which case the model defaults to `high`.
+ */
+export function effortForModel(
+  model: string,
+  effort: TextRequest["effort"],
+): TextRequest["effort"] {
+  if (!effort) return undefined;
+  if (model === "claude-haiku-4-5") return undefined; // effort 400s on Haiku 4.5
+  if (effort === "xhigh" && !model.startsWith("claude-opus")) return "high"; // xhigh is Opus-only
+  return effort;
+}
+
 export const anthropicProvider: TextProvider = {
   async generateText(req: TextRequest): Promise<TextResponse> {
     const primary = req.model ?? DEFAULT_TEXT_MODEL;
@@ -45,12 +63,19 @@ export const anthropicProvider: TextProvider = {
     let lastErr: unknown;
     for (let m = 0; m < chain.length; m++) {
       const model = chain[m];
+      const effort = effortForModel(model, req.effort);
       try {
         const msg = await withRetry(() =>
           getClient().messages.create({
             model,
             max_tokens: req.maxTokens ?? 1024,
-            ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
+            // temperature/top_p are rejected (400) on Opus 4.x — only honor them on
+            // the cheaper Sonnet/Haiku tiers (and never on the Opus fallback).
+            ...(req.temperature !== undefined && model !== ORCHESTRATION_MODEL
+              ? { temperature: req.temperature }
+              : {}),
+            ...(effort ? { output_config: { effort } } : {}),
+            ...(req.stopSequences?.length ? { stop_sequences: req.stopSequences } : {}),
             ...(req.system ? { system: req.system } : {}),
             messages: [{ role: "user", content: req.prompt }],
           }),

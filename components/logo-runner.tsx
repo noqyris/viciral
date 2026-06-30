@@ -12,6 +12,8 @@ import {
   RunButton,
   OutputPanel,
   RunnerError,
+  RefineBar,
+  AiAdvanced,
   CreditsReceipt,
 } from "@/components/studio/runner-kit";
 
@@ -32,6 +34,11 @@ const T = {
     empty: "Unesi naziv i pokreni — SVG logo varijante u bojama brenda pojaviće se ovde.",
     creditsUsed: "Potrošeno kredita:",
     setLogo: "Postavi kao logo brenda",
+    refinePh: "Doradi: npr. jednostavnije, druga ikona…",
+    refine: "Doradi",
+    refineSuggest: ["Jednostavnije", "Druga ikona", "Deblje linije", "Drugačiji font"],
+    size: "Veličina",
+    sizes: { square_hd: "Kvadrat", portrait_16_9: "Uspravno", landscape_16_9: "Položeno" } as Record<string, string>,
     styles: {
       minimal: "Minimalan",
       geometric: "Geometrijski",
@@ -54,6 +61,11 @@ const T = {
     empty: "Enter a name and run — on-brand SVG logo variants will appear here.",
     creditsUsed: "Credits used:",
     setLogo: "Set as brand logo",
+    refinePh: "Refine: e.g. simpler, different icon…",
+    refine: "Refine",
+    refineSuggest: ["Simpler", "Different icon", "Bolder lines", "Different font"],
+    size: "Size",
+    sizes: { square_hd: "Square", portrait_16_9: "Portrait", landscape_16_9: "Landscape" } as Record<string, string>,
     styles: {
       minimal: "Minimal",
       geometric: "Geometric",
@@ -81,6 +93,10 @@ export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, u
   const [variants, setVariants] = useState((initialInputs?.variants as number) ?? 3);
   const [monochrome, setMonochrome] = useState(Boolean(initialInputs?.monochrome));
   const [iconOnly, setIconOnly] = useState(Boolean(initialInputs?.iconOnly));
+  const [refine, setRefine] = useState("");
+  const [imageSize, setImageSize] = useState((initialInputs?.imageSize as string) ?? "square_hd");
+  const [quality, setQuality] = useState((initialInputs?.quality as string) ?? "balanced");
+  const [effort, setEffort] = useState((initialInputs?.effort as string) ?? "");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,13 +115,14 @@ export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, u
         body: JSON.stringify({
           moduleSlug: "logo",
           mode: "manual",
-          inputs: { brandName, style, variants, monochrome, iconOnly },
+          inputs: { brandName, style, variants, monochrome, iconOnly, refine, imageSize, quality, ...(effort ? { effort } : {}) },
         }),
       });
       const data = (await res.json()) as GenResp;
       if (!res.ok) throw new Error(data.error ?? t.err);
       setAssets(data.generation?.assets ?? []);
       setCreditsUsed(data.generation?.creditsUsed ?? null);
+      setRefine("");
       notifyCreditsChanged();
     } catch (e) {
       setError((e as Error).message);
@@ -146,7 +163,7 @@ export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, u
                 min={1}
                 max={4}
                 value={variants}
-                onChange={(e) => setVariants(Number(e.target.value))}
+                onChange={(e) => setVariants(Math.max(1, Math.min(4, Number(e.target.value) || 1)))}
                 className="field"
               />
             </Field>
@@ -162,6 +179,24 @@ export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, u
               {t.iconOnly}
             </label>
           </div>
+
+          <AiAdvanced
+            quality={quality}
+            onQuality={setQuality}
+            effort={effort}
+            onEffort={setEffort}
+            extra={
+              <Field label={t.size}>
+                <select value={imageSize} onChange={(e) => setImageSize(e.target.value)} className="field">
+                  {["square_hd", "portrait_16_9", "landscape_16_9"].map((s) => (
+                    <option key={s} value={s}>
+                      {t.sizes[s]}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            }
+          />
 
           <RunButton
             onClick={run}
@@ -197,6 +232,17 @@ export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, u
                 </div>
               ))}
             </div>
+          )}
+          {logos.length > 0 && (
+            <RefineBar
+              value={refine}
+              onChange={setRefine}
+              onSubmit={run}
+              loading={loading}
+              placeholder={t.refinePh}
+              submitLabel={t.refine}
+              suggestions={t.refineSuggest}
+            />
           )}
         </OutputPanel>
       }

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { estimateCredits } from "@/lib/credits/pricing";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
-import { brandPromptLine } from "@/lib/brand/inject";
-import { runJsonText } from "./text";
+import { brandPromptLine, colorsToStrings } from "@/lib/brand/inject";
+import { runJsonText, modelForQuality } from "./text";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
 /**
@@ -28,6 +28,12 @@ const inputSchema = z.object({
   variants: z.number().int().min(1).max(4).default(3),
   monochrome: z.boolean().default(false),
   iconOnly: z.boolean().default(false),
+  /** Optional refinement instruction for re-prompting. */
+  refine: z.string().max(400).default(""),
+  // ---- Advanced ----
+  imageSize: z.enum(["square_hd", "portrait_16_9", "landscape_16_9"]).default("square_hd"),
+  quality: z.enum(["fast", "balanced", "best"]).default("balanced"),
+  effort: z.enum(["low", "medium", "high", "xhigh", "max"]).optional(),
 });
 
 type Input = z.infer<typeof inputSchema>;
@@ -68,18 +74,23 @@ export const logoModule: ModuleDef<Input> = {
       `Napravi ${n} logo pravaca za brend.\n` +
       `<podaci>\nNaziv: ${input.brandName}\nStil: ${STYLE_HINT[input.style]}` +
       `${input.iconOnly ? "\nSamo ikona (bez teksta)" : ""}` +
-      `${input.monochrome ? "\nMonohromatski (crno-belo)" : ""}\n${brandLine}\n</podaci>\n` +
+      `${input.monochrome ? "\nMonohromatski (crno-belo)" : ""}` +
+      `${input.refine.trim() ? `\nDorada: ${input.refine.trim()}` : ""}\n${brandLine}\n</podaci>\n` +
       `Vrati tačno ${n} prompt(a).`;
 
     const { value: spec, creditsUsed: textCredits } = await runJsonText(ctx, logoSchema, {
       system,
       prompt,
       maxTokens: 1500,
+      model: modelForQuality(input.quality, ctx.mode),
+      ...(input.effort ? { effort: input.effort } : {}),
     });
 
     const assets: GeneratedAsset[] = [];
     let creditsUsed = textCredits;
     const prompts = spec.prompts.slice(0, n);
+    // Recraft v4 takes the brand palette as real input (skip it for mono lockups).
+    const brandColors = input.monochrome ? [] : colorsToStrings(ctx.brand?.colors);
 
     for (let i = 0; i < prompts.length; i++) {
       ctx.onProgress?.(`Generišem logo ${i + 1}…`);
@@ -87,7 +98,8 @@ export const logoModule: ModuleDef<Input> = {
         const res = await ctx.providers.image.generateImage({
           modelId: "recraft-vector",
           prompt: prompts[i],
-          numImages: 1,
+          imageSize: input.imageSize,
+          ...(brandColors.length ? { colors: brandColors } : {}),
         });
         const url = res.images[0]?.url;
         if (url) {

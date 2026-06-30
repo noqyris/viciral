@@ -1,0 +1,170 @@
+- generic [active] [ref=e1]:
+  - complementary [ref=e2]:
+    - link "Viciral" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Viciral
+    - button "D Brand Dev User" [ref=e15]:
+      - generic [ref=e16]: D
+      - generic [ref=e17]:
+        - generic [ref=e18]: Brand
+        - generic [ref=e19]: Dev User
+      - img [ref=e20]
+    - navigation [ref=e23]:
+      - link "Home" [ref=e24] [cursor=pointer]:
+        - /url: /studio
+        - img [ref=e25]
+        - text: Home
+      - link "Brand" [ref=e30] [cursor=pointer]:
+        - /url: /studio/brand
+        - img [ref=e31]
+        - text: Brand
+      - link "Content" [ref=e37] [cursor=pointer]:
+        - /url: /studio/content
+        - img [ref=e38]
+        - text: Content
+      - link "Web" [ref=e41] [cursor=pointer]:
+        - /url: /studio/website
+        - img [ref=e42]
+        - text: Web
+      - link "App" [ref=e45] [cursor=pointer]:
+        - /url: /studio/app-builder
+        - img [ref=e46]
+        - text: App
+      - link "Logo" [ref=e48] [cursor=pointer]:
+        - /url: /studio/logo
+        - img [ref=e49]
+        - text: Logo
+      - link "History" [ref=e51] [cursor=pointer]:
+        - /url: /studio/history
+        - img [ref=e52]
+        - text: History
+      - link "Calendar" [ref=e56] [cursor=pointer]:
+        - /url: /studio/calendar
+        - img [ref=e57]
+        - text: Calendar
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic "credits" [ref=e61]:
+          - img [ref=e62]
+          - text: …
+          - generic [ref=e65]: credits
+        - generic [ref=e66]:
+          - button "SR" [ref=e67]
+          - button "EN" [pressed] [ref=e68]
+      - generic [ref=e69]:
+        - generic "Dev User" [ref=e70]
+        - button "Sign out" [ref=e71]:
+          - img [ref=e72]
+          - text: Sign out
+  - main [ref=e76]:
+    - link "← Studio" [ref=e77] [cursor=pointer]:
+      - /url: /studio
+    - generic [ref=e78]:
+      - img [ref=e80]
+      - generic [ref=e83]:
+        - heading "Content creation" [level=1] [ref=e84]
+        - paragraph [ref=e85]: Make an image, video or post — all in your brand's style.
+    - generic [ref=e87]:
+      - generic [ref=e88]:
+        - button "Image" [pressed] [ref=e89]:
+          - img [ref=e90]
+          - text: Image
+        - button "Video" [ref=e94]:
+          - img [ref=e95]
+          - text: Video
+        - button "Post" [ref=e100]:
+          - img [ref=e101]
+          - text: Post
+      - generic [ref=e104]:
+        - generic [ref=e106]:
+          - generic [ref=e107]:
+            - generic [ref=e109]: Image description
+            - textbox "Image description" [ref=e111]:
+              - /placeholder: e.g. product on a clean studio background, warm light
+          - generic [ref=e112]:
+            - checkbox "Enhance prompt (AI expands)" [ref=e113]
+            - text: Enhance prompt (AI expands)
+          - generic [ref=e114]:
+            - generic [ref=e115]:
+              - generic [ref=e117]: Aspect
+              - combobox "Aspect" [ref=e119]:
+                - option "1:1" [selected]
+                - option "4:5"
+                - option "2:3"
+                - option "3:4"
+                - option "9:16"
+                - option "16:9"
+                - option "1.91:1"
+            - generic [ref=e120]:
+              - generic [ref=e122]: Variants
+              - spinbutton "Variants" [ref=e124]: "2"
+          - generic [ref=e125]:
+            - generic [ref=e126]:
+              - generic [ref=e128]: Style
+              - combobox "Style" [ref=e130]:
+                - option "Auto" [selected]
+                - option "Photo"
+                - option "Cinematic"
+                - option "Illustration"
+                - option "3D"
+                - option "Flat"
+                - option "Minimal"
+                - option "Anime"
+                - option "Watercolor"
+                - option "Line art"
+                - option "Product"
+                - option "Poster"
+            - generic [ref=e131]:
+              - generic [ref=e133]: Lighting
+              - combobox "Lighting" [ref=e135]:
+                - option "Auto" [selected]
+                - option "Natural"
+                - option "Studio"
+                - option "Golden hour"
+                - option "Dramatic"
+                - option "Soft"
+                - option "Neon"
+          - generic [ref=e136]:
+            - generic [ref=e137]:
+              - generic [ref=e138]: Avoid (negative)
+              - generic [ref=e139]: optional
+            - textbox "Avoid (negative) optional" [ref=e141]:
+              - /placeholder: e.g. text, watermark
+          - generic [ref=e142]:
+            - generic [ref=e143]:
+              - generic [ref=e144]: Reference image (URL)
+              - generic [ref=e145]: optional
+            - textbox "Reference image (URL) optional" [ref=e147]:
+              - /placeholder: https://…/reference.png
+          - generic [ref=e148]:
+            - checkbox "In brand style" [checked] [ref=e149]
+            - text: In brand style
+          - group [ref=e150]:
+            - generic "Advanced" [ref=e151] [cursor=pointer]:
+              - generic [ref=e152]:
+                - img [ref=e153]
+                - text: Advanced
+              - img [ref=e154]
+            - option "PNG" [selected]
+            - option "JPEG"
+            - option "WebP"
+            - option "1"
+            - option "2"
+            - option "3"
+            - option "4" [selected]
+            - option "5"
+            - option "6"
+          - generic [ref=e156]:
+            - button "Make images" [disabled]:
+              - img
+              - text: Make images
+            - paragraph [ref=e157]: "Estimate: ≈ 24 credits"
+        - generic [ref=e159]:
+          - generic [ref=e162]: Output
+          - generic [ref=e163]:
+            - img [ref=e165]
+            - paragraph [ref=e168]: Enter a description and run — on-brand images will appear here.
+  - button "Open Next.js Dev Tools" [ref=e174] [cursor=pointer]:
+    - img [ref=e175]

@@ -11,6 +11,8 @@ import {
   RunButton,
   OutputPanel,
   RunnerError,
+  RefineBar,
+  AdvancedSection,
   CreditsReceipt,
 } from "@/components/studio/runner-kit";
 
@@ -52,6 +54,17 @@ const T = {
     output: "Rezultat",
     empty: "Unesi opis i pokreni — slike (u stilu brenda) pojaviće se ovde.",
     creditsUsed: "Potrošeno kredita:",
+    refinePh: "Doradi: npr. toplije svetlo, drugačiji ugao…",
+    refine: "Doradi",
+    refineSuggest: ["Toplije svetlo", "Drugačiji ugao", "Više detalja", "Čistija pozadina"],
+    advanced: "Napredno",
+    model: "Model",
+    modelStd: "Standard",
+    modelPro: "Pro (HD, najbolji tekst)",
+    outputFormat: "Format fajla",
+    seed: "Seed",
+    seedPh: "nasumično",
+    safety: "Strogost filtera",
     styles: {
       auto: "Automatski",
       photo: "Foto",
@@ -96,6 +109,17 @@ const T = {
     output: "Output",
     empty: "Enter a description and run — on-brand images will appear here.",
     creditsUsed: "Credits used:",
+    refinePh: "Refine: e.g. warmer light, different angle…",
+    refine: "Refine",
+    refineSuggest: ["Warmer light", "Different angle", "More detail", "Cleaner background"],
+    advanced: "Advanced",
+    model: "Model",
+    modelStd: "Standard",
+    modelPro: "Pro (HD, best text)",
+    outputFormat: "File format",
+    seed: "Seed",
+    seedPh: "random",
+    safety: "Safety filter",
     styles: {
       auto: "Auto",
       photo: "Photo",
@@ -142,6 +166,11 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
   const [referenceUrl, setReferenceUrl] = useState((initialInputs?.referenceUrl as string) ?? "");
   const [enhancePrompt, setEnhancePrompt] = useState((initialInputs?.enhancePrompt as boolean) ?? false);
   const [useBrand, setUseBrand] = useState((initialInputs?.useBrand as boolean) ?? true);
+  const [refine, setRefine] = useState("");
+  const [model, setModel] = useState((initialInputs?.model as string) ?? "nano-banana");
+  const [outputFormat, setOutputFormat] = useState((initialInputs?.outputFormat as string) ?? "png");
+  const [seed, setSeed] = useState((initialInputs?.seed as number)?.toString() ?? "");
+  const [safetyTolerance, setSafetyTolerance] = useState((initialInputs?.safetyTolerance as string) ?? "4");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -170,6 +199,11 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
             referenceUrl,
             enhancePrompt,
             useBrand,
+            refine,
+            model,
+            outputFormat,
+            safetyTolerance,
+            ...(seed.trim() !== "" && !Number.isNaN(Number(seed)) ? { seed: Number(seed) } : {}),
           },
         }),
       });
@@ -177,6 +211,7 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
       if (!res.ok) throw new Error(data.error ?? t.err);
       setAssets(data.generation?.assets ?? []);
       setCreditsUsed(data.generation?.creditsUsed ?? null);
+      setRefine("");
       notifyCreditsChanged();
     } catch (e) {
       setError((e as Error).message);
@@ -227,7 +262,7 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
                 min={1}
                 max={4}
                 value={variants}
-                onChange={(e) => setVariants(Number(e.target.value))}
+                onChange={(e) => setVariants(Math.max(1, Math.min(4, Number(e.target.value) || 1)))}
                 className="field"
               />
             </Field>
@@ -277,12 +312,49 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
             {t.useBrand}
           </label>
 
+          <AdvancedSection title={t.advanced}>
+            <Field label={t.model}>
+              <select value={model} onChange={(e) => setModel(e.target.value)} className="field">
+                <option value="nano-banana">{t.modelStd}</option>
+                <option value="nano-banana-pro">{t.modelPro}</option>
+                <option value="gpt-image">GPT Image</option>
+              </select>
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label={t.outputFormat}>
+                <select value={outputFormat} onChange={(e) => setOutputFormat(e.target.value)} className="field">
+                  <option value="png">PNG</option>
+                  <option value="jpeg">JPEG</option>
+                  <option value="webp">WebP</option>
+                </select>
+              </Field>
+              <Field label={t.safety}>
+                <select value={safetyTolerance} onChange={(e) => setSafetyTolerance(e.target.value)} className="field">
+                  {["1", "2", "3", "4", "5", "6"].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+            <Field label={t.seed} hint={t.optional}>
+              <input
+                value={seed}
+                onChange={(e) => setSeed(e.target.value)}
+                placeholder={t.seedPh}
+                inputMode="numeric"
+                className="field"
+              />
+            </Field>
+          </AdvancedSection>
+
           <RunButton
             onClick={run}
             disabled={loading || prompt.length < 2}
             loading={loading}
             loadingLabel={t.generating}
-            cost={<CostHint credits={estimateModuleCredits("image", { variants, enhancePrompt })} />}
+            cost={<CostHint credits={estimateModuleCredits("image", { variants, enhancePrompt, model })} />}
           >
             {t.make}
           </RunButton>
@@ -301,6 +373,17 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
                 </div>
               ))}
             </div>
+          )}
+          {images.length > 0 && (
+            <RefineBar
+              value={refine}
+              onChange={setRefine}
+              onSubmit={run}
+              loading={loading}
+              placeholder={t.refinePh}
+              submitLabel={t.refine}
+              suggestions={t.refineSuggest}
+            />
           )}
         </OutputPanel>
       }

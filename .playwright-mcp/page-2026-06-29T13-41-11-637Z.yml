@@ -1,0 +1,149 @@
+- generic [ref=e1]:
+  - complementary [ref=e2]:
+    - link "Viciral" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Viciral
+    - button "D Brand Dev User" [ref=e15]:
+      - generic [ref=e16]: D
+      - generic [ref=e17]:
+        - generic [ref=e18]: Brand
+        - generic [ref=e19]: Dev User
+      - img [ref=e20]
+    - navigation [ref=e23]:
+      - link "Home" [ref=e24] [cursor=pointer]:
+        - /url: /studio
+        - img [ref=e25]
+        - text: Home
+      - link "Brand" [ref=e30] [cursor=pointer]:
+        - /url: /studio/brand
+        - img [ref=e31]
+        - text: Brand
+      - link "Content" [ref=e37] [cursor=pointer]:
+        - /url: /studio/content
+        - img [ref=e38]
+        - text: Content
+      - link "Web" [ref=e41] [cursor=pointer]:
+        - /url: /studio/website
+        - img [ref=e42]
+        - text: Web
+      - link "App" [ref=e45] [cursor=pointer]:
+        - /url: /studio/app-builder
+        - img [ref=e46]
+        - text: App
+      - link "Logo" [ref=e48] [cursor=pointer]:
+        - /url: /studio/logo
+        - img [ref=e49]
+        - text: Logo
+      - link "History" [ref=e51] [cursor=pointer]:
+        - /url: /studio/history
+        - img [ref=e52]
+        - text: History
+      - link "Calendar" [ref=e56] [cursor=pointer]:
+        - /url: /studio/calendar
+        - img [ref=e57]
+        - text: Calendar
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic "credits" [ref=e61]:
+          - img [ref=e62]
+          - text: "5000"
+          - generic [ref=e65]: credits
+        - generic [ref=e66]:
+          - button "SR" [ref=e67]
+          - button "EN" [pressed] [ref=e68]
+      - generic [ref=e69]:
+        - generic "Dev User" [ref=e70]
+        - button "Sign out" [ref=e71]:
+          - img [ref=e72]
+          - text: Sign out
+  - main [ref=e76]:
+    - link "← Studio" [ref=e77] [cursor=pointer]:
+      - /url: /studio
+    - generic [ref=e78]:
+      - img [ref=e80]
+      - generic [ref=e83]:
+        - heading "Content creation" [level=1] [ref=e84]
+        - paragraph [ref=e85]: Make an image, video or post — all in your brand's style.
+    - generic [ref=e87]:
+      - generic [ref=e88]:
+        - button "Image" [ref=e89]:
+          - img [ref=e90]
+          - text: Image
+        - button "Video" [pressed] [ref=e94]:
+          - img [ref=e95]
+          - text: Video
+        - button "Post" [ref=e100]:
+          - img [ref=e101]
+          - text: Post
+      - generic [ref=e178]:
+        - generic [ref=e180]:
+          - generic [ref=e181]:
+            - button "From text" [pressed] [ref=e182]
+            - button "From image" [ref=e183]
+          - generic [ref=e184]:
+            - generic [ref=e186]: Scene / motion description
+            - textbox "Scene / motion description" [ref=e188]:
+              - /placeholder: e.g. slow zoom on the product, warm light, cinematic
+          - generic [ref=e189]:
+            - generic [ref=e190]:
+              - generic [ref=e192]: Aspect
+              - combobox "Aspect" [ref=e194]:
+                - option "9:16" [selected]
+                - option "16:9"
+                - option "1:1"
+            - generic [ref=e195]:
+              - generic [ref=e197]: Clip length
+              - combobox "Clip length" [ref=e199]:
+                - option "5s" [selected]
+                - option "10s"
+                - option "15s"
+            - generic [ref=e200]:
+              - generic [ref=e202]: Number of clips
+              - spinbutton "Number of clips" [ref=e204]: "2"
+          - generic [ref=e205]:
+            - generic [ref=e207]: Resolution
+            - combobox "Resolution" [ref=e209]:
+              - option "480p"
+              - option "720p" [selected]
+              - option "1080p"
+              - option "4k"
+          - paragraph [ref=e210]:
+            - text: "Total:"
+            - generic [ref=e211]: 10s
+            - text: · 2×5s
+          - generic [ref=e212]:
+            - generic [ref=e213]:
+              - checkbox "With audio (Seedance native)" [checked] [ref=e214]
+              - text: With audio (Seedance native)
+            - generic [ref=e215]:
+              - checkbox "In brand style" [checked] [ref=e216]
+              - text: In brand style
+          - group [ref=e217]:
+            - generic "Advanced" [active] [ref=e218] [cursor=pointer]:
+              - generic [ref=e219]:
+                - img [ref=e220]
+                - text: Advanced
+              - img [ref=e221]
+            - generic [ref=e239]:
+              - generic [ref=e241]: Encode quality
+              - combobox "Encode quality" [ref=e243]:
+                - option "Standard" [selected]
+                - option "High"
+          - generic [ref=e223]:
+            - button "Make video" [disabled]:
+              - img
+              - text: Make video
+            - paragraph [ref=e224]:
+              - text: "Estimate: ≈ 410 credits"
+              - generic [ref=e225]: · premium · chained clips (last frame → next)
+          - paragraph [ref=e226]: Chaining runs in the browser — keep this tab open until all clips finish.
+        - generic [ref=e228]:
+          - generic [ref=e231]: Video
+          - generic [ref=e232]:
+            - img [ref=e234]
+            - paragraph [ref=e236]: Your video will appear here — clip by clip, then merged into one.
+  - button "Open Next.js Dev Tools" [ref=e174] [cursor=pointer]:
+    - img [ref=e175]
+  - alert [ref=e237]

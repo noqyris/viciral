@@ -5,13 +5,13 @@ import type { ModuleDef } from "./types";
 
 /**
  * Muzika / Soundtrack — generate a royalty-friendly music track from a text
- * description for use under videos/reels. One fal music model behind the audio
- * provider capability. Sync (completes inline).
+ * description (for use under videos/reels) via Google Lyria 2 (fal). Lyria
+ * outputs a FIXED 30-second 48kHz clip, so there is no duration control and the
+ * cost is a flat per-generation charge. Sync (completes inline).
  */
 
 const inputSchema = z.object({
-  prompt: z.string().min(2, "Opiši muziku").max(500),
-  durationSec: z.number().int().min(5).max(120).default(20),
+  prompt: z.string().min(2, "Opiši muziku").max(2000),
 });
 
 type Input = z.infer<typeof inputSchema>;
@@ -19,32 +19,33 @@ type Input = z.infer<typeof inputSchema>;
 export const musicModule: ModuleDef<Input> = {
   slug: "music",
   name: "Muzika / Soundtrack",
-  tagline: "Opis → muzička podloga za video i reels (po sekundi).",
+  tagline: "Opis → muzička podloga (30s, Lyria 2).",
   category: "audio",
-  status: "soon",
+  status: "available",
   supportsAuto: false,
   icon: "🎵",
   inputSchema,
 
-  estimateCredits(input) {
-    return estimateModuleCredits("music", input as Record<string, unknown>);
+  estimateCredits() {
+    return estimateModuleCredits("music");
   },
 
   async generate(ctx) {
-    const { prompt, durationSec } = ctx.inputs;
+    const { prompt } = ctx.inputs;
     const generateMusic = ctx.providers.audio.generateMusic;
     if (!generateMusic) {
       throw new Error("Generisanje muzike trenutno nije dostupno.");
     }
 
     ctx.onProgress?.("Komponujem…");
-    const result = await generateMusic({ modelId: "music-gen", prompt, durationSec });
+    // Lyria ignores durationSec (fixed 30s); pass it for the shared interface.
+    const result = await generateMusic({ modelId: "lyria-2", prompt, durationSec: 30 });
 
-    const credits = estimateModuleCredits("music", ctx.inputs as Record<string, unknown>);
+    const credits = estimateModuleCredits("music");
     return finishSingleAsset(
       ctx,
       result.audioUrl,
-      (url) => ({ kind: "audio", url, modelId: "music-gen", meta: { prompt, durationSec } }),
+      (url) => ({ kind: "audio", url, modelId: "lyria-2", meta: { prompt } }),
       credits,
       "Muzika nije generisana. Pokušaj drugačiji opis.",
     );

@@ -85,7 +85,7 @@ export default async function ModuleRunnerPage({
   const initial = active?.inputs;
 
   return (
-    <main className="relative mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+    <main className="relative mx-auto w-full max-w-6xl flex-1 px-6 py-12">
       {/* Ambient top glow — same lit feel as the studio hub + landing */}
       <div
         aria-hidden

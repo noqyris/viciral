@@ -12,6 +12,7 @@ import { musicModule } from "./music";
 import { imageModule } from "./image";
 import { logoModule } from "./logo";
 import { appBuilderModule } from "./app-builder";
+import { voiceModule } from "./voice";
 
 /**
  * Module registry. The hub and the studio runner render from this list, so
@@ -32,6 +33,7 @@ export const MODULES: ModuleDef<any>[] = [
   imageModule,
   logoModule,
   appBuilderModule,
+  voiceModule,
 ];
 
 export function getModuleDef(slug: string): ModuleDef | undefined {

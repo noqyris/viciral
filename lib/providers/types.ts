@@ -41,10 +41,34 @@ export interface MusicResponse {
   audioUrl: string;
 }
 
+export interface SpeechRequest {
+  /** Catalog model id, e.g. "elevenlabs-tts". */
+  modelId: string;
+  text: string;
+  /** Voice preset name (e.g. "Rachel", "Aria"). */
+  voice?: string;
+  /** Voice stability 0–1. */
+  stability?: number;
+  /** Adherence to the original voice 0–1. */
+  similarityBoost?: number;
+  /** Style exaggeration 0–1. */
+  style?: number;
+  /** Playback speed 0.7–1.2. */
+  speed?: number;
+  /** ISO 639-1 language code to enforce. */
+  languageCode?: string;
+}
+
+export interface SpeechResponse {
+  audioUrl: string;
+}
+
 export interface AudioProvider {
   transcribe(req: AudioRequest): Promise<TranscriptResult>;
   /** Optional: not every audio backend can generate music. */
   generateMusic?(req: MusicRequest): Promise<MusicResponse>;
+  /** Optional: text-to-speech voiceover. */
+  generateSpeech?(req: SpeechRequest): Promise<SpeechResponse>;
 }
 
 // ---- Text ----
@@ -54,7 +78,12 @@ export interface TextRequest {
   /** Provider model id (e.g. "claude-sonnet-4-6"). Defaults per adapter. */
   model?: string;
   maxTokens?: number;
+  /** Sampling temperature — ONLY honored on Sonnet/Haiku (Opus 4.x returns 400). */
   temperature?: number;
+  /** Reasoning depth (output_config.effort). */
+  effort?: "low" | "medium" | "high" | "xhigh" | "max";
+  /** Custom stop sequences. */
+  stopSequences?: string[];
 }
 
 export interface TextResponse {
@@ -77,6 +106,18 @@ export interface ImageRequest {
   aspectRatio?: string;
   /** Reference/edit images (image-to-image). */
   imageUrls?: string[];
+  // ---- Advanced (nano-banana) ----
+  /** Output container: "jpeg" | "png" | "webp". */
+  outputFormat?: string;
+  /** Deterministic seed (omit for random). */
+  seed?: number;
+  /** Safety strictness as a STRING "1"–"6" (1 strictest). */
+  safetyTolerance?: string;
+  // ---- Recraft (vector) ----
+  /** Brand colors as hex strings; the adapter converts to {r,g,b}. */
+  colors?: string[];
+  /** Recraft size enum (e.g. "square_hd", "landscape_16_9"). */
+  imageSize?: string;
 }
 
 export interface ImageResponse {
@@ -113,6 +154,14 @@ export interface VideoRequest {
   height?: number;
   /** Output aspect ratio (e.g. "9:16", "16:9", "1:1") — Seedance accepts this directly. */
   aspectRatio?: string;
+  /** Output resolution: "480p" | "720p" | "1080p" | "4k" (drives Seedance cost). */
+  resolution?: string;
+  /** Optional end frame — the clip transitions from imageUrl to this still. */
+  endImageUrl?: string;
+  /** Encode quality: "standard" | "high". */
+  bitrateMode?: string;
+  /** Server-set abuse-attribution id (never user-facing). */
+  endUserId?: string;
   /** Generate native synchronized audio (music/SFX/dialogue) with the clip. */
   withAudio?: boolean;
   /** Talking-head script (text the avatar speaks). */

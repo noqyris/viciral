@@ -4,9 +4,21 @@ import type { Providers } from "@/lib/providers";
 import { extractJson } from "./json";
 import type { GenerationMode } from "./types";
 
+export type TextModelKey = "claude-opus" | "claude-sonnet" | "claude-haiku";
+export type Effort = "low" | "medium" | "high" | "xhigh" | "max";
+
 /** Auto mode uses the stronger (more expensive) model; manual uses the cheaper one. */
 export function pickTextModel(mode: GenerationMode): "claude-opus" | "claude-sonnet" {
   return mode === "auto" ? "claude-opus" : "claude-sonnet";
+}
+
+/**
+ * Maps a user "quality" preset to a catalog model key. Auto mode always uses Opus
+ * (the premium "do it all for me" path), regardless of the preset.
+ */
+export function modelForQuality(quality: string | undefined, mode: GenerationMode): TextModelKey {
+  if (mode === "auto") return "claude-opus";
+  return quality === "fast" ? "claude-haiku" : quality === "best" ? "claude-opus" : "claude-sonnet";
 }
 
 interface TextCtx {
@@ -23,14 +35,15 @@ interface TextCtx {
 export async function runJsonText<T>(
   ctx: TextCtx,
   schema: ZodType<T>,
-  args: { system: string; prompt: string; maxTokens: number },
+  args: { system: string; prompt: string; maxTokens: number; model?: TextModelKey; effort?: Effort },
 ): Promise<{ value: T; creditsUsed: number }> {
-  const modelId = pickTextModel(ctx.mode);
+  const modelId = args.model ?? pickTextModel(ctx.mode);
   const res = await ctx.providers.text.generateText({
     system: args.system,
     prompt: args.prompt,
     model: MODEL_CATALOG[modelId].providerModel,
     maxTokens: args.maxTokens,
+    ...(args.effort ? { effort: args.effort } : {}),
   });
   // The model can emit truncated/non-JSON (e.g. when it hits the output-token
   // cap mid-object). Turn the raw SyntaxError into a friendly, retryable error.

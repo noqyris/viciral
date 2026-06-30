@@ -14,6 +14,8 @@ import {
   OutputPanel,
   RunnerLoading,
   RunnerError,
+  RefineBar,
+  AiAdvanced,
   CreditsReceipt,
 } from "@/components/studio/runner-kit";
 
@@ -80,6 +82,9 @@ const T = {
     outputTitle: "Sajt",
     emptyLabel: "Opiši svoj brend pa će se ovde pojaviti pregled spremnog sajta.",
     loading: "Pravim tvoj sajt…",
+    refinePh: "Doradi: npr. dodaj cenovnik, drugačiji ton…",
+    refineLabel: "Doradi",
+    refineSuggest: ["Dodaj cenovnik", "Više sekcija", "Drugačiji ton", "Tamna tema"],
     opts: {
       siteType: { landing: "Landing", onePager: "One-pager", multiSection: "Više sekcija", portfolio: "Portfolio", product: "Proizvod", event: "Događaj" },
       theme: { auto: "Auto", minimal: "Minimal", bold: "Bold", elegant: "Elegant", corporate: "Corporate" },
@@ -146,6 +151,9 @@ const T = {
     outputTitle: "Site",
     emptyLabel: "Describe your brand and a preview of the finished site will appear here.",
     loading: "Building your site…",
+    refinePh: "Refine: e.g. add pricing, different tone…",
+    refineLabel: "Refine",
+    refineSuggest: ["Add pricing", "More sections", "Different tone", "Dark theme"],
     opts: {
       siteType: { landing: "Landing", onePager: "One-pager", multiSection: "Multi-section", portfolio: "Portfolio", product: "Product", event: "Event" },
       theme: { auto: "Auto", minimal: "Minimal", bold: "Bold", elegant: "Elegant", corporate: "Corporate" },
@@ -217,6 +225,9 @@ export function WebsiteRunner({
   const [favicon, setFavicon] = useState((init.favicon as string) ?? "initial");
   const [socialImage, setSocialImage] = useState((init.socialImage as boolean) ?? false);
   const [imagesMode, setImagesMode] = useState((init.imagesMode as string) ?? "hero");
+  const [refine, setRefine] = useState("");
+  const [quality, setQuality] = useState((init.quality as string) ?? "best");
+  const [effort, setEffort] = useState((init.effort as string) ?? "");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -247,7 +258,8 @@ export function WebsiteRunner({
   const inputs = {
     siteName, description, goalCta, siteType, theme, mode, density, roundness, fontPairing,
     contentWidth, accentMode, accentColor, ignoreBrand, language, toneOverride, copyLength,
-    sections, seoTitle, seoDescription, favicon, socialImage, imagesMode,
+    sections, seoTitle, seoDescription, favicon, socialImage, imagesMode, refine,
+    quality, ...(effort ? { effort } : {}),
   };
 
   async function run(genMode: "manual" | "auto") {
@@ -266,6 +278,7 @@ export function WebsiteRunner({
       const site = data.generation?.assets?.find((a) => a.kind === "text" && a.meta?.role === "site-html");
       setHtml(site?.text ?? null);
       setCreditsUsed(data.generation?.creditsUsed ?? null);
+      setRefine("");
       notifyCreditsChanged();
     } catch (err) {
       setError((err as Error).message);
@@ -430,6 +443,8 @@ export function WebsiteRunner({
           {/* Images gate (cost-dominant) */}
           <Field label={t.images}>{sel(imagesMode, setImagesMode, t.opts.images)}</Field>
 
+          <AiAdvanced quality={quality} onQuality={setQuality} effort={effort} onEffort={setEffort} />
+
           <RunButton
             onClick={() => run("manual")}
             disabled={disabled}
@@ -498,6 +513,15 @@ export function WebsiteRunner({
                   className="h-[640px] w-full transition-[width] duration-200"
                 />
               </div>
+              <RefineBar
+                value={refine}
+                onChange={setRefine}
+                onSubmit={() => run("manual")}
+                loading={loading}
+                placeholder={t.refinePh}
+                submitLabel={t.refineLabel}
+                suggestions={t.refineSuggest}
+              />
             </div>
           )}
         </OutputPanel>

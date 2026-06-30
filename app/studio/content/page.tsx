@@ -23,7 +23,7 @@ export default async function ContentPage() {
   const socialAuto = getModuleDef("social-pack")?.supportsAuto ?? false;
 
   return (
-    <main className="relative mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+    <main className="relative mx-auto w-full max-w-6xl flex-1 px-6 py-12">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(70%_100%_at_50%_0%,rgba(99,102,241,0.12),transparent_70%)]"

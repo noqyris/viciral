@@ -70,6 +70,15 @@ const inputSchema = z.object({
   enhancePrompt: z.boolean().default(false),
   /** Inject the brand context (colors/voice/refs). Off = a neutral, brand-free render. */
   useBrand: z.boolean().default(true),
+  /** Optional refinement instruction for re-prompting (e.g. "warmer light"). */
+  refine: z.string().max(400).default(""),
+  // ---- Advanced ----
+  /** Image model: standard (nano-banana), premium (nano-banana-pro), or GPT Image. */
+  model: z.enum(["nano-banana", "nano-banana-pro", "gpt-image"]).default("nano-banana"),
+  outputFormat: z.enum(["png", "jpeg", "webp"]).default("png"),
+  /** Deterministic seed (empty = random). */
+  seed: z.number().int().min(0).optional(),
+  safetyTolerance: z.enum(["1", "2", "3", "4", "5", "6"]).default("4"),
 });
 
 type Input = z.infer<typeof inputSchema>;
@@ -133,17 +142,21 @@ export const imageModule: ModuleDef<Input> = {
       `${styleHint ? `. Style: ${styleHint}` : ""}` +
       `${lightHint ? `. Lighting: ${lightHint}` : ""}` +
       `${brandBlock}` +
-      `${input.negativePrompt ? `. Avoid: ${input.negativePrompt}` : ""}`;
+      `${input.negativePrompt ? `. Avoid: ${input.negativePrompt}` : ""}` +
+      `${input.refine.trim() ? `. Adjustment: ${input.refine.trim()}` : ""}`;
 
     ctx.onProgress?.("Generišem slike…");
     const res = await ctx.providers.image.generateImage({
-      modelId: "nano-banana",
+      modelId: input.model,
       prompt,
       numImages: input.variants,
       aspectRatio: input.aspectRatio,
+      outputFormat: input.outputFormat,
+      safetyTolerance: input.safetyTolerance,
+      ...(input.seed !== undefined ? { seed: input.seed } : {}),
       ...(refs.length ? { imageUrls: refs } : {}),
     });
-    const imageCredits = estimateCredits("nano-banana", { numImages: input.variants });
+    const imageCredits = estimateCredits(input.model, { numImages: input.variants });
     ctx.spend?.(imageCredits);
     creditsUsed += imageCredits;
 
@@ -152,7 +165,7 @@ export const imageModule: ModuleDef<Input> = {
       .map((im, i) => ({
         kind: "image" as const,
         url: im.url,
-        modelId: "nano-banana",
+        modelId: input.model,
         meta: { role: `image-${i}`, aspectRatio: input.aspectRatio },
       }));
 

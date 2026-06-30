@@ -1,16 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { ImageIcon, Clapperboard, FileText } from "lucide-react";
+import { ImageIcon, Clapperboard, FileText, Mic2, Music2 } from "lucide-react";
 import { ImageRunner } from "@/components/image-runner";
 import { VideoRunner } from "@/components/video-runner";
 import { SocialPackRunner } from "@/components/social-pack-runner";
+import { VoiceRunner } from "@/components/voice-runner";
+import { MusicRunner } from "@/components/music-runner";
 import { useLocale } from "@/components/locale-context";
 
 const TABS = [
   { id: "image", icon: ImageIcon, sr: "Slika", en: "Image" },
   { id: "video", icon: Clapperboard, sr: "Video", en: "Video" },
   { id: "post", icon: FileText, sr: "Objava", en: "Post" },
+  { id: "voice", icon: Mic2, sr: "Glas", en: "Voice" },
+  { id: "music", icon: Music2, sr: "Muzika", en: "Music" },
 ] as const;
 
 /**
@@ -49,6 +53,8 @@ export function ContentRunner({ socialAuto }: { socialAuto: boolean }) {
       {tab === "image" && <ImageRunner />}
       {tab === "video" && <VideoRunner />}
       {tab === "post" && <SocialPackRunner supportsAuto={socialAuto} />}
+      {tab === "voice" && <VoiceRunner />}
+      {tab === "music" && <MusicRunner />}
     </div>
   );
 }

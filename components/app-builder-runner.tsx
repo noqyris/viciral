@@ -15,6 +15,8 @@ import {
   OutputPanel,
   RunnerLoading,
   RunnerError,
+  RefineBar,
+  AiAdvanced,
   CreditsReceipt,
 } from "@/components/studio/runner-kit";
 
@@ -42,6 +44,9 @@ const T = {
     output: "Aplikacija",
     empty: "Opiši aplikaciju pa će se ovde pojaviti interaktivni pregled (u stilu brenda).",
     loading: "Pravim tvoju aplikaciju…",
+    refinePh: "Doradi: npr. toplije boje, dodaj ekran sa cenama…",
+    refine: "Doradi",
+    refineSuggest: ["Modernije", "Više boja", "Kraći tekst", "Dodaj CTA"],
     types: {
       "landing-app": "Landing app",
       dashboard: "Dashboard",
@@ -71,6 +76,9 @@ const T = {
     output: "App",
     empty: "Describe the app and an interactive, on-brand preview will appear here.",
     loading: "Building your app…",
+    refinePh: "Refine: e.g. 'warmer colors, add a pricing screen'…",
+    refine: "Refine",
+    refineSuggest: ["More modern", "More color", "Shorter text", "Add a CTA"],
     types: {
       "landing-app": "Landing app",
       dashboard: "Dashboard",
@@ -98,6 +106,9 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
   const [description, setDescription] = useState((initialInputs?.description as string) ?? "");
   const [appType, setAppType] = useState((initialInputs?.appType as string) ?? "landing-app");
   const [screens, setScreens] = useState((initialInputs?.screens as number) ?? 3);
+  const [refine, setRefine] = useState("");
+  const [quality, setQuality] = useState((initialInputs?.quality as string) ?? "best");
+  const [effort, setEffort] = useState((initialInputs?.effort as string) ?? "");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +127,7 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
         body: JSON.stringify({
           moduleSlug: "app-builder",
           mode,
-          inputs: { appName, description, appType, screens },
+          inputs: { appName, description, appType, screens, refine, quality, ...(effort ? { effort } : {}) },
         }),
       });
       const data = (await res.json()) as GenResp;
@@ -124,6 +135,7 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
       const app = data.generation?.assets?.find((a) => a.kind === "text" && a.meta?.role === "app-html");
       setHtml(app?.text ?? null);
       setCreditsUsed(data.generation?.creditsUsed ?? null);
+      setRefine("");
       notifyCreditsChanged();
     } catch (err) {
       setError((err as Error).message);
@@ -177,11 +189,12 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
                 min={2}
                 max={6}
                 value={screens}
-                onChange={(e) => setScreens(Number(e.target.value))}
+                onChange={(e) => setScreens(Math.max(2, Math.min(6, Number(e.target.value) || 2)))}
                 className="field"
               />
             </Field>
           </div>
+          <AiAdvanced quality={quality} onQuality={setQuality} effort={effort} onEffort={setEffort} />
           <RunButton
             onClick={() => run("manual")}
             disabled={disabled}
@@ -199,28 +212,39 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
         </div>
       }
       output={
-        <OutputPanel title={t.output} isEmpty={!html && !loading && !error} emptyLabel={t.empty}>
+        <OutputPanel
+          title={t.output}
+          isEmpty={!html && !loading && !error}
+          emptyLabel={t.empty}
+          actions={
+            html ? (
+              <Button variant="secondary" onClick={download}>
+                {t.download}
+              </Button>
+            ) : undefined
+          }
+        >
           {error && <RunnerError>{error}</RunnerError>}
           {loading && <RunnerLoading label={t.loading} />}
           {html && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                {creditsUsed != null ? (
-                  <CreditsReceipt label={t.creditsUsedLabel} used={creditsUsed} />
-                ) : (
-                  <span className="text-sm text-zinc-400">{t.preview}</span>
-                )}
-                <Button variant="secondary" onClick={download}>
-                  {t.download}
-                </Button>
-              </div>
+            <>
+              {creditsUsed != null && <CreditsReceipt label={t.creditsUsedLabel} used={creditsUsed} />}
               <iframe
                 title={t.preview}
                 srcDoc={html}
                 sandbox="allow-scripts"
                 className="h-[600px] w-full rounded-xl border border-white/10 bg-white"
               />
-            </div>
+              <RefineBar
+                value={refine}
+                onChange={setRefine}
+                onSubmit={() => run("manual")}
+                loading={loading}
+                placeholder={t.refinePh}
+                submitLabel={t.refine}
+                suggestions={t.refineSuggest}
+              />
+            </>
           )}
         </OutputPanel>
       }

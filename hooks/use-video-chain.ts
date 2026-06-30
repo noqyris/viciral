@@ -30,6 +30,9 @@ export interface ChainConfig {
   segmentSec: number;
   withAudio: boolean;
   useBrand: boolean;
+  resolution: string;
+  bitrateMode: string;
+  videoModel: string;
 }
 
 interface GenResp {
@@ -112,6 +115,9 @@ export function useVideoChain() {
           durationSec: cfg.segmentSec,
           aspectRatio: cfg.aspect,
           withAudio: cfg.withAudio,
+          resolution: cfg.resolution,
+          bitrateMode: cfg.bitrateMode,
+          videoModel: cfg.videoModel,
         });
         notifyCreditsChanged();
         const done = started.status === "COMPLETED" ? started : await pollGen(started.id);

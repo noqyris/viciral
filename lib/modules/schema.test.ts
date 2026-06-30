@@ -74,11 +74,10 @@ describe("module input-schema boundaries", () => {
     ).toBe(true);
   });
 
-  it("music accepts an in-range duration and rejects bad duration or empty prompt", () => {
-    expect(accepts("music", { prompt: "lo-fi beat", durationSec: 20 })).toBe(true);
-    expect(rejects("music", { prompt: "lo-fi beat", durationSec: 3 })).toBe(true);
-    expect(rejects("music", { prompt: "lo-fi beat", durationSec: 200 })).toBe(true);
-    expect(rejects("music", { prompt: "", durationSec: 20 })).toBe(true);
+  it("music accepts a prompt and rejects an empty one (Lyria is fixed 30s)", () => {
+    expect(accepts("music", { prompt: "lo-fi beat" })).toBe(true);
+    expect(rejects("music", { prompt: "" })).toBe(true);
+    expect(rejects("music", {})).toBe(true);
   });
 
   it("editor requires an instruction of length >= 2", () => {

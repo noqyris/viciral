@@ -7,7 +7,7 @@
  * Pure (only imports the pricing math), so it is safe to import in client
  * components and server components alike.
  */
-import { estimateCredits, VIDEO_DIMENSIONS } from "./pricing";
+import { estimateCredits, RESOLUTION_DIMENSIONS } from "./pricing";
 import { MODEL_BY_OP } from "@/lib/modules/image-tools";
 import { clampInt as intIn } from "@/lib/utils/math";
 
@@ -109,22 +109,41 @@ export function estimateModuleCredits(
       );
     }
     case "cinematic": {
-      // Seedance caps one clip at 15s (longer videos chain multiple clips).
       const durationSec = intIn(inputs.durationSec, 4, 15, 5);
-      return estimateCredits("seedance-2", {
-        durationSec,
-        width: VIDEO_DIMENSIONS.width,
-        height: VIDEO_DIMENSIONS.height,
-      });
+      const vm = inputs.videoModel;
+      const videoModel = vm === "veo" || vm === "kling" || vm === "sora" ? vm : "seedance";
+      const audio = inputs.withAudio !== false; // default true
+      const res = typeof inputs.resolution === "string" ? inputs.resolution : "720p";
+      // Veo: $0.20/s base; audio ×2, 4k ×2, 4k+audio ×3. Max 8s/clip.
+      if (videoModel === "veo") {
+        const dur = durationSec <= 4 ? 4 : durationSec <= 6 ? 6 : 8;
+        const mult = res === "4k" ? (audio ? 3 : 2) : audio ? 2 : 1;
+        return estimateCredits("veo-3", { durationSec: dur * mult });
+      }
+      // Sora 2: flat $0.10/s; integer duration 4/8/12.
+      if (videoModel === "sora") {
+        const dur = durationSec <= 4 ? 4 : durationSec <= 8 ? 8 : 12;
+        return estimateCredits("sora-2", { durationSec: dur });
+      }
+      // Kling: $0.112/s; audio ≈ ×1.5.
+      if (videoModel === "kling") {
+        return estimateCredits("kling-video", { durationSec: Math.ceil(durationSec * (audio ? 1.5 : 1)) });
+      }
+      // Seedance: token-billed by pixel area → resolution drives the cost.
+      const dims = RESOLUTION_DIMENSIONS[res] ?? RESOLUTION_DIMENSIONS["720p"];
+      return estimateCredits("seedance-2", { durationSec, width: dims.width, height: dims.height });
     }
     case "image": {
       const variants = intIn(inputs.variants, 1, 4, 2);
+      // Reserve at the CHOSEN image model's price.
+      const model =
+        inputs.model === "nano-banana-pro" ? "nano-banana-pro" : inputs.model === "gpt-image" ? "gpt-image" : "nano-banana";
       // Optional AI prompt-enhance adds one short text call. Reserve it at Opus
       // (the priciest) so the reservation always covers the actual run (manual
       // uses the cheaper Sonnet, so the unused remainder is refunded).
       const enhance = inputs.enhancePrompt === true;
       return (
-        estimateCredits("nano-banana", { numImages: variants }) +
+        estimateCredits(model, { numImages: variants }) +
         (enhance ? estimateCredits("claude-opus", { inputTokens: 700, outputTokens: 500 }) : 0)
       );
     }
@@ -154,7 +173,13 @@ export function estimateModuleCredits(
     case "dubbing":
       return estimateCredits("video-dub", { durationSec: intIn(inputs.approxSeconds, 5, 300, 30) });
     case "music":
-      return estimateCredits("music-gen", { durationSec: intIn(inputs.durationSec, 5, 120, 20) });
+      // Lyria 2 — flat per-generation cost (fixed 30s clip).
+      return estimateCredits("lyria-2", { numImages: 1 });
+    case "voice": {
+      // TTS is billed per 1000 chars — reserve at the exact script length.
+      const chars = typeof inputs.text === "string" ? inputs.text.length : 0;
+      return estimateCredits("elevenlabs-tts", { chars: Math.max(0, chars) });
+    }
     case "short-form": {
       const minutes = intIn(inputs.approxMinutes, 1, 60, 10);
       return (

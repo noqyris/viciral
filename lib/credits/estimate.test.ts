@@ -87,20 +87,14 @@ describe("estimateModuleCredits", () => {
     });
   });
 
-  describe("music input clamping (no throw)", () => {
-    // music-gen: $0.002/s × margin 3. Default 20s → 0.04 × 3 = 0.12 → ceil = 12.
-    it("uses the default 20s when no input is given", () => {
-      expect(estimateModuleCredits("music", {})).toBe(12);
-    });
-
-    it("clamps out-of-range / junk inputs without throwing", () => {
-      // [5,120] bounds.
-      const min = estimateCredits("music-gen", { durationSec: 5 });
-      const max = estimateCredits("music-gen", { durationSec: 120 });
-      expect(() => estimateModuleCredits("music", { durationSec: 9999 })).not.toThrow();
-      expect(estimateModuleCredits("music", { durationSec: 0 })).toBe(min);
-      expect(estimateModuleCredits("music", { durationSec: 9999 })).toBe(max);
-      expect(estimateModuleCredits("music", { durationSec: "junk" })).toBe(12);
+  describe("music (Lyria 2 — flat per-generation cost)", () => {
+    // Lyria 2: a flat per-generation charge (fixed 30s clip) — duration is ignored.
+    const flat = estimateCredits("lyria-2", { numImages: 1 });
+    it("is a flat cost regardless of input (duration is fixed)", () => {
+      expect(flat).toBeGreaterThan(0);
+      expect(estimateModuleCredits("music", {})).toBe(flat);
+      expect(estimateModuleCredits("music", { prompt: "x" })).toBe(flat);
+      expect(estimateModuleCredits("music", { durationSec: 9999 })).toBe(flat);
     });
   });
 

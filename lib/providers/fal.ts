@@ -10,6 +10,8 @@ import type {
   ImageTransformRequest,
   MusicRequest,
   MusicResponse,
+  SpeechRequest,
+  SpeechResponse,
   TranscriptResult,
   VideoProvider,
   VideoRequest,
@@ -25,17 +27,60 @@ function ensureConfigured() {
   }
 }
 
+/** Map our aspect-ratio enum to GPT Image's fixed `image_size` enum. */
+function gptImageSize(aspect?: string): string {
+  if (aspect === "1:1") return "1024x1024";
+  if (aspect === "16:9" || aspect === "1.91:1") return "1536x1024";
+  return "1024x1536"; // portrait / default
+}
+
+/** Parse a #rgb / #rrggbb hex into Recraft's {r,g,b} (0–255); null if invalid. */
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  let h = (hex || "").replace("#", "").trim();
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  const n = parseInt(h, 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
 export const falImageProvider: ImageProvider = {
   async generateImage(req: ImageRequest): Promise<ImageResponse> {
     ensureConfigured();
     const model = getModel(req.modelId);
-    const result = await fal.subscribe(model.providerModel, {
-      input: {
+    // Each image model has its own input contract.
+    let input: Record<string, unknown>;
+    if (req.modelId === "recraft-vector") {
+      // Recraft (vector): no num_images/aspect_ratio; brand `colors` ({r,g,b}) + size enum.
+      input = {
+        prompt: req.prompt,
+        ...(req.colors?.length
+          ? { colors: req.colors.map(hexToRgb).filter((c): c is { r: number; g: number; b: number } => c !== null) }
+          : {}),
+        ...(req.imageSize ? { image_size: req.imageSize } : {}),
+      };
+    } else if (req.modelId === "gpt-image") {
+      // GPT Image: fixed `image_size` enum (from aspect) + quality tier; no aspect_ratio.
+      input = {
+        prompt: req.prompt,
+        num_images: req.numImages ?? 1,
+        image_size: gptImageSize(req.aspectRatio),
+        quality: "medium",
+        ...(req.outputFormat ? { output_format: req.outputFormat } : {}),
+      };
+    } else {
+      // nano-banana / nano-banana-pro (Gemini contract).
+      input = {
         prompt: req.prompt,
         num_images: req.numImages ?? 1,
         ...(req.aspectRatio ? { aspect_ratio: req.aspectRatio } : {}),
         ...(req.imageUrls?.length ? { image_urls: req.imageUrls } : {}),
-      },
+        ...(req.outputFormat ? { output_format: req.outputFormat } : {}),
+        ...(req.seed !== undefined ? { seed: req.seed } : {}),
+        ...(req.safetyTolerance ? { safety_tolerance: req.safetyTolerance } : {}),
+      };
+    }
+    const result = await fal.subscribe(model.providerModel, {
+      input,
       logs: false,
     });
     // fal returns either an `images[]` or a single `image` depending on the
@@ -102,39 +147,105 @@ export const falAudioProvider: AudioProvider = {
   async generateMusic(req: MusicRequest): Promise<MusicResponse> {
     ensureConfigured();
     const model = getModel(req.modelId);
-    const result = await fal.subscribe(model.providerModel, {
-      input: { prompt: req.prompt, seconds_total: req.durationSec },
-      logs: false,
-    });
+    // Lyria 2 has a FIXED 30s length (no seconds_total); stable-audio takes one.
+    const input =
+      req.modelId === "lyria-2"
+        ? { prompt: req.prompt }
+        : { prompt: req.prompt, seconds_total: req.durationSec };
+    const result = await fal.subscribe(model.providerModel, { input, logs: false });
     const data = result.data as { audio?: { url: string }; audio_file?: { url: string } };
     return { audioUrl: data.audio?.url ?? data.audio_file?.url ?? "" };
   },
+
+  async generateSpeech(req: SpeechRequest): Promise<SpeechResponse> {
+    ensureConfigured();
+    const model = getModel(req.modelId);
+    const result = await fal.subscribe(model.providerModel, {
+      input: {
+        text: req.text,
+        ...(req.voice ? { voice: req.voice } : {}),
+        ...(req.stability !== undefined ? { stability: req.stability } : {}),
+        ...(req.similarityBoost !== undefined ? { similarity_boost: req.similarityBoost } : {}),
+        ...(req.style !== undefined ? { style: req.style } : {}),
+        ...(req.speed !== undefined ? { speed: req.speed } : {}),
+        ...(req.languageCode ? { language_code: req.languageCode } : {}),
+      },
+      logs: false,
+    });
+    const data = result.data as { audio?: { url: string } };
+    return { audioUrl: data.audio?.url ?? "" };
+  },
 };
+
+/** Veo i2v only accepts auto/16:9/9:16 — map our wider aspect set down. */
+function veoAspect(a: string): string {
+  return a === "16:9" || a === "9:16" ? a : "auto";
+}
+
+/**
+ * Each video model has its own input contract. We map our normalized VideoRequest
+ * to the exact keys/serialization each fal endpoint expects (verified schemas).
+ */
+function buildVideoInput(req: VideoRequest): Record<string, unknown> {
+  if (req.modelId === "veo-3") {
+    return {
+      ...(req.prompt ? { prompt: req.prompt } : {}),
+      ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
+      // Veo duration is "4s" | "6s" | "8s".
+      ...(req.durationSec ? { duration: `${req.durationSec}s` } : {}),
+      ...(req.aspectRatio ? { aspect_ratio: veoAspect(req.aspectRatio) } : {}),
+      ...(req.resolution ? { resolution: req.resolution } : {}),
+      ...(req.withAudio !== undefined ? { generate_audio: req.withAudio } : {}),
+    };
+  }
+  if (req.modelId === "kling-video") {
+    return {
+      ...(req.prompt ? { prompt: req.prompt } : {}),
+      // Kling Pro i2v uses `start_image_url` (NOT image_url) + optional end frame.
+      ...(req.imageUrl ? { start_image_url: req.imageUrl } : {}),
+      ...(req.endImageUrl ? { end_image_url: req.endImageUrl } : {}),
+      ...(req.durationSec ? { duration: String(req.durationSec) } : {}),
+      ...(req.withAudio !== undefined ? { generate_audio: req.withAudio } : {}),
+    };
+  }
+  if (req.modelId === "sora-2") {
+    return {
+      ...(req.prompt ? { prompt: req.prompt } : {}),
+      ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
+      // Sora duration is an INTEGER (4/8/12/16/20), not a "Ns" string.
+      ...(req.durationSec ? { duration: req.durationSec } : {}),
+      ...(req.aspectRatio ? { aspect_ratio: veoAspect(req.aspectRatio) } : {}),
+    };
+  }
+  // Seedance + talking-head/dubbing (the original shape).
+  return {
+    ...(req.prompt ? { prompt: req.prompt } : {}),
+    ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
+    // Seedance expects duration as a STRING enum ("auto","4"…"15").
+    ...(req.durationSec ? { duration: String(req.durationSec) } : {}),
+    // Seedance accepts aspect_ratio directly (auto/16:9/9:16/1:1/4:3/3:4/21:9).
+    ...(req.aspectRatio ? { aspect_ratio: req.aspectRatio } : {}),
+    ...(req.resolution ? { resolution: req.resolution } : {}),
+    ...(req.endImageUrl ? { end_image_url: req.endImageUrl } : {}),
+    ...(req.bitrateMode ? { bitrate_mode: req.bitrateMode } : {}),
+    ...(req.endUserId ? { end_user_id: req.endUserId } : {}),
+    // Seedance 2 generates native synchronized audio; opt in/out explicitly.
+    ...(req.withAudio !== undefined ? { generate_audio: req.withAudio } : {}),
+    // Talking-head models: spoken script + voice.
+    ...(req.script ? { text: req.script } : {}),
+    ...(req.voiceId ? { voice: req.voiceId } : {}),
+    // Dubbing/translation: source video + target language.
+    ...(req.videoUrl ? { video_url: req.videoUrl } : {}),
+    ...(req.targetLang ? { target_language: req.targetLang } : {}),
+  };
+}
 
 export const falVideoProvider: VideoProvider = {
   async submitVideo(req: VideoRequest): Promise<VideoSubmitResponse> {
     ensureConfigured();
     const model = getModel(req.modelId);
-    // Seedance image-to-video derives output resolution from the input image, so
-    // we don't forward width/height here. The reservation and the settlement use
-    // the same assumed dimensions (consistent charge); the webhook reports actual
-    // dimensions when available so the cost basis tracks the real output.
     const queued = await fal.queue.submit(model.providerModel, {
-      input: {
-        ...(req.prompt ? { prompt: req.prompt } : {}),
-        ...(req.imageUrl ? { image_url: req.imageUrl } : {}),
-        ...(req.durationSec ? { duration: req.durationSec } : {}),
-        // Seedance accepts aspect_ratio directly (auto/16:9/9:16/1:1/4:3/3:4/21:9).
-        ...(req.aspectRatio ? { aspect_ratio: req.aspectRatio } : {}),
-        // Seedance 2 generates native synchronized audio; opt in/out explicitly.
-        ...(req.withAudio !== undefined ? { generate_audio: req.withAudio } : {}),
-        // Talking-head models: spoken script + voice.
-        ...(req.script ? { text: req.script } : {}),
-        ...(req.voiceId ? { voice: req.voiceId } : {}),
-        // Dubbing/translation: source video + target language.
-        ...(req.videoUrl ? { video_url: req.videoUrl } : {}),
-        ...(req.targetLang ? { target_language: req.targetLang } : {}),
-      },
+      input: buildVideoInput(req),
       ...(req.webhookUrl ? { webhookUrl: req.webhookUrl } : {}),
     });
     return { requestId: queued.request_id, modelId: req.modelId, status: "queued" };

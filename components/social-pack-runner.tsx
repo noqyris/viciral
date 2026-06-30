@@ -11,6 +11,8 @@ import {
   RunButton,
   OutputPanel,
   RunnerError,
+  RefineBar,
+  AiAdvanced,
   CreditsReceipt,
 } from "@/components/studio/runner-kit";
 import { notifyCreditsChanged } from "@/components/credits-context";
@@ -47,6 +49,9 @@ const T = {
     generatedImage: (i: number) => `Generisana slika ${i}`,
     outputTitle: "Rezultat",
     emptyLabel: "Unesi temu i pokreni — slike i tekstovi objava pojaviće se ovde.",
+    refinePh: "Doradi: npr. duhovitije, drugačiji CTA…",
+    refine: "Doradi",
+    refineSuggest: ["Duhovitije", "Kraće", "Drugačiji CTA", "Više hashtagova"],
     formats: { single: "Jedna objava", carousel: "Carousel", story: "Story" } as Record<string, string>,
     lengths: { short: "Kratko", medium: "Srednje", long: "Dugačko" } as Record<string, string>,
   },
@@ -76,6 +81,9 @@ const T = {
     generatedImage: (i: number) => `Generated image ${i}`,
     outputTitle: "Output",
     emptyLabel: "Enter a topic and run — your post images and captions will appear here.",
+    refinePh: "Refine: e.g. funnier, different CTA…",
+    refine: "Refine",
+    refineSuggest: ["Funnier", "Shorter", "Different CTA", "More hashtags"],
     formats: { single: "Single post", carousel: "Carousel", story: "Story" } as Record<string, string>,
     lengths: { short: "Short", medium: "Medium", long: "Long" } as Record<string, string>,
   },
@@ -113,6 +121,9 @@ export function SocialPackRunner({
   const [includeCta, setIncludeCta] = useState((initialInputs?.includeCta as boolean) ?? true);
   const [useEmoji, setUseEmoji] = useState((initialInputs?.useEmoji as boolean) ?? true);
   const [includeImage, setIncludeImage] = useState((initialInputs?.includeImage as boolean) ?? true);
+  const [refine, setRefine] = useState("");
+  const [quality, setQuality] = useState((initialInputs?.quality as string) ?? "balanced");
+  const [effort, setEffort] = useState((initialInputs?.effort as string) ?? "");
   const t = T[useLocale()];
 
   const [loading, setLoading] = useState(false);
@@ -145,6 +156,9 @@ export function SocialPackRunner({
             includeCta,
             useEmoji,
             includeImage,
+            refine,
+            quality,
+            ...(effort ? { effort } : {}),
           },
         }),
       });
@@ -152,6 +166,7 @@ export function SocialPackRunner({
       if (!res.ok) throw new Error(data.error ?? t.genError);
       setAssets(data.generation?.assets ?? []);
       setCreditsUsed(data.generation?.creditsUsed ?? null);
+      setRefine("");
       notifyCreditsChanged();
     } catch (err) {
       setError((err as Error).message);
@@ -202,7 +217,7 @@ export function SocialPackRunner({
                 min={1}
                 max={10}
                 value={postCount}
-                onChange={(e) => setPostCount(Number(e.target.value))}
+                onChange={(e) => setPostCount(Math.max(1, Math.min(10, Number(e.target.value) || 1)))}
                 className="field"
               />
             </Field>
@@ -242,7 +257,7 @@ export function SocialPackRunner({
                 min={0}
                 max={15}
                 value={hashtagCount}
-                onChange={(e) => setHashtagCount(Number(e.target.value))}
+                onChange={(e) => setHashtagCount(Math.max(0, Math.min(15, Number(e.target.value) || 0)))}
                 className="field"
               />
             </Field>
@@ -253,7 +268,7 @@ export function SocialPackRunner({
                 min={1}
                 max={3}
                 value={variantsPerPost}
-                onChange={(e) => setVariantsPerPost(Number(e.target.value))}
+                onChange={(e) => setVariantsPerPost(Math.max(1, Math.min(3, Number(e.target.value) || 1)))}
                 className="field"
                 disabled={!includeImage}
               />
@@ -274,6 +289,8 @@ export function SocialPackRunner({
               {t.useEmoji}
             </label>
           </div>
+
+          <AiAdvanced quality={quality} onQuality={setQuality} effort={effort} onEffort={setEffort} />
 
           <RunButton
             onClick={() => run("manual")}
@@ -348,6 +365,18 @@ export function SocialPackRunner({
                 ) : null,
               )}
             </div>
+          )}
+
+          {hasAssets && (
+            <RefineBar
+              value={refine}
+              onChange={setRefine}
+              onSubmit={() => run("manual")}
+              loading={loading}
+              placeholder={t.refinePh}
+              submitLabel={t.refine}
+              suggestions={t.refineSuggest}
+            />
           )}
         </OutputPanel>
       }

@@ -1,28 +1,51 @@
 import { z } from "zod";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
-import { VIDEO_DIMENSIONS } from "@/lib/credits/pricing";
+import { RESOLUTION_DIMENSIONS, type UsageParams } from "@/lib/credits/pricing";
 import { submitVideoJob } from "./async-video";
 import type { ModuleDef } from "./types";
 
 /**
  * Cinematic Video — async module, and the per-segment generator behind the
- * Content "Video" builder. Image + prompt → one Seedance clip (≤15s) via the fal
- * queue; the fal webhook settles credits and persists the clip (lib/jobs/settle).
- * Arbitrary-length video chains many of these (extract last frame → next clip →
- * merge) in the client (components/video-runner.tsx). Premium / gated.
+ * Content "Video" builder. Image + prompt → one clip via the chosen video model
+ * (Seedance / Veo 3.1 / Kling 3.0) on the fal queue; the fal webhook settles
+ * credits and persists the clip. Arbitrary-length video chains many of these
+ * (extract last frame → next clip → merge) client-side. Premium / gated.
  */
 
-const { width: WIDTH, height: HEIGHT } = VIDEO_DIMENSIONS;
-
-// Aspect ratios Seedance accepts directly (subset that's also useful socially).
 const ASPECTS = ["9:16", "16:9", "1:1", "4:3", "3:4"] as const;
+const RESOLUTIONS = ["480p", "720p", "1080p", "4k"] as const;
+const VIDEO_MODELS = ["seedance", "veo", "kling", "sora"] as const;
+type VideoModel = (typeof VIDEO_MODELS)[number];
+
+const MODEL_ID: Record<VideoModel, string> = {
+  seedance: "seedance-2",
+  veo: "veo-3",
+  kling: "kling-video",
+  sora: "sora-2",
+};
+
+// Veo accepts only 4s/6s/8s (max 8s); snap the requested duration down to those.
+export const veoSnap = (d: number) => (d <= 4 ? 4 : d <= 6 ? 6 : 8);
+// Sora accepts integer 4/8/12/16/20s; within our 15s cap that's 4/8/12.
+export const soraSnap = (d: number) => (d <= 4 ? 4 : d <= 8 ? 8 : 12);
+// Veo bills $0.20/s base; audio ×2, 4k ×2, 4k+audio ×3 → an integer multiplier.
+export const veoMult = (resolution: string, audio: boolean) =>
+  resolution === "4k" ? (audio ? 3 : 2) : audio ? 2 : 1;
+// Kling bills $0.112/s; audio ≈ ×1.5.
+export const klingMult = (audio: boolean) => (audio ? 1.5 : 1);
 
 const inputSchema = z.object({
   prompt: z.string().min(2, "Opis je obavezan").max(500),
   imageUrl: z.string().url("Potrebna je URL adresa polazne slike"),
-  // Seedance caps a single clip at 15s; longer videos are built by chaining clips.
+  // Seedance caps a single clip at 15s (longer videos chain clips); Veo caps at 8s.
   durationSec: z.number().int().min(4).max(15).default(5),
+  videoModel: z.enum(VIDEO_MODELS).default("seedance"),
   aspectRatio: z.enum(ASPECTS).default("9:16"),
+  // Resolution is the dominant cost lever for Seedance/Veo (Kling ignores it).
+  resolution: z.enum(RESOLUTIONS).default("720p"),
+  /** Optional end frame (start→end transition). */
+  endImageUrl: z.string().max(600).default(""),
+  bitrateMode: z.enum(["standard", "high"]).default("standard"),
   withAudio: z.boolean().default(true),
 });
 
@@ -31,7 +54,7 @@ type Input = z.infer<typeof inputSchema>;
 export const cinematicModule: ModuleDef<Input> = {
   slug: "cinematic",
   name: "Cinematic Video",
-  tagline: "Slika + opis → kinematski video klip (Seedance).",
+  tagline: "Slika + opis → kinematski video klip (Seedance / Veo / Kling).",
   category: "video",
   status: "available",
   kind: "async",
@@ -45,25 +68,48 @@ export const cinematicModule: ModuleDef<Input> = {
   },
 
   async submit(ctx) {
+    const input = ctx.inputs;
     // Inject the brand block into the prompt (text-level on-brand). The start
-    // frame is the user's image, so visual identity comes from there (Seedance
-    // takes a single imageUrl — no reference-image array).
+    // frame is the user's image, so visual identity comes from there.
     const prompt = ctx.brandContext?.hasIdentity
-      ? `${ctx.inputs.prompt} ${ctx.brandContext.promptBlock}`
-      : ctx.inputs.prompt;
+      ? `${input.prompt} ${ctx.brandContext.promptBlock}`
+      : input.prompt;
+
+    const endImage = input.endImageUrl.trim();
+    const endImageUrl = /^https?:\/\//i.test(endImage) ? endImage : undefined;
+
+    // Per-model generation duration + cost basis (settle reconciles against
+    // `params`, so reserve == charge for any model/config).
+    let reqDuration = input.durationSec;
+    let params: UsageParams;
+    if (input.videoModel === "veo") {
+      reqDuration = veoSnap(input.durationSec);
+      params = { durationSec: reqDuration * veoMult(input.resolution, input.withAudio) };
+    } else if (input.videoModel === "sora") {
+      // Sora 2: flat $0.10/s (audio included), integer duration.
+      reqDuration = soraSnap(input.durationSec);
+      params = { durationSec: reqDuration };
+    } else if (input.videoModel === "kling") {
+      params = { durationSec: Math.ceil(input.durationSec * klingMult(input.withAudio)) };
+    } else {
+      const dims = RESOLUTION_DIMENSIONS[input.resolution] ?? RESOLUTION_DIMENSIONS["720p"];
+      params = { durationSec: input.durationSec, width: dims.width, height: dims.height };
+    }
+
     return submitVideoJob(
       ctx,
-      "seedance-2",
+      MODEL_ID[input.videoModel],
       {
         prompt,
-        imageUrl: ctx.inputs.imageUrl,
-        durationSec: ctx.inputs.durationSec,
-        aspectRatio: ctx.inputs.aspectRatio,
-        width: WIDTH,
-        height: HEIGHT,
-        withAudio: ctx.inputs.withAudio,
+        imageUrl: input.imageUrl,
+        durationSec: reqDuration,
+        aspectRatio: input.aspectRatio,
+        resolution: input.resolution,
+        ...(endImageUrl ? { endImageUrl } : {}),
+        bitrateMode: input.bitrateMode,
+        withAudio: input.withAudio,
       },
-      { durationSec: ctx.inputs.durationSec, width: WIDTH, height: HEIGHT },
+      params,
     );
   },
 };

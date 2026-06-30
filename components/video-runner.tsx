@@ -11,6 +11,7 @@ import {
   RunnerError,
   RunnerNote,
   AssetAction,
+  AdvancedSection,
 } from "@/components/studio/runner-kit";
 import { useLocale } from "@/components/locale-context";
 import { useVideoChain } from "@/hooks/use-video-chain";
@@ -19,6 +20,7 @@ import { estimateCredits } from "@/lib/credits/pricing";
 
 const ASPECTS = ["9:16", "16:9", "1:1"] as const;
 const SEG_SECONDS = [5, 10, 15] as const;
+const RESOLUTIONS = ["480p", "720p", "1080p", "4k"] as const;
 
 const T = {
   sr: {
@@ -28,9 +30,19 @@ const T = {
     promptPh: "npr. spori zoom na proizvod, topla svetlost, kinematski",
     startImage: "Polazna slika (URL)",
     startImagePh: "https://…/slika.png",
+    model: "Video model",
+    modelSeedance: "Seedance 2.0",
+    modelVeo: "Veo 3.1 (Google)",
+    modelKling: "Kling 3.0",
+    modelSora: "Sora 2 (OpenAI)",
     aspect: "Format",
     segmentSec: "Trajanje klipa",
     segments: "Broj klipova",
+    resolution: "Rezolucija",
+    advanced: "Napredno",
+    bitrate: "Kvalitet enkodiranja",
+    bitrateStd: "Standardno",
+    bitrateHigh: "Visok",
     total: "Ukupno",
     withAudio: "Sa zvukom (Seedance native)",
     useBrand: "U stilu brenda",
@@ -59,9 +71,19 @@ const T = {
     promptPh: "e.g. slow zoom on the product, warm light, cinematic",
     startImage: "Starting image (URL)",
     startImagePh: "https://…/image.png",
+    model: "Video model",
+    modelSeedance: "Seedance 2.0",
+    modelVeo: "Veo 3.1 (Google)",
+    modelKling: "Kling 3.0",
+    modelSora: "Sora 2 (OpenAI)",
     aspect: "Aspect",
     segmentSec: "Clip length",
     segments: "Number of clips",
+    resolution: "Resolution",
+    advanced: "Advanced",
+    bitrate: "Encode quality",
+    bitrateStd: "Standard",
+    bitrateHigh: "High",
     total: "Total",
     withAudio: "With audio (Seedance native)",
     useBrand: "In brand style",
@@ -92,15 +114,32 @@ export function VideoRunner() {
   const [aspect, setAspect] = useState<string>("9:16");
   const [segmentSec, setSegmentSec] = useState<number>(5);
   const [segments, setSegments] = useState<number>(2);
+  const [videoModel, setVideoModel] = useState<string>("seedance");
+  const [resolution, setResolution] = useState<string>("720p");
+  const [bitrateMode, setBitrateMode] = useState<string>("standard");
   const [withAudio, setWithAudio] = useState(true);
   const [useBrand, setUseBrand] = useState(true);
+
+  // Per-model clip-length options (Veo: 4/6/8; Sora: 4/8/12; else 5/10/15).
+  const optionsFor = (m: string): number[] =>
+    m === "veo" ? [4, 6, 8] : m === "sora" ? [4, 8, 12] : [...SEG_SECONDS];
+  const segOptions = optionsFor(videoModel);
+  function changeModel(m: string) {
+    setVideoModel(m);
+    const opts = optionsFor(m);
+    if (!opts.includes(segmentSec)) {
+      // Snap to the nearest valid clip length for the new model.
+      const nearest = opts.reduce((a, b) => (Math.abs(b - segmentSec) < Math.abs(a - segmentSec) ? b : a));
+      setSegmentSec(nearest);
+    }
+  }
 
   const { phase, segmentIndex, clips, finalUrl, error, running, run } = useVideoChain();
 
   const totalSec = segments * segmentSec;
 
   // Cost = (text → 1 first frame) + N clips + (N−1) frame extracts + (N>1 merge).
-  const segCost = estimateModuleCredits("cinematic", { durationSec: segmentSec });
+  const segCost = estimateModuleCredits("cinematic", { durationSec: segmentSec, resolution, videoModel, withAudio });
   const extractCost = estimateCredits("ffmpeg-extract-frame", { numImages: 1 });
   const mergeCost = segments > 1 ? estimateCredits("ffmpeg-merge", { durationSec: totalSec }) : 0;
   const frameCost = mode === "text" ? estimateCredits("nano-banana", { numImages: 1 }) : 0;
@@ -111,8 +150,14 @@ export function VideoRunner() {
 
   const isEmpty = phase === "idle" && clips.length === 0 && !finalUrl && !error;
 
+  // Per-clip breakdown, excluding the clip already shown as the final video.
+  // For a single-segment chain, finalUrl IS the only clip, so this is empty and
+  // we don't render the same video twice; for merged multi-clip videos (or a
+  // partial run with no final yet) every produced clip still shows.
+  const clipBreakdown = clips.filter((url) => url !== finalUrl);
+
   function go() {
-    run({ mode, prompt, startImageUrl, aspect, segments, segmentSec, withAudio, useBrand });
+    run({ mode, prompt, startImageUrl, aspect, segments, segmentSec, withAudio, useBrand, resolution, bitrateMode, videoModel });
   }
 
   return (
@@ -157,6 +202,15 @@ export function VideoRunner() {
             </Field>
           )}
 
+          <Field label={t.model}>
+            <select value={videoModel} onChange={(e) => changeModel(e.target.value)} className="field">
+              <option value="seedance">{t.modelSeedance}</option>
+              <option value="veo">{t.modelVeo}</option>
+              <option value="kling">{t.modelKling}</option>
+              <option value="sora">{t.modelSora}</option>
+            </select>
+          </Field>
+
           <div className="grid grid-cols-3 gap-4">
             <Field label={t.aspect}>
               <select value={aspect} onChange={(e) => setAspect(e.target.value)} className="field">
@@ -173,7 +227,7 @@ export function VideoRunner() {
                 onChange={(e) => setSegmentSec(Number(e.target.value))}
                 className="field"
               >
-                {SEG_SECONDS.map((s) => (
+                {segOptions.map((s) => (
                   <option key={s} value={s}>
                     {s}
                     {t.sec}
@@ -193,6 +247,16 @@ export function VideoRunner() {
             </Field>
           </div>
 
+          <Field label={t.resolution}>
+            <select value={resolution} onChange={(e) => setResolution(e.target.value)} className="field">
+              {RESOLUTIONS.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </Field>
+
           <p className="text-xs text-zinc-500">
             {t.total}: <span className="font-medium text-zinc-300">{totalSec}{t.sec}</span> · {segments}×{segmentSec}{t.sec}
           </p>
@@ -207,6 +271,15 @@ export function VideoRunner() {
               {t.useBrand}
             </label>
           </div>
+
+          <AdvancedSection title={t.advanced}>
+            <Field label={t.bitrate}>
+              <select value={bitrateMode} onChange={(e) => setBitrateMode(e.target.value)} className="field">
+                <option value="standard">{t.bitrateStd}</option>
+                <option value="high">{t.bitrateHigh}</option>
+              </select>
+            </Field>
+          </AdvancedSection>
 
           <RunButton
             onClick={go}
@@ -246,9 +319,9 @@ export function VideoRunner() {
             </div>
           )}
 
-          {clips.length > 0 && (
+          {clipBreakdown.length > 0 && (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {clips.map((url, i) => (
+              {clipBreakdown.map((url, i) => (
                 <div key={i} className="space-y-1">
                   <p className="text-xs text-zinc-500">{t.clip(i + 1)}</p>
                   <video src={url} controls className="w-full rounded-lg border border-white/10" />

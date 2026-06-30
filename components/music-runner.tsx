@@ -29,7 +29,7 @@ const T = {
     durationLabel: "Trajanje (sek)",
     composing: "Komponujem…",
     makeMusic: "Napravi muziku",
-    costNote: "po sekundi",
+    costNote: "30s · Lyria 2",
     creditsUsed: "Potrošeno kredita:",
     download: "Preuzmi / otvori →",
     outputTitle: "Numera",
@@ -48,7 +48,7 @@ const T = {
     durationLabel: "Duration (sec)",
     composing: "Composing…",
     makeMusic: "Make music",
-    costNote: "per second",
+    costNote: "30s · Lyria 2",
     creditsUsed: "Credits used:",
     download: "Download / open →",
     outputTitle: "Track",
@@ -70,7 +70,6 @@ interface GenerationResponse {
 export function MusicRunner({ initialInputs }: { initialInputs?: Record<string, unknown> }) {
   const t = T[useLocale()];
   const [prompt, setPrompt] = useState((initialInputs?.prompt as string) ?? "");
-  const [durationSec, setDurationSec] = useState((initialInputs?.durationSec as number) ?? 20);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +88,7 @@ export function MusicRunner({ initialInputs }: { initialInputs?: Record<string, 
         body: JSON.stringify({
           moduleSlug: "music",
           mode: "manual",
-          inputs: { prompt, durationSec },
+          inputs: { prompt },
         }),
       });
       const data = (await res.json()) as GenerationResponse;
@@ -132,23 +131,12 @@ export function MusicRunner({ initialInputs }: { initialInputs?: Record<string, 
             ))}
           </div>
 
-          <Field label={t.durationLabel} className="sm:max-w-[12rem]">
-            <input
-              type="number"
-              min={5}
-              max={120}
-              value={durationSec}
-              onChange={(e) => setDurationSec(Number(e.target.value))}
-              className="field"
-            />
-          </Field>
-
           <RunButton
             onClick={run}
             disabled={loading || prompt.length < 2}
             loading={loading}
             loadingLabel={t.composing}
-            cost={<CostHint credits={estimateModuleCredits("music", { durationSec })} note={t.costNote} />}
+            cost={<CostHint credits={estimateModuleCredits("music")} note={t.costNote} />}
           >
             {t.makeMusic}
           </RunButton>

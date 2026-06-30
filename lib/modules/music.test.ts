@@ -5,7 +5,7 @@ import { estimateCredits } from "@/lib/credits/pricing";
 import { musicModule } from "./music";
 
 function ctxFor(
-  inputs: { prompt: string; durationSec: number },
+  inputs: { prompt: string },
   generateMusic: (req: MusicRequest) => Promise<{ audioUrl: string }>,
 ) {
   const spent: number[] = [];
@@ -25,27 +25,27 @@ function ctxFor(
   };
 }
 
-describe("music module", () => {
-  it("estimates per second", () => {
-    expect(musicModule.estimateCredits({ prompt: "x", durationSec: 20 })).toBe(
-      estimateCredits("music-gen", { durationSec: 20 }),
+describe("music module (Lyria 2)", () => {
+  it("estimates a flat per-generation cost", () => {
+    expect(musicModule.estimateCredits({ prompt: "x" })).toBe(
+      estimateCredits("lyria-2", { numImages: 1 }),
     );
   });
 
-  it("returns an audio asset and spends exactly the reserve", async () => {
+  it("returns an audio asset (via Lyria) and spends exactly the reserve", async () => {
     const calls: MusicRequest[] = [];
-    const { ctx, spent } = ctxFor({ prompt: "vesela gitara", durationSec: 20 }, async (req) => {
+    const { ctx, spent } = ctxFor({ prompt: "vesela gitara" }, async (req) => {
       calls.push(req);
-      return { audioUrl: "https://x/m.mp3" };
+      return { audioUrl: "https://x/m.wav" };
     });
     const res = await musicModule.generate!(ctx);
-    expect(calls[0].modelId).toBe("music-gen");
-    expect(res.assets[0]).toMatchObject({ kind: "audio", url: "https://x/m.mp3" });
+    expect(calls[0].modelId).toBe("lyria-2");
+    expect(res.assets[0]).toMatchObject({ kind: "audio", url: "https://x/m.wav" });
     expect(spent[0]).toBe(res.creditsUsed);
   });
 
   it("does NOT charge when no track is returned", async () => {
-    const { ctx, spent } = ctxFor({ prompt: "test muzika", durationSec: 20 }, async () => ({ audioUrl: "" }));
+    const { ctx, spent } = ctxFor({ prompt: "test muzika" }, async () => ({ audioUrl: "" }));
     await expect(musicModule.generate!(ctx)).rejects.toThrow(/nije generisana/);
     expect(spent).toHaveLength(0);
   });
@@ -55,7 +55,7 @@ describe("music module", () => {
     const ctx = {
       userId: "u1",
       mode: "manual" as const,
-      inputs: musicModule.inputSchema.parse({ prompt: "test muzika", durationSec: 20 }),
+      inputs: musicModule.inputSchema.parse({ prompt: "test muzika" }),
       brand: null,
       providers,
       spend: () => {},
