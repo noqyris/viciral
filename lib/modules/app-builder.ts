@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { estimateCredits } from "@/lib/credits/pricing";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
-import { brandPromptLine, brandReferenceImages } from "@/lib/brand/inject";
-import { runJsonText, modelForQuality } from "./text";
+import { brandPromptLine, resolveReferenceImages } from "@/lib/brand/inject";
+import { runJsonText } from "./text";
+import { genBrandImage } from "./gen-image";
 import { buildAppHtml, type AppSpec } from "./app-html";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
@@ -99,30 +100,17 @@ export const appBuilderModule: ModuleDef<Input> = {
       system,
       prompt,
       maxTokens: MAX_OUTPUT_TOKENS,
-      model: modelForQuality(input.quality, ctx.mode),
-      ...(input.effort ? { effort: input.effort } : {}),
+      quality: input.quality,
+      effort: input.effort,
     });
 
     let creditsUsed = textCredits;
-    const referenceImages = ctx.brandContext?.referenceImages ?? brandReferenceImages(ctx.brand);
+    const referenceImages = resolveReferenceImages(ctx.brandContext, ctx.brand);
 
     const genImage = async (p: string): Promise<string | undefined> => {
-      try {
-        const res = await ctx.providers.image.generateImage({
-          modelId: "nano-banana",
-          prompt: p,
-          numImages: 1,
-          ...(referenceImages.length ? { imageUrls: referenceImages } : {}),
-        });
-        const url = res.images[0]?.url;
-        if (!url) return undefined;
-        ctx.spend?.(imgCredits);
-        creditsUsed += imgCredits;
-        return url;
-      } catch (err) {
-        console.error("app-builder: image failed (app continues):", err);
-        return undefined;
-      }
+      const r = await genBrandImage(ctx, p, { referenceImages, credits: imgCredits, label: "app-builder" });
+      creditsUsed += r.spent;
+      return r.url;
     };
 
     let imagesUsed = 0;

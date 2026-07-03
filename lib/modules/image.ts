@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { estimateCredits } from "@/lib/credits/pricing";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
-import { brandReferenceImages } from "@/lib/brand/inject";
+import { resolveReferenceImages } from "@/lib/brand/inject";
+import { isHttpUrl } from "@/lib/http";
 import { runText } from "./text";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
@@ -83,8 +84,6 @@ const inputSchema = z.object({
 
 type Input = z.infer<typeof inputSchema>;
 
-const isHttpUrl = (s: string) => /^https?:\/\//i.test(s.trim());
-
 export const imageModule: ModuleDef<Input> = {
   slug: "image",
   name: "Slike",
@@ -127,10 +126,8 @@ export const imageModule: ModuleDef<Input> = {
     }
 
     const useBrand = input.useBrand;
-    const brandRefs = useBrand
-      ? (ctx.brandContext?.referenceImages ?? brandReferenceImages(ctx.brand))
-      : [];
-    const userRef = isHttpUrl(input.referenceUrl) ? [input.referenceUrl.trim()] : [];
+    const brandRefs = useBrand ? resolveReferenceImages(ctx.brandContext, ctx.brand) : [];
+    const userRef = isHttpUrl(input.referenceUrl.trim()) ? [input.referenceUrl.trim()] : [];
     const refs = [...userRef, ...brandRefs];
 
     const styleHint = STYLE_HINT[input.style] ?? "";
@@ -156,10 +153,10 @@ export const imageModule: ModuleDef<Input> = {
       ...(input.seed !== undefined ? { seed: input.seed } : {}),
       ...(refs.length ? { imageUrls: refs } : {}),
     });
-    const imageCredits = estimateCredits(input.model, { numImages: input.variants });
-    ctx.spend?.(imageCredits);
-    creditsUsed += imageCredits;
-
+    // Only spend for images that actually came back. A content-filtered or
+    // malformed provider response can be an empty batch (fal normalizes it to
+    // { images: [] } without throwing); charging the full reservation for zero
+    // delivered images would over-bill. Mirrors the guard in social-pack.ts.
     const assets: GeneratedAsset[] = res.images
       .filter((im): im is { url: string } => Boolean(im.url))
       .map((im, i) => ({
@@ -168,6 +165,12 @@ export const imageModule: ModuleDef<Input> = {
         modelId: input.model,
         meta: { role: `image-${i}`, aspectRatio: input.aspectRatio },
       }));
+
+    if (assets.length > 0) {
+      const imageCredits = estimateCredits(input.model, { numImages: input.variants });
+      ctx.spend?.(imageCredits);
+      creditsUsed += imageCredits;
+    }
 
     return { assets, creditsUsed };
   },

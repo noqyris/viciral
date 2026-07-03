@@ -1,8 +1,13 @@
 import { z } from "zod";
 import { estimateCredits } from "@/lib/credits/pricing";
-import { estimateModuleCredits } from "@/lib/credits/estimate";
+import {
+  estimateModuleCredits,
+  WEBSITE_MAX_SECTION_IMAGES,
+  WEBSITE_OUTPUT_BY_LENGTH as OUTPUT_BY_LENGTH,
+} from "@/lib/credits/estimate";
 import { brandPromptLine, brandReferenceImages, colorsToStrings } from "@/lib/brand/inject";
-import { runJsonText, modelForQuality } from "./text";
+import { runJsonText } from "./text";
+import { genBrandImage } from "./gen-image";
 import { buildSiteHtml, type BuildOpts, type SiteImages } from "./website-html";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
@@ -245,13 +250,11 @@ const SECTION_WINDOW: Record<Input["siteType"], [number, number]> = {
   product: [5, 8],
   event: [4, 6],
 };
-const OUTPUT_BY_LENGTH = { short: 2200, medium: 3000, long: 4200 } as const;
 const LENGTH_HINT: Record<Input["copyLength"], string> = {
   short: "Kratko i jezgrovito.",
   medium: "Umerena dužina.",
   long: "Detaljnije, sa više konteksta i storytellinga.",
 };
-const WEBSITE_MAX_SECTION_IMAGES = 4;
 
 function synthHero(meta: Meta): Section {
   return {
@@ -324,8 +327,8 @@ export const websiteModule: ModuleDef<Input> = {
       system,
       prompt,
       maxTokens: OUTPUT_BY_LENGTH[input.copyLength],
-      model: modelForQuality(input.quality, ctx.mode),
-      ...(input.effort ? { effort: input.effort } : {}),
+      quality: input.quality,
+      effort: input.effort,
     });
 
     // Per-section validate + drop invalid (resilient to model slip-ups).
@@ -392,22 +395,9 @@ export const websiteModule: ModuleDef<Input> = {
     const byKey: Record<string, string | undefined> = {};
 
     const genImage = async (imgPrompt: string): Promise<string | undefined> => {
-      try {
-        const res = await ctx.providers.image.generateImage({
-          modelId: "nano-banana",
-          prompt: imgPrompt,
-          numImages: 1,
-          ...(referenceImages.length ? { imageUrls: referenceImages } : {}),
-        });
-        const url = res.images[0]?.url;
-        if (!url) return undefined;
-        ctx.spend?.(imgCredits);
-        creditsUsed += imgCredits;
-        return url;
-      } catch (err) {
-        console.error("website: image generation failed (site continues):", err);
-        return undefined;
-      }
+      const r = await genBrandImage(ctx, imgPrompt, { referenceImages, credits: imgCredits, label: "website" });
+      creditsUsed += r.spent;
+      return r.url;
     };
 
     for (let i = 0; i < selected.length; i++) {

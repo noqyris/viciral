@@ -103,6 +103,7 @@ export function BrandManager({ initial }: { initial: BrandView[] }) {
 
   async function refresh() {
     const res = await fetch("/api/brands");
+    if (!res.ok) return; // don't blank the list on a transient GET failure
     const data = (await res.json()) as { brands?: RawBrand[] };
     setBrands((data.brands ?? []).map(normalize));
   }
@@ -145,17 +146,35 @@ export function BrandManager({ initial }: { initial: BrandView[] }) {
   }
 
   async function setDefault(id: string) {
-    await fetch(`/api/brands/${id}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ isDefault: true }),
-    });
-    await refresh();
+    setError(null);
+    try {
+      const res = await fetch(`/api/brands/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ isDefault: true }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error ?? t.genericError);
+      }
+      await refresh();
+    } catch (err) {
+      setError((err as Error).message);
+    }
   }
 
   async function remove(id: string) {
-    await fetch(`/api/brands/${id}`, { method: "DELETE" });
-    await refresh();
+    setError(null);
+    try {
+      const res = await fetch(`/api/brands/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error ?? t.genericError);
+      }
+      await refresh();
+    } catch (err) {
+      setError((err as Error).message);
+    }
   }
 
   return (

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { estimateCredits } from "@/lib/credits/pricing";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { brandPromptLine, brandReferenceImages } from "@/lib/brand/inject";
-import { runJsonText, modelForQuality } from "./text";
+import { runJsonText, formatHashtags } from "./text";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
 /**
@@ -124,8 +124,8 @@ export const socialPackModule: ModuleDef<Input> = {
       system,
       prompt,
       maxTokens: MAX_OUTPUT_TOKENS,
-      model: modelForQuality(input.quality, ctx.mode),
-      ...(input.effort ? { effort: input.effort } : {}),
+      quality: input.quality,
+      effort: input.effort,
     });
 
     const assets: GeneratedAsset[] = [];
@@ -144,7 +144,7 @@ export const socialPackModule: ModuleDef<Input> = {
 
       // Emit the caption first: it's already produced (and paid for) by the text
       // step, so a later image failure must never discard it.
-      const hashtags = post.hashtags.map((h) => "#" + h.replace(/^#/, "")).join(" ");
+      const hashtags = formatHashtags(post.hashtags);
       assets.push({
         kind: "text",
         text: hashtags ? `${post.caption}\n\n${hashtags}` : post.caption,

@@ -43,6 +43,12 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
 
+/** fal returns either `images[]` or a single `image` depending on the endpoint. */
+function normalizeImages(data: unknown): { url: string }[] {
+  const d = data as { image?: { url: string }; images?: { url: string }[] };
+  return d.images ?? (d.image ? [d.image] : []);
+}
+
 export const falImageProvider: ImageProvider = {
   async generateImage(req: ImageRequest): Promise<ImageResponse> {
     ensureConfigured();
@@ -83,10 +89,7 @@ export const falImageProvider: ImageProvider = {
       input,
       logs: false,
     });
-    // fal returns either an `images[]` or a single `image` depending on the
-    // endpoint (e.g. recraft-vector) — normalize both, same as transformImage.
-    const data = result.data as { image?: { url: string }; images?: { url: string }[] };
-    const images = data.images ?? (data.image ? [data.image] : []);
+    const images = normalizeImages(result.data);
     return {
       images: images.map((i) => ({ url: i.url })),
       modelId: req.modelId,
@@ -108,8 +111,7 @@ export const falImageProvider: ImageProvider = {
           }
         : { image_url: req.imageUrl };
     const result = await fal.subscribe(model.providerModel, { input, logs: false });
-    const data = result.data as { image?: { url: string }; images?: { url: string }[] };
-    const images = data.images ?? (data.image ? [data.image] : []);
+    const images = normalizeImages(result.data);
     return { images: images.map((i) => ({ url: i.url })), modelId: req.modelId };
   },
 };

@@ -52,6 +52,19 @@ export const RESOLUTION_DIMENSIONS: Record<string, { width: number; height: numb
   "4k": { width: 3840, height: 2160 },
 };
 
+// ---- Video-model duration snapping + cost multipliers ----
+// Single source shared by the cinematic module (generation) and estimate.ts
+// (reservation), so reserve == charge can never drift.
+/** Veo accepts only 4s/6s/8s (max 8s); snap the requested duration down. */
+export const veoSnap = (d: number) => (d <= 4 ? 4 : d <= 6 ? 6 : 8);
+/** Sora accepts integer 4/8/12/16/20s; within our 15s cap that's 4/8/12. */
+export const soraSnap = (d: number) => (d <= 4 ? 4 : d <= 8 ? 8 : 12);
+/** Veo bills $0.20/s base; audio ×2, 4k ×2, 4k+audio ×3 → an integer multiplier. */
+export const veoMult = (resolution: string, audio: boolean) =>
+  resolution === "4k" ? (audio ? 3 : 2) : audio ? 2 : 1;
+/** Kling bills $0.112/s; audio ≈ ×1.5. */
+export const klingMult = (audio: boolean) => (audio ? 1.5 : 1);
+
 export const MODEL_CATALOG: Record<string, ModelInfo> = {
   "nano-banana": {
     id: "nano-banana",

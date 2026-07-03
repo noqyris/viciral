@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Mic2 } from "lucide-react";
 import { CostHint } from "@/components/cost-hint";
-import { notifyCreditsChanged } from "@/components/credits-context";
 import { useLocale } from "@/components/locale-context";
+import { useGeneration } from "@/hooks/use-generation";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import {
   RunnerLayout,
@@ -69,15 +69,6 @@ const T = {
   },
 } as const;
 
-interface Asset {
-  kind: "image" | "video" | "text" | "audio";
-  url?: string | null;
-}
-interface GenResp {
-  generation?: { creditsUsed?: number; assets?: Asset[] };
-  error?: string;
-}
-
 export function VoiceRunner() {
   const t = T[useLocale()];
   const [text, setText] = useState("");
@@ -88,38 +79,10 @@ export function VoiceRunner() {
   const [speed, setSpeed] = useState(1);
   const [language, setLanguage] = useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
+  const { loading, error, assets, creditsUsed, run } = useGeneration("voice", { errorLabel: t.err });
+  const audioUrl = assets.find((a) => a.kind === "audio")?.url ?? null;
 
-  async function run() {
-    setLoading(true);
-    setError(null);
-    setAudioUrl(null);
-    setCreditsUsed(null);
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          moduleSlug: "voice",
-          mode: "manual",
-          inputs: { text, voice, stability, similarityBoost, style, speed, language },
-        }),
-      });
-      const data = (await res.json()) as GenResp;
-      if (!res.ok) throw new Error(data.error ?? t.err);
-      const audio = data.generation?.assets?.find((a) => a.kind === "audio");
-      setAudioUrl(audio?.url ?? null);
-      setCreditsUsed(data.generation?.creditsUsed ?? null);
-      notifyCreditsChanged();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const submit = () => run({ text, voice, stability, similarityBoost, style, speed, language });
 
   const slider = (label: string, value: number, set: (v: number) => void, min: number, max: number, step: number) => (
     <Field label={`${label}: ${value}`}>
@@ -171,7 +134,7 @@ export function VoiceRunner() {
           </AdvancedSection>
 
           <RunButton
-            onClick={run}
+            onClick={submit}
             disabled={loading || text.trim().length < 1}
             loading={loading}
             loadingLabel={t.generating}

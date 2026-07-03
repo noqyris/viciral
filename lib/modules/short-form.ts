@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { estimateCredits } from "@/lib/credits/pricing";
 import { estimateModuleCredits, SHORTFORM_TRANSCRIPT_CHARS } from "@/lib/credits/estimate";
-import { runJsonText } from "./text";
+import { runJsonText, formatHashtags } from "./text";
 import type { TranscriptSegment } from "@/lib/providers/types";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
@@ -127,7 +127,7 @@ export const shortFormModule: ModuleDef<Input> = {
 
     const clips = plan.clips.slice(0, input.clipCount);
     const assets: GeneratedAsset[] = clips.map((c, i) => {
-      const hashtags = c.hashtags.map((h) => "#" + h.replace(/^#/, "")).join(" ");
+      const hashtags = formatHashtags(c.hashtags);
       const text =
         `🎬 Klip ${i + 1} · ${toClock(c.startSec)}–${toClock(c.endSec)} · score ${Math.round(c.viralityScore)}/100\n` +
         `Hook: ${c.title}\n\n${c.caption}\n\n${hashtags}\n\n💡 ${c.reason}`;

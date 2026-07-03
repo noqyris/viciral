@@ -4,11 +4,9 @@ import { getActiveOrg } from "@/lib/active-org";
 import { providers } from "@/lib/providers";
 import { debitCredits, refundCredits } from "@/lib/credits/ledger";
 import { estimateCredits } from "@/lib/credits/pricing";
-import { AppError, jsonError, readJsonBody } from "@/lib/http";
+import { AppError, jsonError, readJsonBody, isHttpUrl } from "@/lib/http";
 
 export const runtime = "nodejs";
-
-const isHttpUrl = (s: unknown): s is string => typeof s === "string" && /^https?:\/\//i.test(s);
 
 /**
  * Merges the finished clips of a video chain into one video (fal ffmpeg), in the

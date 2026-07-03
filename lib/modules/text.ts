@@ -7,6 +7,11 @@ import type { GenerationMode } from "./types";
 export type TextModelKey = "claude-opus" | "claude-sonnet" | "claude-haiku";
 export type Effort = "low" | "medium" | "high" | "xhigh" | "max";
 
+/** "#" -prefix each tag (dedup any existing "#") and space-join. */
+export function formatHashtags(tags: string[]): string {
+  return tags.map((h) => "#" + h.replace(/^#/, "")).join(" ");
+}
+
 /** Auto mode uses the stronger (more expensive) model; manual uses the cheaper one. */
 export function pickTextModel(mode: GenerationMode): "claude-opus" | "claude-sonnet" {
   return mode === "auto" ? "claude-opus" : "claude-sonnet";
@@ -35,9 +40,20 @@ interface TextCtx {
 export async function runJsonText<T>(
   ctx: TextCtx,
   schema: ZodType<T>,
-  args: { system: string; prompt: string; maxTokens: number; model?: TextModelKey; effort?: Effort },
+  args: {
+    system: string;
+    prompt: string;
+    maxTokens: number;
+    /** Explicit catalog model id (wins over `quality`). */
+    model?: TextModelKey;
+    /** User quality preset → model via `modelForQuality` (auto mode forces Opus). */
+    quality?: string;
+    effort?: Effort;
+  },
 ): Promise<{ value: T; creditsUsed: number }> {
-  const modelId = args.model ?? pickTextModel(ctx.mode);
+  const modelId =
+    args.model ??
+    (args.quality !== undefined ? modelForQuality(args.quality, ctx.mode) : pickTextModel(ctx.mode));
   const res = await ctx.providers.text.generateText({
     system: args.system,
     prompt: args.prompt,
@@ -45,15 +61,16 @@ export async function runJsonText<T>(
     maxTokens: args.maxTokens,
     ...(args.effort ? { effort: args.effort } : {}),
   });
-  // The model can emit truncated/non-JSON (e.g. when it hits the output-token
-  // cap mid-object). Turn the raw SyntaxError into a friendly, retryable error.
-  let parsed: unknown;
+  // The model can emit truncated/non-JSON (SyntaxError) or valid JSON of the
+  // wrong shape (ZodError) — e.g. when it hits the output-token cap mid-object.
+  // Turn either into the same friendly, retryable error rather than surfacing a
+  // raw parser/validation stack to the user.
+  let value: T;
   try {
-    parsed = JSON.parse(extractJson(res.text));
+    value = schema.parse(JSON.parse(extractJson(res.text)));
   } catch {
     throw new Error("Model je vratio nevalidan odgovor. Pokušaj ponovo.");
   }
-  const value = schema.parse(parsed);
   const creditsUsed = estimateCredits(modelId, {
     inputTokens: res.inputTokens,
     outputTokens: res.outputTokens,

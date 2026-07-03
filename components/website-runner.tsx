@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Zap, Plus, X, ChevronUp, ChevronDown, Monitor, Tablet, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
-import { notifyCreditsChanged } from "@/components/credits-context";
+import { useGeneration } from "@/hooks/use-generation";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
+import { downloadHtml } from "@/lib/download";
 import {
   RunnerLayout,
   Field,
@@ -173,18 +174,6 @@ const T = {
   },
 } as const;
 
-interface Asset {
-  id?: string;
-  kind: "image" | "video" | "text";
-  url?: string | null;
-  text?: string | null;
-  meta?: { role?: string } | null;
-}
-interface GenerationResponse {
-  generation?: { creditsUsed?: number; assets?: Asset[] };
-  error?: string;
-}
-
 function Group({ title, children, open = false }: { title: string; children: React.ReactNode; open?: boolean }) {
   return (
     <details open={open} className="rounded-xl border border-white/10 bg-white/[0.02]">
@@ -229,10 +218,8 @@ export function WebsiteRunner({
   const [quality, setQuality] = useState((init.quality as string) ?? "best");
   const [effort, setEffort] = useState((init.effort as string) ?? "");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [html, setHtml] = useState<string | null>(null);
-  const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
+  const { loading, error, assets, creditsUsed, run } = useGeneration("website", { errorLabel: t.genError });
+  const html = assets.find((a) => a.kind === "text" && a.meta?.role === "site-html")?.text ?? null;
   const [device, setDevice] = useState<Device>("desktop");
   const [copied, setCopied] = useState(false);
 
@@ -262,40 +249,13 @@ export function WebsiteRunner({
     quality, ...(effort ? { effort } : {}),
   };
 
-  async function run(genMode: "manual" | "auto") {
-    setLoading(true);
-    setError(null);
-    setHtml(null);
-    setCreditsUsed(null);
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ moduleSlug: "website", mode: genMode, inputs }),
-      });
-      const data = (await res.json()) as GenerationResponse;
-      if (!res.ok) throw new Error(data.error ?? t.genError);
-      const site = data.generation?.assets?.find((a) => a.kind === "text" && a.meta?.role === "site-html");
-      setHtml(site?.text ?? null);
-      setCreditsUsed(data.generation?.creditsUsed ?? null);
-      setRefine("");
-      notifyCreditsChanged();
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  async function submit(genMode: "manual" | "auto") {
+    const g = await run(inputs, genMode);
+    if (g) setRefine("");
   }
 
   function download() {
-    if (!html) return;
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${siteName || t.fallbackFile}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (html) downloadHtml(html, `${siteName || t.fallbackFile}.html`);
   }
   async function copy() {
     if (!html) return;
@@ -446,7 +406,7 @@ export function WebsiteRunner({
           <AiAdvanced quality={quality} onQuality={setQuality} effort={effort} onEffort={setEffort} />
 
           <RunButton
-            onClick={() => run("manual")}
+            onClick={() => submit("manual")}
             disabled={disabled}
             loading={loading}
             loadingLabel={t.building}
@@ -460,7 +420,7 @@ export function WebsiteRunner({
             {t.makeSite}
           </RunButton>
           {supportsAuto && (
-            <Button variant="secondary" onClick={() => run("auto")} disabled={disabled} title={t.autoTitle} className="w-full gap-2">
+            <Button variant="secondary" onClick={() => submit("auto")} disabled={disabled} title={t.autoTitle} className="w-full gap-2">
               <Zap className="h-4 w-4" strokeWidth={2.25} aria-hidden />
               {t.auto}
             </Button>
@@ -516,7 +476,7 @@ export function WebsiteRunner({
               <RefineBar
                 value={refine}
                 onChange={setRefine}
-                onSubmit={() => run("manual")}
+                onSubmit={() => submit("manual")}
                 loading={loading}
                 placeholder={t.refinePh}
                 submitLabel={t.refineLabel}

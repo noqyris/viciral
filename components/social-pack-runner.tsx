@@ -15,7 +15,7 @@ import {
   AiAdvanced,
   CreditsReceipt,
 } from "@/components/studio/runner-kit";
-import { notifyCreditsChanged } from "@/components/credits-context";
+import { useGeneration } from "@/hooks/use-generation";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 
@@ -89,16 +89,6 @@ const T = {
   },
 } as const;
 
-interface Asset {
-  kind: "image" | "video" | "text";
-  url?: string;
-  text?: string;
-}
-
-interface GenerationResponse {
-  generation?: { creditsUsed?: number; assets?: Asset[] };
-  error?: string;
-}
 
 export function SocialPackRunner({
   supportsAuto,
@@ -126,56 +116,23 @@ export function SocialPackRunner({
   const [effort, setEffort] = useState((initialInputs?.effort as string) ?? "");
   const t = T[useLocale()];
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [assets, setAssets] = useState<Asset[] | null>(null);
-  const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
+  const { loading, error, assets, creditsUsed, run } = useGeneration("social-pack", {
+    errorLabel: t.genError,
+  });
 
-  async function run(mode: "manual" | "auto") {
-    setLoading(true);
-    setError(null);
-    setAssets(null);
-    setCreditsUsed(null);
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          moduleSlug: "social-pack",
-          mode,
-          inputs: {
-            topic,
-            platform,
-            postCount,
-            tone,
-            variantsPerPost,
-            format,
-            captionLength,
-            hashtagCount,
-            language,
-            includeCta,
-            useEmoji,
-            includeImage,
-            refine,
-            quality,
-            ...(effort ? { effort } : {}),
-          },
-        }),
-      });
-      const data = (await res.json()) as GenerationResponse;
-      if (!res.ok) throw new Error(data.error ?? t.genError);
-      setAssets(data.generation?.assets ?? []);
-      setCreditsUsed(data.generation?.creditsUsed ?? null);
-      setRefine("");
-      notifyCreditsChanged();
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  async function submit(mode: "manual" | "auto") {
+    const g = await run(
+      {
+        topic, platform, postCount, tone, variantsPerPost, format, captionLength,
+        hashtagCount, language, includeCta, useEmoji, includeImage, refine, quality,
+        ...(effort ? { effort } : {}),
+      },
+      mode,
+    );
+    if (g) setRefine("");
   }
 
-  const hasAssets = assets != null && assets.length > 0;
+  const hasAssets = assets.length > 0;
   const isEmpty = !loading && !error && !hasAssets && creditsUsed == null;
 
   return (
@@ -293,7 +250,7 @@ export function SocialPackRunner({
           <AiAdvanced quality={quality} onQuality={setQuality} effort={effort} onEffort={setEffort} />
 
           <RunButton
-            onClick={() => run("manual")}
+            onClick={() => submit("manual")}
             disabled={loading || topic.length < 2}
             loading={loading}
             loadingLabel={t.generating}
@@ -314,7 +271,7 @@ export function SocialPackRunner({
           {supportsAuto && (
             <Button
               variant="secondary"
-              onClick={() => run("auto")}
+              onClick={() => submit("auto")}
               disabled={loading || topic.length < 2}
               title={t.autoTitle}
               className="w-full gap-1.5"
@@ -371,7 +328,7 @@ export function SocialPackRunner({
             <RefineBar
               value={refine}
               onChange={setRefine}
-              onSubmit={() => run("manual")}
+              onSubmit={() => submit("manual")}
               loading={loading}
               placeholder={t.refinePh}
               submitLabel={t.refine}

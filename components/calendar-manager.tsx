@@ -110,6 +110,7 @@ export function CalendarManager({
 
   async function refresh() {
     const res = await fetch("/api/schedule");
+    if (!res.ok) return; // don't blank the list on a transient GET failure
     const data = (await res.json()) as { posts?: ScheduledView[] };
     setPosts(data.posts ?? []);
   }
@@ -143,8 +144,17 @@ export function CalendarManager({
   }
 
   async function cancel(id: string) {
-    await fetch(`/api/schedule/${id}`, { method: "DELETE" });
-    await refresh();
+    setError(null);
+    try {
+      const res = await fetch(`/api/schedule/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error ?? t.genericError);
+      }
+      await refresh();
+    } catch (err) {
+      setError((err as Error).message);
+    }
   }
 
   return (

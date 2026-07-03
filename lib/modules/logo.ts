@@ -2,7 +2,7 @@ import { z } from "zod";
 import { estimateCredits } from "@/lib/credits/pricing";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { brandPromptLine, colorsToStrings } from "@/lib/brand/inject";
-import { runJsonText, modelForQuality } from "./text";
+import { runJsonText } from "./text";
 import type { GeneratedAsset, ModuleDef } from "./types";
 
 /**
@@ -82,8 +82,8 @@ export const logoModule: ModuleDef<Input> = {
       system,
       prompt,
       maxTokens: 1500,
-      model: modelForQuality(input.quality, ctx.mode),
-      ...(input.effort ? { effort: input.effort } : {}),
+      quality: input.quality,
+      effort: input.effort,
     });
 
     const assets: GeneratedAsset[] = [];

@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CostHint } from "@/components/cost-hint";
-import { notifyCreditsChanged } from "@/components/credits-context";
+import { useGeneration } from "@/hooks/use-generation";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
+import { downloadHtml } from "@/lib/download";
 import {
   RunnerLayout,
   Field,
@@ -89,17 +90,6 @@ const T = {
   },
 } as const;
 
-interface Asset {
-  kind: string;
-  url?: string | null;
-  text?: string | null;
-  meta?: { role?: string } | null;
-}
-interface GenResp {
-  generation?: { creditsUsed?: number; assets?: Asset[] };
-  error?: string;
-}
-
 export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<string, unknown> }) {
   const t = T[useLocale()];
   const [appName, setAppName] = useState((initialInputs?.appName as string) ?? "");
@@ -110,49 +100,19 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
   const [quality, setQuality] = useState((initialInputs?.quality as string) ?? "best");
   const [effort, setEffort] = useState((initialInputs?.effort as string) ?? "");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [html, setHtml] = useState<string | null>(null);
-  const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
+  const { loading, error, assets, creditsUsed, run } = useGeneration("app-builder", { errorLabel: t.genError });
+  const html = assets.find((a) => a.kind === "text" && a.meta?.role === "app-html")?.text ?? null;
 
-  async function run(mode: "manual" | "auto") {
-    setLoading(true);
-    setError(null);
-    setHtml(null);
-    setCreditsUsed(null);
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          moduleSlug: "app-builder",
-          mode,
-          inputs: { appName, description, appType, screens, refine, quality, ...(effort ? { effort } : {}) },
-        }),
-      });
-      const data = (await res.json()) as GenResp;
-      if (!res.ok) throw new Error(data.error ?? t.genError);
-      const app = data.generation?.assets?.find((a) => a.kind === "text" && a.meta?.role === "app-html");
-      setHtml(app?.text ?? null);
-      setCreditsUsed(data.generation?.creditsUsed ?? null);
-      setRefine("");
-      notifyCreditsChanged();
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  async function submit(mode: "manual" | "auto") {
+    const g = await run(
+      { appName, description, appType, screens, refine, quality, ...(effort ? { effort } : {}) },
+      mode,
+    );
+    if (g) setRefine("");
   }
 
   function download() {
-    if (!html) return;
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${appName || "app"}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    if (html) downloadHtml(html, `${appName || "app"}.html`);
   }
 
   const disabled = loading || appName.length < 2 || description.length < 2;
@@ -196,7 +156,7 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
           </div>
           <AiAdvanced quality={quality} onQuality={setQuality} effort={effort} onEffort={setEffort} />
           <RunButton
-            onClick={() => run("manual")}
+            onClick={() => submit("manual")}
             disabled={disabled}
             loading={loading}
             loadingLabel={t.building}
@@ -204,7 +164,7 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
           >
             {t.make}
           </RunButton>
-          <Button variant="secondary" onClick={() => run("auto")} disabled={disabled} title={t.autoTitle} className="w-full gap-2">
+          <Button variant="secondary" onClick={() => submit("auto")} disabled={disabled} title={t.autoTitle} className="w-full gap-2">
             <Zap className="h-4 w-4" strokeWidth={2.25} aria-hidden />
             {t.auto}
           </Button>
@@ -238,7 +198,7 @@ export function AppBuilderRunner({ initialInputs }: { initialInputs?: Record<str
               <RefineBar
                 value={refine}
                 onChange={setRefine}
-                onSubmit={() => run("manual")}
+                onSubmit={() => submit("manual")}
                 loading={loading}
                 placeholder={t.refinePh}
                 submitLabel={t.refine}

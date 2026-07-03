@@ -7,7 +7,7 @@
  * Pure (only imports the pricing math), so it is safe to import in client
  * components and server components alike.
  */
-import { estimateCredits, RESOLUTION_DIMENSIONS } from "./pricing";
+import { estimateCredits, RESOLUTION_DIMENSIONS, veoSnap, soraSnap, veoMult, klingMult } from "./pricing";
 import { MODEL_BY_OP } from "@/lib/modules/image-tools";
 import { clampInt as intIn } from "@/lib/utils/math";
 
@@ -17,9 +17,9 @@ const OPUS_INPUT_TOKENS = 2000;
 const SOCIAL_OUTPUT_TOKENS = 2000;
 const BRAND_OUTPUT_TOKENS = 2000;
 const WEBSITE_INPUT_TOKENS = 2500;
-const WEBSITE_MAX_SECTION_IMAGES = 4; // hard cap on section images in "all" mode
-// Output-token budget by copy length (mirrors website.ts OUTPUT_BY_LENGTH).
-const WEBSITE_OUTPUT_BY_LENGTH = { short: 2200, medium: 3000, long: 4200 } as const;
+// Single source (imported by website.ts) so the reservation and the module agree.
+export const WEBSITE_MAX_SECTION_IMAGES = 4; // hard cap on section images in "all" mode
+export const WEBSITE_OUTPUT_BY_LENGTH = { short: 2200, medium: 3000, long: 4200 } as const;
 // Talking-head length is driven by the script (~150 wpm ≈ 2.5 words/sec), clamped.
 const AVATAR_MIN_SEC = 3;
 const AVATAR_MAX_SEC = 120;
@@ -116,18 +116,15 @@ export function estimateModuleCredits(
       const res = typeof inputs.resolution === "string" ? inputs.resolution : "720p";
       // Veo: $0.20/s base; audio ×2, 4k ×2, 4k+audio ×3. Max 8s/clip.
       if (videoModel === "veo") {
-        const dur = durationSec <= 4 ? 4 : durationSec <= 6 ? 6 : 8;
-        const mult = res === "4k" ? (audio ? 3 : 2) : audio ? 2 : 1;
-        return estimateCredits("veo-3", { durationSec: dur * mult });
+        return estimateCredits("veo-3", { durationSec: veoSnap(durationSec) * veoMult(res, audio) });
       }
       // Sora 2: flat $0.10/s; integer duration 4/8/12.
       if (videoModel === "sora") {
-        const dur = durationSec <= 4 ? 4 : durationSec <= 8 ? 8 : 12;
-        return estimateCredits("sora-2", { durationSec: dur });
+        return estimateCredits("sora-2", { durationSec: soraSnap(durationSec) });
       }
       // Kling: $0.112/s; audio ≈ ×1.5.
       if (videoModel === "kling") {
-        return estimateCredits("kling-video", { durationSec: Math.ceil(durationSec * (audio ? 1.5 : 1)) });
+        return estimateCredits("kling-video", { durationSec: Math.ceil(durationSec * klingMult(audio)) });
       }
       // Seedance: token-billed by pixel area → resolution drives the cost.
       const dims = RESOLUTION_DIMENSIONS[res] ?? RESOLUTION_DIMENSIONS["720p"];

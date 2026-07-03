@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { CostHint } from "@/components/cost-hint";
-import { notifyCreditsChanged } from "@/components/credits-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { useLocale } from "@/components/locale-context";
+import { useGeneration } from "@/hooks/use-generation";
 import {
   RunnerLayout,
   Field,
@@ -57,52 +57,16 @@ const T = {
   },
 } as const;
 
-interface Asset {
-  kind: "image" | "video" | "text" | "audio";
-  url?: string | null;
-}
-
-interface GenerationResponse {
-  generation?: { creditsUsed?: number; assets?: Asset[] };
-  error?: string;
-}
-
 export function MusicRunner({ initialInputs }: { initialInputs?: Record<string, unknown> }) {
   const t = T[useLocale()];
   const [prompt, setPrompt] = useState((initialInputs?.prompt as string) ?? "");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
+  const { loading, error, assets, creditsUsed, run } = useGeneration("music", {
+    errorLabel: t.generationError,
+  });
+  const audioUrl = assets.find((a) => a.kind === "audio")?.url ?? null;
 
-  async function run() {
-    setLoading(true);
-    setError(null);
-    setAudioUrl(null);
-    setCreditsUsed(null);
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          moduleSlug: "music",
-          mode: "manual",
-          inputs: { prompt },
-        }),
-      });
-      const data = (await res.json()) as GenerationResponse;
-      if (!res.ok) throw new Error(data.error ?? t.generationError);
-      const audio = data.generation?.assets?.find((a) => a.kind === "audio");
-      setAudioUrl(audio?.url ?? null);
-      setCreditsUsed(data.generation?.creditsUsed ?? null);
-      notifyCreditsChanged();
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const submit = () => run({ prompt });
 
   return (
     <RunnerLayout
@@ -132,7 +96,7 @@ export function MusicRunner({ initialInputs }: { initialInputs?: Record<string, 
           </div>
 
           <RunButton
-            onClick={run}
+            onClick={submit}
             disabled={loading || prompt.length < 2}
             loading={loading}
             loadingLabel={t.composing}

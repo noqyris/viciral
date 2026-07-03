@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
-import { RESOLUTION_DIMENSIONS, type UsageParams } from "@/lib/credits/pricing";
+import {
+  RESOLUTION_DIMENSIONS,
+  veoSnap,
+  soraSnap,
+  veoMult,
+  klingMult,
+  type UsageParams,
+} from "@/lib/credits/pricing";
 import { submitVideoJob } from "./async-video";
 import type { ModuleDef } from "./types";
 
@@ -23,16 +30,6 @@ const MODEL_ID: Record<VideoModel, string> = {
   kling: "kling-video",
   sora: "sora-2",
 };
-
-// Veo accepts only 4s/6s/8s (max 8s); snap the requested duration down to those.
-export const veoSnap = (d: number) => (d <= 4 ? 4 : d <= 6 ? 6 : 8);
-// Sora accepts integer 4/8/12/16/20s; within our 15s cap that's 4/8/12.
-export const soraSnap = (d: number) => (d <= 4 ? 4 : d <= 8 ? 8 : 12);
-// Veo bills $0.20/s base; audio ×2, 4k ×2, 4k+audio ×3 → an integer multiplier.
-export const veoMult = (resolution: string, audio: boolean) =>
-  resolution === "4k" ? (audio ? 3 : 2) : audio ? 2 : 1;
-// Kling bills $0.112/s; audio ≈ ×1.5.
-export const klingMult = (audio: boolean) => (audio ? 1.5 : 1);
 
 const inputSchema = z.object({
   prompt: z.string().min(2, "Opis je obavezan").max(500),

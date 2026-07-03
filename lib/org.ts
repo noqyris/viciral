@@ -1,4 +1,4 @@
-import { Prisma, type OrgRole } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 /**
@@ -101,11 +101,4 @@ export async function getOrgForUser(slug: string, userId: string) {
     include: { organization: true },
   });
   return membership ? { ...membership.organization, role: membership.role } : null;
-}
-
-const ROLE_RANK: Record<OrgRole, number> = { MEMBER: 0, ADMIN: 1, OWNER: 2 };
-
-/** Minimal RBAC check (team-ready, simple while solo). */
-export function hasRole(role: OrgRole, min: OrgRole): boolean {
-  return ROLE_RANK[role] >= ROLE_RANK[min];
 }

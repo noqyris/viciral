@@ -10,8 +10,6 @@ import { ensureUserHasOrg, getOrgForUser } from "@/lib/org";
  */
 export const ACTIVE_ORG_COOKIE = "viciral.activeOrg";
 
-export type ActiveOrg = Awaited<ReturnType<typeof getOrgForUser>>;
-
 /** The current user's active org (cookie → membership check → default fallback). */
 export async function getActiveOrg(userId: string) {
   const slug = (await cookies()).get(ACTIVE_ORG_COOKIE)?.value;

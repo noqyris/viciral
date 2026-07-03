@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { CostHint } from "@/components/cost-hint";
-import { notifyCreditsChanged } from "@/components/credits-context";
+import { useGeneration } from "@/hooks/use-generation";
+import type { GenerationAsset } from "@/components/runner-types";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import {
@@ -146,14 +147,6 @@ const T = {
   },
 } as const;
 
-interface Asset {
-  kind: string;
-  url?: string;
-}
-interface GenResp {
-  generation?: { creditsUsed?: number; assets?: Asset[] };
-  error?: string;
-}
 
 export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, unknown> }) {
   const t = T[useLocale()];
@@ -172,55 +165,31 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
   const [seed, setSeed] = useState((initialInputs?.seed as number)?.toString() ?? "");
   const [safetyTolerance, setSafetyTolerance] = useState((initialInputs?.safetyTolerance as string) ?? "4");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [assets, setAssets] = useState<Asset[] | null>(null);
-  const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
+  const { loading, error, assets, creditsUsed, run } = useGeneration("image", { errorLabel: t.err });
 
-  async function run() {
-    setLoading(true);
-    setError(null);
-    setAssets(null);
-    setCreditsUsed(null);
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          moduleSlug: "image",
-          mode: "manual",
-          inputs: {
-            prompt,
-            aspectRatio,
-            variants,
-            style,
-            lighting,
-            negativePrompt,
-            referenceUrl,
-            enhancePrompt,
-            useBrand,
-            refine,
-            model,
-            outputFormat,
-            safetyTolerance,
-            ...(seed.trim() !== "" && !Number.isNaN(Number(seed)) ? { seed: Number(seed) } : {}),
-          },
-        }),
-      });
-      const data = (await res.json()) as GenResp;
-      if (!res.ok) throw new Error(data.error ?? t.err);
-      setAssets(data.generation?.assets ?? []);
-      setCreditsUsed(data.generation?.creditsUsed ?? null);
-      setRefine("");
-      notifyCreditsChanged();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  async function submit() {
+    const g = await run({
+      prompt,
+      aspectRatio,
+      variants,
+      style,
+      lighting,
+      negativePrompt,
+      referenceUrl,
+      enhancePrompt,
+      useBrand,
+      refine,
+      model,
+      outputFormat,
+      safetyTolerance,
+      ...(seed.trim() !== "" && !Number.isNaN(Number(seed)) ? { seed: Number(seed) } : {}),
+    });
+    if (g) setRefine("");
   }
 
-  const images = assets?.filter((a) => a.kind === "image" && a.url) ?? [];
+  const images = assets.filter(
+    (a): a is GenerationAsset & { url: string } => a.kind === "image" && Boolean(a.url),
+  );
   const isEmpty = !loading && !error && images.length === 0 && creditsUsed == null;
 
   return (
@@ -350,7 +319,7 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
           </AdvancedSection>
 
           <RunButton
-            onClick={run}
+            onClick={submit}
             disabled={loading || prompt.length < 2}
             loading={loading}
             loadingLabel={t.generating}
@@ -378,7 +347,7 @@ export function ImageRunner({ initialInputs }: { initialInputs?: Record<string, 
             <RefineBar
               value={refine}
               onChange={setRefine}
-              onSubmit={run}
+              onSubmit={submit}
               loading={loading}
               placeholder={t.refinePh}
               submitLabel={t.refine}

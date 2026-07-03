@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { CostHint } from "@/components/cost-hint";
-import { notifyCreditsChanged } from "@/components/credits-context";
+import { useGeneration } from "@/hooks/use-generation";
+import type { GenerationAsset } from "@/components/runner-types";
 import { useLocale } from "@/components/locale-context";
 import { estimateModuleCredits } from "@/lib/credits/estimate";
 import { setBrandLogo } from "@/app/studio/brand/brand-actions";
@@ -76,16 +77,6 @@ const T = {
   },
 } as const;
 
-interface Asset {
-  kind: string;
-  url?: string;
-  meta?: { role?: string };
-}
-interface GenResp {
-  generation?: { creditsUsed?: number; assets?: Asset[] };
-  error?: string;
-}
-
 export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, unknown> }) {
   const t = T[useLocale()];
   const [brandName, setBrandName] = useState((initialInputs?.brandName as string) ?? "");
@@ -98,40 +89,16 @@ export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, u
   const [quality, setQuality] = useState((initialInputs?.quality as string) ?? "balanced");
   const [effort, setEffort] = useState((initialInputs?.effort as string) ?? "");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [assets, setAssets] = useState<Asset[] | null>(null);
-  const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
+  const { loading, error, assets, creditsUsed, run } = useGeneration("logo", { errorLabel: t.err });
 
-  async function run() {
-    setLoading(true);
-    setError(null);
-    setAssets(null);
-    setCreditsUsed(null);
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          moduleSlug: "logo",
-          mode: "manual",
-          inputs: { brandName, style, variants, monochrome, iconOnly, refine, imageSize, quality, ...(effort ? { effort } : {}) },
-        }),
-      });
-      const data = (await res.json()) as GenResp;
-      if (!res.ok) throw new Error(data.error ?? t.err);
-      setAssets(data.generation?.assets ?? []);
-      setCreditsUsed(data.generation?.creditsUsed ?? null);
-      setRefine("");
-      notifyCreditsChanged();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  async function submit() {
+    const g = await run({ brandName, style, variants, monochrome, iconOnly, refine, imageSize, quality, ...(effort ? { effort } : {}) });
+    if (g) setRefine("");
   }
 
-  const logos = assets?.filter((a) => a.kind === "image" && a.meta?.role === "logo" && a.url) ?? [];
+  const logos = assets.filter(
+    (a): a is GenerationAsset & { url: string } => a.kind === "image" && a.meta?.role === "logo" && Boolean(a.url),
+  );
   const isEmpty = !loading && !error && logos.length === 0 && creditsUsed == null;
 
   return (
@@ -199,7 +166,7 @@ export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, u
           />
 
           <RunButton
-            onClick={run}
+            onClick={submit}
             disabled={loading || brandName.length < 2}
             loading={loading}
             loadingLabel={t.generating}
@@ -237,7 +204,7 @@ export function LogoRunner({ initialInputs }: { initialInputs?: Record<string, u
             <RefineBar
               value={refine}
               onChange={setRefine}
-              onSubmit={run}
+              onSubmit={submit}
               loading={loading}
               placeholder={t.refinePh}
               submitLabel={t.refine}

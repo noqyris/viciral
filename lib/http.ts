@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { InsufficientCreditsError } from "@/lib/credits/ledger";
 
+/** True for a non-empty http(s) URL string (does not trim — trim at the call site). */
+export const isHttpUrl = (s: unknown): s is string =>
+  typeof s === "string" && /^https?:\/\//i.test(s);
+
 /** A user-safe, intentional error whose message may be shown to the client. */
 export class AppError extends Error {
   constructor(

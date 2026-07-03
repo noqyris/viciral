@@ -139,7 +139,7 @@ export function ShortFormRunner({
                 min={1}
                 max={10}
                 value={clipCount}
-                onChange={(e) => setClipCount(Number(e.target.value))}
+                onChange={(e) => setClipCount(Math.max(1, Math.min(10, Number(e.target.value) || 5)))}
                 className="field"
               />
             </Field>
@@ -150,7 +150,7 @@ export function ShortFormRunner({
                 min={1}
                 max={60}
                 value={approxMinutes}
-                onChange={(e) => setApproxMinutes(Number(e.target.value))}
+                onChange={(e) => setApproxMinutes(Math.max(1, Math.min(60, Number(e.target.value) || 10)))}
                 className="field"
               />
             </Field>

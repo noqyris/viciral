@@ -5,8 +5,6 @@
  * (mitigates platform-dependency risk).
  */
 
-export type ModelKind = "text" | "image" | "video" | "audio";
-
 // ---- Audio / transcription ----
 export interface TranscriptSegment {
   /** Seconds from the start of the media. */

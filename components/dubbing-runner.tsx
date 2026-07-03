@@ -113,7 +113,7 @@ export function DubbingRunner({ initialInputs }: { initialInputs?: Record<string
                 min={5}
                 max={300}
                 value={approxSeconds}
-                onChange={(e) => setApproxSeconds(Number(e.target.value))}
+                onChange={(e) => setApproxSeconds(Math.max(5, Math.min(300, Number(e.target.value) || 30)))}
                 className="field"
               />
             </Field>

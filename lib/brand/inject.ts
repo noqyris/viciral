@@ -17,6 +17,14 @@ export function brandReferenceImages(brand: BrandProfile | null | undefined): st
   return referenceImagesToStrings(brand.referenceImages);
 }
 
+/** Prefer the precomputed brand-context reference images; else derive from the brand. */
+export function resolveReferenceImages(
+  brandContext: BrandContext | undefined,
+  brand: BrandProfile | null | undefined,
+): string[] {
+  return brandContext?.referenceImages ?? brandReferenceImages(brand);
+}
+
 /**
  * Builds a Serbian brand-context line injected into generation prompts.
  * Pure — depends only on its inputs (the brand-memory moat in prompt form).
